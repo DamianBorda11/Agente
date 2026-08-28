@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<!-- Este meta tag es obligatorio para que las media queries funcionen bien en celulares:
+     sin él, el navegador mobile simula un ancho de escritorio (~980px) y tu
+     media query de "min-width: 768px" se activaría incluso en un celular chico. -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maldoror — responsive</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- DISEÑO 1: visible por defecto (mobile, < 768px) -->
+  <div class="card-mobile">
+    <div class="container">
+      <div class="header">Gótico decadente</div>
+      <div class="image"></div>
+      <div class="text">
+        Maldoror
+        <span style="font-size:9px;font-weight:400;color:var(--muted)">Tu amigo el vampiro / Lvl 3</span>
+      </div>
+      <div class="power">
+        <div style="display:flex;justify-content:space-between"><span>Lluvia de Sangre</span><span>66</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Ácaro Sarcopto</span><span>40</span></div>
+      </div>
+      <div class="description">
+        Se declara amigo del hombre, aunque su sombra sea la misma que lo destruye.
+      </div>
+    </div>
+  </div>
+
+  <!-- DISEÑO 2: visible desde 768px en adelante (desktop/web) -->
+  <div class="card-desktop">
+    <div class="container">
+      <div class="HEADER">Gótico decadente</div>
+      <div class="IMAGE"></div>
+      <div class="TEXT">
+        Maldoror
+        <span style="font-size:9px;font-weight:400;color:var(--muted)">Tu amigo el vampiro / Lvl 3</span>
+      </div>
+      <div class="POWER">
+        <div style="display:flex;justify-content:space-between"><span>Lluvia de Sangre</span><span>66</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Ácaro Sarcopto</span><span>40</span></div>
+      </div>
+      <div class="DESCRIPTION">
+        Se declara amigo del hombre, aunque su sombra sea la misma que lo destruye.
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
