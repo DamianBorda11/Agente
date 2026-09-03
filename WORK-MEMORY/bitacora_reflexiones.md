@@ -15,3 +15,8 @@ que nunca definí.
 Me costó organizar las referencias visuales por tema en vez de por sitio de origen. Al principio
 quería agruparlas por dónde las encontré, pero agruparlas por lo que inspiran (color, tipografía,
 layout) tiene más sentido para el proyecto.
+
+## 2026-09-03
+
+Sesión de interacción con CSS (grid con media queries + botones con event listeners para cambiar
+texto, color y modo oscuro). Por ahora no sentí que aprendí algo nuevo.

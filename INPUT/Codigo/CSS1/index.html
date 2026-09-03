@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My New CodePen</title>
+</head>
+<style>
+  /* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.dark-mode{
+    background-color: black;
+}
+
+/* Grid de 3 columnas x 3 filas, cada celda de 200px */
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 200px);
+  grid-template-rows: repeat(3, 200px);
+  gap: 15px;
+}
+
+.grid-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+/* Modo celular (por defecto, hasta 767px): azul */
+.grid-item {
+  background-color: #1e88e5;
+}
+
+/* Modo tablet (768px en adelante): verde */
+@media (min-width: 768px) {
+  .grid-item {
+    background-color: #43a047;
+  }
+}
+
+/* Modo PC (1024px en adelante): morado */
+@media (min-width: 1024px) {
+  .grid-item {
+    background-color: #8e24aa;
+  }
+}
+  </style>
+<body>
+ <!-- Contenedor principal del grid -->
+<div class="grid-container">
+  <div class="grid-item">1</div>
+  <div class="grid-item">2</div>
+  <div class="grid-item">3</div>
+  <div class="grid-item">4</div>
+  <div class="grid-item">5</div>
+  <div class="grid-item">6</div>
+  <div class="grid-item">7</div>
+  <div class="grid-item">8</div>
+  <div id= "demo" class="grid-item">9</div>
+</div>
+
+<button id="buttom">Click</button>
+
+<button id="buttom2">Punch</button>
+
+<script>
+
+let txt = document.getElementById("demo");
+txt.textContent="hey girl";
+let rojo = document.getElementById("buttom"); 
+rojo.addEventListener("click", function() {
+  console.log("clicked");
+    txt.style.backgroundColor="red"
+  txt.textContent="Bro ohno";
+});
+
+let btnPunch = document.getElementById("buttom2");
+btnPunch.addEventListener("click", function() {
+  console.log("punched");
+  document.body.classList.toggle('dark-mode');
+});
+
+</script>
+
+</body>
+
+</html>
