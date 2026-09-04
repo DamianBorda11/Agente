@@ -1,105 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My New CodePen</title>
-</head>
-<style>
-  /* Reset básico */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+  <title>Estado 2 — Grid Básico (para completar en clase)</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
 
-body {
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+    body.dark-mode {
+      background-color: #000000;
+      color: #640b0b;
+    }
+    /* ==========================================
+       ESTADO 2 — Grid Básico (SIN RESOLVER a propósito)
+       Este es el punto de partida para escribirlo en vivo en clase.
+       Sigue los TODO en orden — cada uno agrega UNA propiedad de la
+       tabla "Propiedades del contenedor" del recurso de Grid/Flexbox
+       (semana_03_recurso_css_grid_flexbox_tailwind.md).
+    ========================================== */
+    .grid-container {
+      /* TODO 1: activa Grid en este contenedor.
+         Propiedad: display
+         Valor: grid
+      */
+      
+      display: grid ;
+      
+      /* TODO 2: define 3 columnas de 200px cada una.
+         Propiedad: grid-template-columns
+         Pista: puedes escribir "200px 200px 200px" a mano,
+         o usar el atajo repeat(3, 200px) — ambos hacen lo mismo.
+      */
+      grid-template-columns: 100px 2fr 1fr;
+      
+      /* TODO 3: agrega espacio entre las celdas, sin usar márgenes.
+         Propiedad: gap
+         Valor sugerido: 15px
+      */
+      
+       gap:10px;
+      
+      @media (min-width: 500px) {
+      .grid-item {
+        background-color: rgb(109, 0, 103); 
+        }
+       }
+      
+       @media (min-width: 600px) {
+      .grid-item {
+        border-radius: 50px;
+        background-color: rgb(129, 4, 4); 
+        }
+       }
 
-body.dark-mode{
-    background-color: black;
-}
+       @media (min-width: 600px) {
+      .grid-item2 {
+        display: none;
+       }
+      }
 
-/* Grid de 3 columnas x 3 filas, cada celda de 200px */
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(3, 200px);
-  grid-template-rows: repeat(3, 200px);
-  gap: 15px;
-}
+      /* Ya viene incluido, no lo toques: */
+      background-color: #ecf0f1;
+      padding: 15px;
+      border-radius: 8px;
+    }
 
-.grid-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 2rem;
-  font-weight: bold;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-}
+    .grid-item {
+      background-color: #3498db;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      font-size: 1.5rem;
+      border-radius: 6px;
+    }
+    .grid-item2 {
+      background-color: #3498db;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      font-size: 1.5rem;
+      border-radius: 6px;
+    }
+    .grid-item3 {
+      background-color: #3498db;
+      color: white;
+      padding: 30px;
+      text-align: center;
+      font-size: 1.5rem;
+      border-radius: 6px;
+    }
 
-/* Modo celular (por defecto, hasta 767px): azul */
-.grid-item {
-  background-color: #1e88e5;
-}
-
-/* Modo tablet (768px en adelante): verde */
-@media (min-width: 768px) {
-  .grid-item {
-    background-color: #43a047;
-  }
-}
-
-/* Modo PC (1024px en adelante): morado */
-@media (min-width: 1024px) {
-  .grid-item {
-    background-color: #8e24aa;
-  }
-}
+    /* TODO 4 (opcional, para quien termine antes): alinea el
+       contenido de cada celda al centro verticalmente.
+       Propiedad: align-items (va en .grid-container, no en .grid-item)
+       Valor: center
+    */
   </style>
+</head>
 <body>
- <!-- Contenedor principal del grid -->
-<div class="grid-container">
-  <div class="grid-item">1</div>
-  <div class="grid-item">2</div>
-  <div class="grid-item">3</div>
-  <div class="grid-item">4</div>
-  <div class="grid-item">5</div>
-  <div class="grid-item">6</div>
-  <div class="grid-item">7</div>
-  <div class="grid-item">8</div>
-  <div id= "demo" class="grid-item">9</div>
-</div>
+  <h1>Mi Primer Grid</h1>
+  <p style="margin: 20px 0;">Grid con 3 columnas de 200px cada una — completa los TODO del CSS.</p>
 
-<button id="buttom">Click</button>
+  <div class="grid-container">
+    <div class="grid-item">1</div>
+    <div class="grid-item">2</div>
+    <div class="grid-item">3</div>
+    <div class="grid-item">4</div>
+    <div class="grid-item">5</div>
+    <div class="grid-item">6</div>
+    <div " class="grid-item">7</div>
+    <div class="grid-item">8</div>
+    <div id="demo"class="grid-item">9</div>
+  </div>
+  
+  <button id="boton">Botón</button>
+  <button id="btnOscuro">Dark mode</button>
 
-<button id="buttom2">Punch</button>
+  <div id="caja2" class="grid-container">
+    <div class="grid-item2">1</div>
+    <div class="grid-item2">2</div>
+    <div class="grid-item2">3</div>
+  </div>
+
+  <div id="caja3" class="grid-container">
+    <div class="grid-item3">1</div>
+    <div class="grid-item3">2</div>
+    <div class="grid-item3">3</div>
+  </div>
 
 <script>
 
-let txt = document.getElementById("demo");
-txt.textContent="hey girl";
-let rojo = document.getElementById("buttom"); 
-rojo.addEventListener("click", function() {
-  console.log("clicked");
-    txt.style.backgroundColor="red"
-  txt.textContent="Bro ohno";
+let txt = document.getElementById("demo");    
+let btnMsg = document.getElementById("boton");
+btnMsg.addEventListener("click", function() {
+  console.log("click en el botón");
+  txt.textContent = "Holiiis";
+  txt.style.backgroundColor = 'green';
+  
 });
 
-let btnPunch = document.getElementById("buttom2");
-btnPunch.addEventListener("click", function() {
-  console.log("punched");
-  document.body.classList.toggle('dark-mode');
+
+let btnOscuro = document.getElementById("btnOscuro");
+
+btnOscuro.addEventListener("click", function() {
+  console.log("click en el botón");
+document.body.classList.toggle("dark-mode");
+if (document.body.classList.contains("dark-mode")) {
+  btnOscuro.textContent = "Light mode";
+} else {
+  btnOscuro.textContent = "Dark mode"; }
 });
+
+// Elemento que queremos ocultar/mostrar según el ancho de pantalla
+let caja3 = document.getElementById("caja3");
+
+// matchMedia crea un "sensor" para el mismo breakpoint que usa el CSS
+// (min-width: 600px). mqAnchoMedio.matches va cambiando entre true/false
+// solo cuando la ventana cruza esos 600px, no en cada pixel que se mueve.
+let mqAnchoMedio = window.matchMedia("(min-width: 600px)");
+
+// Esta función decide si caja3 se ve o no, según el sensor.
+// e.matches === true  -> la pantalla YA tiene 600px o más -> se oculta
+// e.matches === false -> la pantalla es angosta            -> se muestra en grid
+function actualizarCaja3(e) {
+  caja3.style.display = e.matches ? "none" : "grid";
+}
+
+// Se ejecuta una vez apenas carga la página, para que arranque en el
+// estado correcto (por si la ventana ya está ancha desde el inicio).
+actualizarCaja3(mqAnchoMedio);
+
+// Y se vuelve a ejecutar cada vez que el sensor detecta que cruzamos
+// el umbral de 600px (por ejemplo, al redimensionar la ventana).
+mqAnchoMedio.addEventListener("change", actualizarCaja3);
 
 </script>
 
 </body>
-
 </html>
