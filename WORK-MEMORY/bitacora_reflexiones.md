@@ -20,3 +20,7 @@ layout) tiene más sentido para el proyecto.
 
 Sesión de interacción con CSS (grid con media queries + botones con event listeners para cambiar
 texto, color y modo oscuro). Por ahora no sentí que aprendí algo nuevo.
+
+## 2026-09-04
+
+Hoy aprendí que debo cerrar los paréntesis.
