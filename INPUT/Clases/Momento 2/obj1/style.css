@@ -1,0 +1,330 @@
+html {
+    background-color: #050608;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #050608;
+    background-image:
+        radial-gradient(circle at 50% -10%, rgba(30, 136, 229, 0.16), transparent 55%),
+        repeating-linear-gradient(45deg, rgba(230, 241, 255, 0.025) 0px, rgba(230, 241, 255, 0.025) 1px, transparent 1px, transparent 42px),
+        repeating-linear-gradient(-45deg, rgba(230, 241, 255, 0.025) 0px, rgba(230, 241, 255, 0.025) 1px, transparent 1px, transparent 42px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-btn {
+    margin-bottom: 20px;
+    padding: 8px 18px;
+    border-radius: 2px;
+    border: 2px dashed #e6f1ff;
+    background-color: #1e88e5;
+    color: #fff;
+    font-family: "Bebas Neue", Arial, sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transform: rotate(-2deg);
+    box-shadow: 4px 4px 0 #e6f1ff;
+}
+
+body.light-mode {
+    background-color: #eef3fa;
+    background-image:
+        radial-gradient(circle at 50% -10%, rgba(21, 101, 192, 0.12), transparent 55%),
+        repeating-linear-gradient(45deg, rgba(18, 20, 28, 0.02) 0px, rgba(18, 20, 28, 0.02) 1px, transparent 1px, transparent 42px),
+        repeating-linear-gradient(-45deg, rgba(18, 20, 28, 0.02) 0px, rgba(18, 20, 28, 0.02) 1px, transparent 1px, transparent 42px);
+}
+
+body.light-mode .toggle-btn {
+    background-color: #ffffff;
+    color: #1565c0;
+    border-color: #1565c0;
+    box-shadow: 4px 4px 0 #1565c0;
+}
+
+.galeria {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 32px 24px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 24px 0;
+}
+
+.card-container {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    background-color: #12141c;
+    border: 3px solid #1e88e5;
+    border-radius: 3px 16px 4px 18px;
+    overflow: hidden;
+    position: relative;
+    transform: rotate(-1.2deg);
+    box-shadow: 7px 7px 0 #1e88e5;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.card-container:hover {
+    transform: rotate(0deg) scale(1.05);
+    box-shadow: 11px 11px 0 #1e88e5;
+    z-index: 10;
+}
+
+/* imperdible tipo DIY en la esquina */
+.card-container::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 24px;
+    width: 46px;
+    height: 12px;
+    border: 3px solid #b8c2d1;
+    border-radius: 50%;
+    border-bottom: none;
+    transform: rotate(8deg);
+    z-index: 2;
+}
+
+.card-container::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 20px;
+    width: 8px;
+    height: 8px;
+    background-color: #b8c2d1;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.card-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+    filter: contrast(1.1) saturate(0.9);
+}
+
+.card-body {
+    padding: 16px;
+}
+
+.card-body h2 {
+    margin: 0 0 8px;
+    color: #e6f1ff;
+    font-family: "Bebas Neue", Arial, sans-serif;
+    font-size: 30px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.badge {
+    display: inline-block;
+    background-color: #1e88e5;
+    color: #fff;
+    font-family: "Bebas Neue", Arial, sans-serif;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 12px;
+    border: 2px dashed #e6f1ff;
+    border-radius: 2px;
+    margin-bottom: 10px;
+    transform: rotate(-3deg);
+}
+
+.badge-villano {
+    background-color: #b3261e;
+    border-color: #ffd9d6;
+}
+
+.card-body p {
+    font-size: 14px;
+    color: #a8b3c7;
+    margin: 0 0 12px;
+}
+
+.poderes-list {
+    list-style: "// ";
+    padding-left: 20px;
+    margin: 0 0 16px;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: #cfd8e6;
+}
+
+.poderes-list li::marker {
+    color: #1e88e5;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    background-color: #1a1d29;
+    border: 2px dashed #263041;
+    border-radius: 2px;
+    padding: 8px;
+    font-size: 13px;
+    color: #e6f1ff;
+}
+
+.stat strong {
+    font-size: 11px;
+    color: #5b9bd5;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Modo claro */
+body.light-mode .card-container {
+    background-color: #ffffff;
+    border-color: #1565c0;
+    box-shadow: 7px 7px 0 #1565c0;
+}
+
+body.light-mode .badge-villano {
+    border-color: #b3261e;
+}
+
+body.light-mode .card-body h2 {
+    color: #12141c;
+}
+
+body.light-mode .badge {
+    border-color: #12141c;
+}
+
+body.light-mode .card-body p {
+    color: #444;
+}
+
+body.light-mode .poderes-list {
+    color: #333;
+}
+
+body.light-mode .stat {
+    background-color: #f2f6fc;
+    border-color: #cfe0f5;
+    color: #12141c;
+}
+
+body.light-mode .stat strong {
+    color: #1565c0;
+}
+
+/* Modal de detalle */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(5, 6, 8, 0.85);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.modal-overlay.activo {
+    display: flex;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 380px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background-color: #12141c;
+    border: 3px solid #1e88e5;
+    border-radius: 3px 16px 4px 18px;
+    box-shadow: 9px 9px 0 #1e88e5;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border: 2px dashed #e6f1ff;
+    background-color: #1e88e5;
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    border-radius: 2px;
+    cursor: pointer;
+    z-index: 3;
+}
+
+body.light-mode .modal-content {
+    background-color: #ffffff;
+    border-color: #1565c0;
+    box-shadow: 9px 9px 0 #1565c0;
+}
+
+body.light-mode .modal-close {
+    border-color: #1565c0;
+}
+
+/* Breakpoints responsive - mobile */
+@media (max-width: 600px) {
+    body {
+        padding: 24px 12px;
+    }
+
+    .card-container {
+        max-width: 340px;
+        transform: rotate(-0.6deg);
+    }
+}
+
+@media (max-width: 480px) {
+    .card-img {
+        height: 180px;
+    }
+
+    .card-body h2 {
+        font-size: 24px;
+    }
+
+    .card-body p {
+        font-size: 13px;
+    }
+
+    .card-container {
+        transform: rotate(0deg);
+    }
+}
+
+@media (max-width: 360px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .badge {
+        font-size: 11px;
+        transform: rotate(0deg);
+    }
+
+    .toggle-btn {
+        font-size: 13px;
+        padding: 6px 14px;
+        transform: rotate(0deg);
+    }
+}
