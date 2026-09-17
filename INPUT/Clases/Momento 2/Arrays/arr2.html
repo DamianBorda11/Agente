@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Arrays - Ejercicio 2</title>
+</head>
+<body>
+  <input type="text" id="textInput">
+  <button id="button">Enviar</button>
+  <button id="button2">Eliminar</button>
+  <button id="button3" onclick="eliminarPrimero()">Eliminar primero</button>
+  <button id="button4">Mostrar lista</button>
+  <button id="button5">Buscar</button>
+    <p id="resultado"></p>
+    <ul id="lista"></ul>
+
+  <script>
+
+    let arr = ["Light", "L", "Misa", "Kira", "Ryuk", "Rem", "Near", "Mello"];
+
+    const textInput = document.getElementById("textInput");
+    const button = document.getElementById("button");
+    const resultado = document.getElementById("resultado");
+    const button2 = document.getElementById("button2");
+    const button3 = document.getElementById("button3");
+    const button4 = document.getElementById("button4");
+    const button5 = document.getElementById("button5");
+    const lista = document.getElementById("lista");
+
+    button.addEventListener("click", function() {
+       console.log("input:", textInput.value.trim().toLowerCase());
+       resultado.textContent = textInput.value.trim().toLowerCase();
+
+       //arreglar valor ingresado al arreglo
+       //arr.push(textInput.value.trim().toLowerCase());
+       //valor ingresado al inicio del arreglo
+       arr.unshift(textInput.value.trim().toLowerCase());
+    });
+
+    function eliminarUltimo() {
+      if (arr.length > 0) {
+        arr.pop();
+        resultado.textContent = "Último elemento eliminado. Nuevo arreglo: " + arr.join(", "); mostrarLista();
+      } else {
+        resultado.textContent = "El arreglo está vacío.";
+      }
+    }
+
+    function eliminarPrimero() {
+      if (arr.length > 0) {
+        arr.shift();
+        resultado.textContent = "Primer elemento eliminado. Nuevo arreglo: " + arr.join(", "); mostrarLista();
+      } else {
+        resultado.textContent = "El arreglo está vacío.";
+      }
+    }
+
+    function mostrarLista() {
+      lista.innerHTML = "";
+      arr.forEach(function(item) {
+        const li = document.createElement("li");
+        li.textContent = item;
+        lista.appendChild(li);
+      });
+    }
+   
+    function buscarElemento() {
+      const valorBuscado = textInput.value.trim().toLowerCase();
+      const indice = arr.findIndex(item => item.toLowerCase() === valorBuscado);
+      if (indice !== -1) {
+        resultado.textContent = "Elemento encontrado en la posición: " + indice;
+      } else {
+        resultado.textContent = "Elemento no encontrado en el arreglo.";
+      }
+    }
+
+     button2.addEventListener("click", eliminarUltimo);
+    button4.addEventListener("click", mostrarLista);
+    button5.addEventListener("click", buscarElemento);
+  </script>
+</body>
+</html>
