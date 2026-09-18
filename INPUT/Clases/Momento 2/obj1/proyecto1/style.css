@@ -1,0 +1,691 @@
+/* Reseteo básico: quitamos los márgenes/paddings que trae el navegador por defecto */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Fondo de la página: simula una mesa de metal cepillado (líneas finas + viñeta oscura) */
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    background-color: #2b2b2b;
+    background-image:
+        repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.035) 0 2px, rgba(0, 0, 0, 0.03) 2px 4px),
+        radial-gradient(circle at 30% 15%, rgba(255, 255, 255, 0.06), transparent 45%),
+        radial-gradient(circle at 75% 85%, rgba(0, 0, 0, 0.35), transparent 55%),
+        radial-gradient(ellipse at center, #444444 0%, #1c1c1c 100%);
+    font-family: system-ui, sans-serif;
+    padding: 2.5rem 1rem;
+}
+
+/* Sin esto, estos contenedores (hijos directos de body, un flex container)
+   se encogen a su contenido mínimo en vez de tomar el ancho disponible,
+   dejando sin espacio real a cualquier hijo con width:100% o flex:1 */
+#raiz,
+#gestion-raiz {
+    width: 100%;
+}
+
+/* --- Efecto reutilizable: hojas de papel asomando detrás de un fólder --- */
+/* Lo usan tanto la carpeta cerrada como la abierta, para que en las dos
+   se note que adentro hay más de un expediente apilado. */
+.pila-de-papeles {
+    position: relative;
+}
+
+.pila-de-papeles::before,
+.pila-de-papeles::after {
+    content: "";
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: -8px;
+    height: 20px;
+    border-radius: 0 0 4px 4px;
+    z-index: -1;
+}
+
+.pila-de-papeles::before {
+    bottom: -6px;
+    background-color: #a88c52;
+}
+
+.pila-de-papeles::after {
+    bottom: -12px;
+    left: 18px;
+    right: 18px;
+    background-color: #987c47;
+}
+
+/* --- Carpeta: el marco fijo. Contiene la tapa (arriba) y el interior (abajo) --- */
+/* perspective es lo que hace que rotateX() de la tapa se vea como una tapa
+   real girando en 3D, en vez de solo achicarse verticalmente en el aire. */
+.carpeta {
+    position: relative;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    perspective: 1200px;
+}
+
+/* Pestaña de la carpeta, como la lengüeta de un fólder real */
+.carpeta__pestana {
+    position: absolute;
+    top: -1.3rem;
+    left: 1.2rem;
+    z-index: 2;
+    font-family: "Special Elite", monospace;
+    font-size: 0.72rem;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #f3e9cf;
+    background-color: #1a1508;
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px 4px 0 0;
+}
+
+/* --- Tapa: mide lo mismo que una carpeta de archivos tamaño carta cerrada
+   (más ancha que alta, proporción real ~6:5). Es lo primero que se ve. --- */
+.carpeta__tapa {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    aspect-ratio: 6 / 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: none;
+    border-radius: 4px;
+    background: linear-gradient(170deg, #cdb87f 0%, #b89b5e 100%);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+    transform-origin: top center;
+    transform: rotateX(0deg);
+    /* margin-bottom en % se calcula sobre el ANCHO del contenedor, así que
+       -83.4% cancela casi exactamente el alto que la tapa gana por su propio
+       aspect-ratio (5/6 ≈ 83.4%) apenas termina de girar */
+    margin-bottom: 0;
+    transition: transform 0.6s ease, margin-bottom 0.6s ease, box-shadow 0.6s ease;
+}
+
+.carpeta__sello {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 50%;
+    border: 3px solid #8a0303;
+    font-family: "Creepster", cursive;
+    font-size: 1.6rem;
+    color: #8a0303;
+}
+
+.carpeta__texto {
+    font-family: "Special Elite", monospace;
+    font-size: 0.75rem;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #1a1508;
+}
+
+.carpeta__ayuda {
+    font-family: "Special Elite", monospace;
+    font-style: italic;
+    font-size: 0.68rem;
+    color: #6b5a30;
+}
+
+/* --- Interior: arranca colapsado (sin alto, invisible) y se despliega
+   debajo de la tapa cuando esta termina de girar --- */
+.carpeta__interior {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    border-radius: 4px;
+    background: linear-gradient(170deg, #cdb87f 0%, #b89b5e 100%);
+    transition: max-height 0.5s ease 0.15s, opacity 0.4s ease 0.2s, padding 0.5s ease 0.15s;
+}
+
+/* --- Estado abierto: se agrega/saca esta clase con JS --- */
+.carpeta--abierta .carpeta__tapa {
+    transform: rotateX(100deg);
+    margin-bottom: -83.4%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    pointer-events: none; /* ya no se puede volver a "abrir" clickeando la tapa girada */
+}
+
+.carpeta--abierta .carpeta__interior {
+    max-height: 900px;
+    opacity: 1;
+    padding: 1.2rem;
+}
+
+/* --- Botón para volver a cerrar la carpeta (gira la tapa de nuevo a su lugar) --- */
+.carpeta__cerrar {
+    display: block;
+    margin: 0.8rem auto 0;
+    font-family: "Special Elite", monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #6b5a30;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* --- Controles para pasar de un expediente a otro --- */
+.carpeta__controles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: 1rem;
+}
+
+.carpeta__boton {
+    font-family: "Special Elite", monospace;
+    font-size: 0.72rem;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #f3e9cf;
+    background-color: #8a0303;
+    border: none;
+    border-radius: 2px;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+}
+
+.carpeta__boton:disabled {
+    background-color: #6b6142;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.carpeta__contador {
+    font-family: "Special Elite", monospace;
+    font-size: 0.68rem;
+    color: #1a1508;
+    white-space: nowrap;
+}
+
+/* --- Carta individual --- */
+/* Ocupa todo el ancho disponible y el alto sale del aspect-ratio, sin
+   límite de altura: si no entra completa en la pantalla, la página hace
+   scroll en vez de achicar la carta hasta hacerla ilegible. */
+.carta {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 0; /* evita que una carta con más texto (tipo, habilidades) crezca más alta que las demás */
+    aspect-ratio: 59 / 86; /* proporción real de una carta de coleccionable */
+    padding: 4%;
+    border-radius: 2px;
+    background:
+        radial-gradient(circle at 15% 20%, rgba(120, 95, 45, 0.3) 0 10%, transparent 40%),
+        radial-gradient(circle at 85% 78%, rgba(120, 95, 45, 0.25) 0 12%, transparent 45%),
+        linear-gradient(170deg, #e9dcbb 0%, #dccb9d 55%, #cdb87f 100%);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(80, 60, 20, 0.35);
+}
+
+/* Clip de metal dibujado en la esquina, como si la carta fuera una hoja de expediente engrapada */
+.carta::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 16px;
+    width: 26px;
+    height: 46px;
+    border: 4px solid #8a8a8a;
+    border-radius: 4px;
+    background: transparent;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.5);
+    transform: rotate(-4deg);
+}
+
+/* --- Marco interno: acomoda las secciones de la carta con Grid --- */
+/* Grid de nuevo, porque la foto ocupa 2 filas a la izquierda mientras el
+   nombre/tipo/habilidades van a la derecha: es un acomodo en dos dimensiones */
+.carta__marco {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 38% 1fr;
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+        "encabezado    encabezado"
+        "foto          datos"
+        "notas         notas"
+        "estadisticas  estadisticas";
+    gap: 3%;
+    padding: 3%;
+    border: 3px double #1a1508;
+    background-color: #ecdfc0;
+    overflow: hidden;
+}
+
+/* --- Encabezado: etiqueta de "Expediente" + atributo --- */
+.carta__encabezado {
+    grid-area: encabezado;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.3rem;
+    border-bottom: 3px solid #1a1508;
+}
+
+.carta__etiqueta-expediente {
+    font-family: "Special Elite", monospace;
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #f3e9cf;
+    background-color: #8a0303;
+    padding: 0.15rem 0.5rem;
+}
+
+.carta__atributo {
+    color: #8a0303;
+    font-size: 1rem;
+}
+
+/* --- Estado true/false (peligroso) --- */
+/* El color y el texto cambian según el booleano "peligroso" del objeto */
+.carta__estado {
+    align-self: flex-start;
+    font-family: "Special Elite", monospace;
+    font-size: 0.6rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+}
+
+.carta__estado--peligroso {
+    background-color: #8a0303;
+    color: #f3e9cf;
+}
+
+.carta__estado--seguro {
+    background-color: #6b6142;
+    color: #f3e9cf;
+}
+
+/* --- Foto del personaje --- */
+.carta__foto {
+    grid-area: foto;
+    height: 100%;
+}
+
+.carta__imagen {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: #1a1a1a;
+    border: 2px solid #1a1508;
+    filter: grayscale(100%) contrast(1.2) brightness(0.95) sepia(0.15);
+}
+
+/* --- Datos del personaje (nombre, tipo, estado, habilidades) --- */
+/* Acá sí usamos Flexbox: son elementos apilados en una sola columna,
+   uno debajo del otro, así que no hace falta la potencia de Grid */
+.carta__datos {
+    grid-area: datos;
+    min-width: 0; /* sin esto, un "Tipo" largo (ej. "Oscuro / Sobrenatural") empuja la columna
+                     y se lleva puesta la barra de ATK/DEF fuera de la carta */
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-left: 0.4rem;
+    border-left: 1px dashed #8a7a4d;
+}
+
+.carta__nombre {
+    font-family: "Special Elite", monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #1a1508;
+    line-height: 1.15;
+    /* antes lo recortábamos con "..." en una sola línea; ahora, si el
+       nombre es largo (ej. "Jeff the Killer"), baja a una segunda línea
+       en vez de esconder parte del texto */
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.carta__campo {
+    font-family: "Special Elite", monospace;
+    font-size: 0.68rem;
+    color: #1a1508;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.carta__campo-etiqueta {
+    font-weight: bold;
+    color: #8a0303;
+}
+
+.carta__habilidades {
+    list-style: none;
+    font-family: "Special Elite", monospace;
+    font-size: 0.66rem;
+    line-height: 1.5;
+    color: #8a0303;
+    overflow: hidden;
+}
+
+.carta__habilidades li::before {
+    content: "\2620 ";
+    margin-right: 0.15rem;
+}
+
+/* --- Notas del caso (descripción) --- */
+.carta__notas {
+    grid-area: notas;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 0.4rem;
+    border-top: 2px solid #1a1508;
+    color: #1a1508;
+}
+
+.carta__notas-etiqueta {
+    font-family: "Special Elite", monospace;
+    font-size: 0.62rem;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #4a3f26;
+    margin-bottom: 0.2rem;
+}
+
+/* Recortamos la descripción a 6 líneas para que nunca se salga de la carta */
+.carta__descripcion {
+    font-family: "Special Elite", monospace;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    text-align: justify;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 6;
+    line-clamp: 6;
+    overflow: hidden;
+}
+
+/* --- Estadísticas: ataque y defensa --- */
+.carta__estadisticas {
+    grid-area: estadisticas;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 0.4rem;
+    border-top: 3px double #1a1508;
+}
+
+.carta__estadistica {
+    font-family: "Creepster", cursive;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    color: #8a0303;
+}
+
+/* --- Página de gestión: sidebar de procesos CRUD + panel de contenido --- */
+.gestion {
+    display: flex;
+    width: 100%;
+    max-width: 900px;
+    min-height: 70vh;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.8);
+}
+
+.gestion__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 200px;
+    flex-shrink: 0;
+    padding: 1.2rem 0.8rem;
+    background: linear-gradient(170deg, #cdb87f 0%, #b89b5e 100%);
+    border-right: 3px double #1a1508;
+}
+
+.gestion__sidebar-titulo {
+    font-family: "Special Elite", monospace;
+    font-size: 0.8rem;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #1a1508;
+    padding-bottom: 0.6rem;
+    margin-bottom: 0.4rem;
+    border-bottom: 3px solid #1a1508;
+}
+
+.gestion__item {
+    font-family: "Special Elite", monospace;
+    font-size: 0.7rem;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    text-align: left;
+    color: #1a1508;
+    background: none;
+    border: none;
+    border-radius: 2px;
+    padding: 0.6rem 0.7rem;
+    cursor: pointer;
+}
+
+.gestion__item:hover {
+    background-color: rgba(26, 21, 8, 0.15);
+}
+
+.gestion__item--activo {
+    background-color: #8a0303;
+    color: #f3e9cf;
+}
+
+.gestion__contenido {
+    flex: 1;
+    padding: 1.5rem;
+    background-color: #ecdfc0;
+    color: #1a1508;
+    font-family: "Special Elite", monospace;
+}
+
+.gestion__titulo-seccion {
+    font-family: "Special Elite", monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #1a1508;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    border-bottom: 3px double #1a1508;
+}
+
+/* --- Tabla de "Mostrar todos" --- */
+.gestion__tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "Special Elite", monospace;
+    font-size: 0.72rem;
+    color: #1a1508;
+}
+
+.gestion__tabla th,
+.gestion__tabla td {
+    text-align: left;
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #8a7a4d;
+}
+
+.gestion__tabla th {
+    font-size: 0.66rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #4a3f26;
+    border-bottom: 2px solid #1a1508;
+}
+
+.gestion__tabla tbody tr:hover {
+    background-color: rgba(138, 3, 3, 0.08);
+}
+
+.gestion__boton--eliminar {
+    font-size: 0.62rem;
+    padding: 0.35rem 0.6rem;
+}
+
+/* --- Formulario de "Crear" --- */
+.gestion__formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    max-width: 420px;
+}
+
+.gestion__campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.gestion__campo--checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.gestion__etiqueta {
+    font-family: "Special Elite", monospace;
+    font-size: 0.68rem;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #4a3f26;
+}
+
+.gestion__input {
+    font-family: "Special Elite", monospace;
+    font-size: 0.75rem;
+    color: #1a1508;
+    background-color: #f3e9cf;
+    border: 1px solid #8a7a4d;
+    border-radius: 2px;
+    padding: 0.5rem 0.6rem;
+}
+
+.gestion__textarea {
+    resize: vertical;
+}
+
+.gestion__boton {
+    align-self: flex-start;
+    font-family: "Special Elite", monospace;
+    font-size: 0.72rem;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #f3e9cf;
+    background-color: #8a0303;
+    border: none;
+    border-radius: 2px;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+}
+
+.gestion__mensaje {
+    font-family: "Special Elite", monospace;
+    font-size: 0.68rem;
+    font-style: italic;
+    color: #4a3f26;
+    min-height: 1em;
+}
+
+/* CELULAR: el sidebar pasa de columna a fila arriba del contenido */
+@media (max-width: 640px) {
+    .gestion {
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .gestion__sidebar {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-right: none;
+        border-bottom: 3px double #1a1508;
+    }
+}
+
+/* --- Responsive: 3 quiebres (escritorio / tablet / celular) ---
+   Ahora se muestra una sola carta a la vez, así que ya no hay columnas que
+   acomodar: el ancho de la carpeta ya se adapta solo porque .carpeta usa
+   width: 100% + max-width. Estos quiebres afinan detalles que sí cambian
+   con el tamaño de pantalla: separación del marco y tamaño de los botones,
+   para que el texto y los controles se sigan viendo cómodos en cada caso. */
+
+/* TABLET: la carpeta se achica un poco junto con el margen del cuerpo */
+@media (max-width: 1024px) {
+    body {
+        padding: 2rem 1rem;
+    }
+
+    .carpeta {
+        max-width: 340px;
+    }
+}
+
+/* CELULAR: menos padding alrededor y botones más chicos para que
+   "← Anterior", el contador y "Siguiente →" entren en una sola fila */
+@media (max-width: 640px) {
+    body {
+        padding: 1.5rem 0.75rem;
+    }
+
+    .carpeta {
+        max-width: 300px;
+        padding: 2rem 1rem 1rem;
+    }
+
+    .carpeta__boton {
+        font-size: 0.62rem;
+        padding: 0.45rem 0.6rem;
+    }
+
+    /* Los 3 elementos (Anterior, contador, Siguiente) ya no entran en una
+       sola fila en celular sin cortarse: el contador pasa a su propia línea,
+       arriba de los dos botones, en vez de quedar recortado por el costado */
+    .carpeta__controles {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .carpeta__contador {
+        order: -1;
+        flex-basis: 100%;
+        text-align: center;
+        font-size: 0.65rem;
+        margin-bottom: 0.3rem;
+    }
+}

@@ -11,6 +11,8 @@
   <button id="button3" onclick="eliminarPrimero()">Eliminar primero</button>
   <button id="button4">Mostrar lista</button>
   <button id="button5">Buscar</button>
+  <button id="button6">Eliminar por nombre</button>
+  <button id="button7">Cambiar elemento</button>
     <p id="resultado"></p>
     <ul id="lista"></ul>
 
@@ -22,9 +24,10 @@
     const button = document.getElementById("button");
     const resultado = document.getElementById("resultado");
     const button2 = document.getElementById("button2");
-    const button3 = document.getElementById("button3");
     const button4 = document.getElementById("button4");
     const button5 = document.getElementById("button5");
+    const button6 = document.getElementById("button6");
+    const button7 = document.getElementById("button7");
     const lista = document.getElementById("lista");
 
     button.addEventListener("click", function() {
@@ -36,6 +39,11 @@
        //valor ingresado al inicio del arreglo
        arr.unshift(textInput.value.trim().toLowerCase());
     });
+    button2.addEventListener("click", eliminarUltimo);
+    button4.addEventListener("click", mostrarLista);
+    button5.addEventListener("click", buscarElemento);
+    button6.addEventListener("click", eliminarElemento);
+    button7.addEventListener("click", cambiarElemento);
 
     function eliminarUltimo() {
       if (arr.length > 0) {
@@ -74,9 +82,45 @@
       }
     }
 
-     button2.addEventListener("click", eliminarUltimo);
-    button4.addEventListener("click", mostrarLista);
-    button5.addEventListener("click", buscarElemento);
+function eliminarElemento() {
+   let valorBuscado = textInput.value.trim().toLowerCase();
+   if (valorBuscado === "") {
+     resultado.textContent = "Por favor, ingrese un valor para eliminar.";
+     return;
+   }
+   let indice = arr.findIndex(item => item.toLowerCase() === valorBuscado);
+   if (indice !== -1) {
+     resultado.textContent = "Elemento eliminado de la posición:" + indice; 
+    arr.splice(indice, 1);
+    mostrarLista();
+   }
+   else {
+     resultado.textContent = "Elemento no encontrado en el arreglo.";
+   }
+  }
+
+function cambiarElemento() {
+ let valorBuscado = textInput.value.trim().toLowerCase();
+   if (valorBuscado === "") {
+     resultado.textContent = "Por favor, ingrese un valor para eliminar.";
+     return;
+   }
+
+   let indice = arr.findIndex(item => item.toLowerCase() === valorBuscado);
+   if (indice !== -1) {
+     let nuevoValor = prompt("Ingrese el nuevo valor para reemplazar '" + arr[indice] + "':");
+     if (nuevoValor !== null && nuevoValor.trim() !== "") {
+       arr[indice] = nuevoValor.trim().toLowerCase();
+       resultado.textContent = "Elemento en la posición " + indice + " cambiado a: " + arr[indice];
+       mostrarLista();
+     } else {
+       resultado.textContent = "No se ingresó un nuevo valor válido.";
+     }
+   } else {
+     resultado.textContent = "Elemento no encontrado en el arreglo.";
+   }
+}
+    mostrarLista();
   </script>
 </body>
 </html>
