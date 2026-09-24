@@ -41,3 +41,10 @@ CRUD para los expedientes. Dos errores que me hubiera gustado entender antes de 
   todo lo que dependía de `width: 100%` adentro se quedaba sin referencia real. Me hubiera
   ahorrado tiempo saber que un contenedor sin ancho explícito no es "automáticamente 100% de la
   pantalla".
+
+## 2026-09-24
+
+Sesión de seguridad en `gestion.html` (login con hash, IIFE, pruebas de ataque desde la consola),
+ids en las cartas, `renderizarObjetos()` y filtro por peligroso en `index.html`.
+
+"Que cada día estoy más cerca de aprender a doxear."
