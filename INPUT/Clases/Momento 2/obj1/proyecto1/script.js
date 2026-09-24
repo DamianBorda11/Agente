@@ -1,6 +1,10 @@
 // Copia de las cartas para esta página (solo lectura: index.html no edita nada).
 const cartas = cargarCartas();
 
+// Cartas que se recorren con Anterior/Siguiente según el filtro elegido.
+// Empieza con todas; aplicarFiltro() la reemplaza por la lista filtrada.
+let cartasVisibles = cartas;
+
 // Arma la lista de <li> de habilidades a partir del array datos.habilidades.
 // Está separada en su propia función porque es la única parte que repite
 // una misma etiqueta varias veces (una por cada habilidad).
@@ -63,7 +67,7 @@ function crearHtmlCarpeta() {
             <span class="carpeta__pestana">Archivo de casos</span>
 
             <button class="carpeta__tapa pila-de-papeles" id="carpeta-tapa" type="button">
-                <span class="carpeta__sello">${cartas.length}</span>
+                <span class="carpeta__sello" id="carpeta-sello">${cartasVisibles.length}</span>
                 <span class="carpeta__texto">Expedientes</span>
                 <span class="carpeta__ayuda">Click para abrir</span>
             </button>
@@ -86,27 +90,85 @@ function crearHtmlCarpeta() {
 // Índice de la carta que se está mostrando ahora mismo dentro de la carpeta.
 let indiceActual = 0;
 
-// Dibuja SOLO la carta que está en cartas[indice] dentro del visor,
+// Dibuja SOLO la carta que está en cartasVisibles[indice] dentro del visor,
 // actualiza el contador ("Expediente 3 de 9") y prende/apaga los botones
 // cuando llegamos al principio o al final del array.
 function mostrarCarta(indice) {
     const visor = document.getElementById("carpeta-visor");
-    visor.innerHTML = crearHtmlCarta(cartas[indice]);
-
     const contador = document.getElementById("carpeta-contador");
-    contador.textContent = `Expediente ${indice + 1} de ${cartas.length}`;
+
+    // Sin cartas no hay cartasVisibles[0]: mostramos un aviso en vez de
+    // pasarle undefined a crearHtmlCarta (que fallaría al leer sus datos).
+    if (cartasVisibles.length === 0) {
+        visor.innerHTML = `<p class="carpeta__vacio">No hay expedientes con este filtro.</p>`;
+        contador.textContent = "Sin expedientes";
+        document.getElementById("boton-anterior").disabled = true;
+        document.getElementById("boton-siguiente").disabled = true;
+        return;
+    }
+
+    visor.innerHTML = crearHtmlCarta(cartasVisibles[indice]);
+    contador.textContent = `Expediente ${indice + 1} de ${cartasVisibles.length}`;
 
     document.getElementById("boton-anterior").disabled = indice === 0;
-    document.getElementById("boton-siguiente").disabled = indice === cartas.length - 1;
+    document.getElementById("boton-siguiente").disabled = indice === cartasVisibles.length - 1;
+}
+
+// Barra de filtros que va encima de la carpeta. Cada botón guarda en
+// data-filtro qué grupo de cartas muestra.
+function crearHtmlFiltros() {
+    return `
+        <div class="filtros" id="filtros">
+            <span class="filtros__titulo">Filtrar por</span>
+            <button class="filtros__boton filtros__boton--activo" data-filtro="todos" type="button">Todos</button>
+            <button class="filtros__boton" data-filtro="peligrosos" type="button">Peligrosos</button>
+            <button class="filtros__boton" data-filtro="seguros" type="button">No peligrosos</button>
+        </div>
+    `;
+}
+
+// Devuelve la lista de cartas que corresponde a cada filtro. No modifica
+// "cartas": filter() siempre crea un array nuevo.
+function obtenerCartasFiltradas(filtro) {
+    if (filtro === "peligrosos") {
+        return cartas.filter((carta) => carta.peligroso);
+    }
+    if (filtro === "seguros") {
+        return cartas.filter((carta) => !carta.peligroso);
+    }
+    return cartas;
+}
+
+// Cambia la lista visible, vuelve a la primera carta y actualiza el sello,
+// el botón activo y el visor.
+function aplicarFiltro(filtro) {
+    cartasVisibles = obtenerCartasFiltradas(filtro);
+    indiceActual = 0;
+
+    document.getElementById("carpeta-sello").textContent = cartasVisibles.length;
+
+    document.querySelectorAll(".filtros__boton").forEach((boton) => {
+        boton.classList.toggle("filtros__boton--activo", boton.dataset.filtro === filtro);
+    });
+
+    mostrarCarta(indiceActual);
 }
 
 // Punto de entrada: primero inyecta el HTML de la carpeta dentro de #raiz,
 // y recién ahí puede buscar los botones (todavía no existían) y conectarles
 // los clicks.
 function iniciar() {
-    document.getElementById("raiz").innerHTML = crearHtmlCarpeta();
+    document.getElementById("raiz").innerHTML = crearHtmlFiltros() + crearHtmlCarpeta();
 
     const carpeta = document.getElementById("carpeta");
+
+    // Un solo listener en la barra: detecta qué botón de filtro se tocó.
+    document.getElementById("filtros").addEventListener("click", (evento) => {
+        const boton = evento.target.closest("[data-filtro]");
+        if (boton) {
+            aplicarFiltro(boton.dataset.filtro);
+        }
+    });
 
     // Los botones solo mueven el índice y vuelven a llamar a mostrarCarta().
     document.getElementById("boton-anterior").addEventListener("click", () => {
@@ -117,7 +179,7 @@ function iniciar() {
     });
 
     document.getElementById("boton-siguiente").addEventListener("click", () => {
-        if (indiceActual < cartas.length - 1) {
+        if (indiceActual < cartasVisibles.length - 1) {
             indiceActual++;
             mostrarCarta(indiceActual);
         }

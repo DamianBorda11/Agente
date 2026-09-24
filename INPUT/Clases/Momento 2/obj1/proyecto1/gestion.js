@@ -45,31 +45,41 @@
         `;
     }
 
-    // Tabla con todos los expedientes cargados en cartas (se arma de nuevo cada
-    // vez que se muestra, así refleja los que se agreguen desde "Crear").
-    function crearHtmlTablaTodos() {
-        if (cartas.length === 0) {
-            return `
+    // Arma la fila <tr> de UNA carta. La columna # muestra carta.id (y no la
+    // posición en el array) para que siga siendo correcta en listas filtradas.
+    function crearHtmlFila(carta) {
+        return `
+            <tr>
+                <td>${carta.id}</td>
+                <td>${carta.nombre}</td>
+                <td>${carta.tipo}</td>
+                <td>${carta.ataque}</td>
+                <td>${carta.defensa}</td>
+                <td>${carta.peligroso ? "Sí" : "No"}</td>
+            </tr>
+        `;
+    }
+
+    // Pinta en #seccion-todos la tabla con los objetos de listaObjetos.
+    // Recibe la lista por parámetro (no usa cartas), así sirve para cualquier
+    // array: todas, solo peligrosas, un resultado de búsqueda, etc.
+    // Asignar innerHTML reemplaza todo lo anterior, así que llamarla varias
+    // veces no duplica filas.
+    function renderizarObjetos(listaObjetos) {
+        const seccion = document.getElementById("seccion-todos");
+
+        if (listaObjetos.length === 0) {
+            seccion.innerHTML = `
                 <h2 class="gestion__titulo-seccion">Todos los expedientes</h2>
                 <p class="gestion__mensaje">No hay expedientes cargados.</p>
             `;
+            return;
         }
 
-        const filas = cartas
-            .map((carta, indice) => `
-                <tr>
-                    <td>${indice + 1}</td>
-                    <td>${carta.nombre}</td>
-                    <td>${carta.tipo}</td>
-                    <td>${carta.ataque}</td>
-                    <td>${carta.defensa}</td>
-                    <td>${carta.peligroso ? "Sí" : "No"}</td>
-                </tr>
-            `)
-            .join("");
+        const filas = listaObjetos.map(crearHtmlFila).join("");
 
-        return `
-            <h2 class="gestion__titulo-seccion">Todos los expedientes (${cartas.length})</h2>
+        seccion.innerHTML = `
+            <h2 class="gestion__titulo-seccion">Todos los expedientes (${listaObjetos.length})</h2>
             <table class="gestion__tabla">
                 <thead>
                     <tr>
@@ -414,7 +424,7 @@
         }
 
         if (nombre === "todos") {
-            document.getElementById("seccion-todos").innerHTML = crearHtmlTablaTodos();
+            renderizarObjetos(cartas);
         }
 
         if (nombre === "eliminar") {
@@ -487,15 +497,27 @@
 
         const usuario = document.getElementById("login-usuario").value.trim();
         const contrasena = document.getElementById("login-contrasena").value;
+        const mensaje = document.getElementById("login-mensaje");
 
-        if (await verificar(usuario, contrasena)) {
+        let datosCorrectos;
+        try {
+            datosCorrectos = await verificar(usuario, contrasena);
+        } catch (error) {
+            // crypto.subtle solo existe en contextos seguros (https, localhost
+            // o file://). Si la página se abre por http con una IP de red, falla.
+            console.error(error);
+            mensaje.textContent = "No se pudo verificar: abre la página desde localhost o como archivo local.";
+            return;
+        }
+
+        if (datosCorrectos) {
             sesionActiva = true;
             iniciarGestion();
             return;
         }
 
         document.getElementById("login-contrasena").value = "";
-        document.getElementById("login-mensaje").textContent = "Usuario o contraseña incorrectos.";
+        mensaje.textContent = "Usuario o contraseña incorrectos.";
     }
 
     function mostrarLogin() {

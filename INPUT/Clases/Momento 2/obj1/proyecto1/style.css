@@ -217,6 +217,69 @@ body {
     white-space: nowrap;
 }
 
+/* Aviso dentro del visor cuando el filtro no deja ninguna carta */
+.carpeta__vacio {
+    font-family: "Special Elite", monospace;
+    font-size: 0.8rem;
+    font-style: italic;
+    text-align: center;
+    color: #4a3f26;
+    padding: 2rem 1rem;
+}
+
+/* --- Barra de filtros sobre la carpeta --- */
+/* margin-bottom deja lugar a la pestaña de la carpeta, que sobresale
+   1.3rem hacia arriba con position: absolute. position + z-index la dejan
+   por encima de la tapa, que al abrirse gira hacia arriba y la taparía. */
+.filtros {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    max-width: 440px;
+    margin: 0 auto 2.4rem;
+    padding: 0.6rem 0.8rem;
+    background-color: rgba(26, 21, 8, 0.9);
+    border-radius: 2px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.filtros__titulo {
+    font-family: "Special Elite", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c9bc98;
+}
+
+.filtros__boton {
+    font-family: "Special Elite", monospace;
+    font-size: 0.68rem;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #1a1508;
+    background-color: #ecdfc0;
+    border: 2px solid #1a1508;
+    border-radius: 2px;
+    padding: 0.4rem 0.7rem;
+    cursor: pointer;
+}
+
+.filtros__boton:hover {
+    background-color: #f3e9cf;
+}
+
+.filtros__boton--activo,
+.filtros__boton--activo:hover {
+    color: #f3e9cf;
+    background-color: #8a0303;
+    border-color: #8a0303;
+}
+
 /* --- Carta individual --- */
 /* Ocupa todo el ancho disponible y el alto sale del aspect-ratio, sin
    límite de altura: si no entra completa en la pantalla, la página hace
