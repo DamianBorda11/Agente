@@ -1,3 +1,6 @@
+// Copia de las cartas para esta página (solo lectura: index.html no edita nada).
+const cartas = cargarCartas();
+
 // Arma la lista de <li> de habilidades a partir del array datos.habilidades.
 // Está separada en su propia función porque es la única parte que repite
 // una misma etiqueta varias veces (una por cada habilidad).

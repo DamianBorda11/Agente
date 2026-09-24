@@ -622,6 +622,27 @@ body {
     min-height: 1em;
 }
 
+/* --- Login de gestion.html --- */
+.login {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.login__caja {
+    width: 100%;
+    padding: 1.5rem;
+    background-color: #ecdfc0;
+    border: 3px double #1a1508;
+    border-radius: 2px;
+}
+
+.login__error {
+    color: #8a0303;
+}
+
 /* CELULAR: el sidebar pasa de columna a fila arriba del contenido */
 @media (max-width: 640px) {
     .gestion {
