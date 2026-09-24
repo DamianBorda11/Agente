@@ -46,3 +46,35 @@ for (let i = 0; i < 10; i++) {
 La idea de fondo: la condición de un bucle se vuelve a evaluar en cada vuelta. Si el cuerpo
 modifica algo que la condición lee (aquí `cartas.length`), el límite se mueve mientras
 iteras. Con un `for` y un contador fijo, el límite no debe depender de lo que estás cambiando.
+
+---
+
+## Código (credenciales.js, login rechaza admin / 123456)
+```js
+const credenciales = Object.freeze({
+    usuario: "admin",
+    hashContrasena: "123456",
+});
+```
+Síntoma: con usuario `admin` y contraseña `123456` sale "Usuario o contraseña incorrectos".
+
+## Tipo de error — `logica`
+No hay error en consola: el código corre, pero la comparación nunca puede dar `true`
+porque se comparan dos cosas de distinto formato.
+
+**Causa:** `verificarLogin` no compara contraseña con contraseña, compara **hash con hash**:
+```js
+const hashEscrito = await calcularHash(contrasena); // "123456" → "8d969eef...6c92"
+return hashEscrito === credenciales.hashContrasena;  // "8d969eef...6c92" === "123456" → false
+```
+En `hashContrasena` se guardó el texto plano `"123456"`, no su hash.
+
+## Corrección
+```js
+hashContrasena: "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+```
+(Se obtiene con la línea que está en el comentario de credenciales.js, cambiando "NUEVA" por la contraseña.)
+
+La idea de fondo: cuando dos valores se comparan con `===`, ambos lados tienen que pasar por
+la misma transformación. Si uno se hashea (o se pasa a minúsculas, o se convierte a número)
+y el otro no, nunca coinciden aunque "representen" lo mismo.
