@@ -48,3 +48,14 @@ Sesión de seguridad en `gestion.html` (login con hash, IIFE, pruebas de ataque 
 ids en las cartas, `renderizarObjetos()` y filtro por peligroso en `index.html`.
 
 "Que cada día estoy más cerca de aprender a doxear."
+
+## 2026-09-25
+
+Sesión larga en `proyecto1`: filtros de `index.html` (slider de rango doble de ataque, select de
+tipo, botón restaurar, todo visible solo con la carpeta abierta), `game.html` con login/registro
+validado por regex (contraseña y email) contra `usuarios.json` + `localStorage`, pestaña de
+usuarios en `gestion.html`, juego de memoria adaptado del ejemplo `EjemploJuego` y registro de
+cada intento (id, fecha ISO, número de intentos, tiempo) con ids autogenerados y exportación
+del JSON.
+
+"El juego y el orden de los datos está interesante."
