@@ -227,10 +227,9 @@ body {
     padding: 2rem 1rem;
 }
 
-/* --- Barra de filtros sobre la carpeta --- */
-/* margin-bottom deja lugar a la pestaña de la carpeta, que sobresale
-   1.3rem hacia arriba con position: absolute. position + z-index la dejan
-   por encima de la tapa, que al abrirse gira hacia arriba y la taparía. */
+/* --- Barra de filtros debajo de la carpeta --- */
+/* margin-top la separa del borde inferior de la carpeta. position + z-index
+   la dejan por encima de la tapa por si al girar llega a pasarle por encima. */
 .filtros {
     position: relative;
     z-index: 10;
@@ -240,11 +239,26 @@ body {
     justify-content: center;
     gap: 0.5rem;
     max-width: 440px;
-    margin: 0 auto 2.4rem;
+    margin: 1.5rem auto 0;
     padding: 0.6rem 0.8rem;
     background-color: rgba(26, 21, 8, 0.9);
     border-radius: 2px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+
+    /* Igual que las fichas laterales: oculta con la carpeta cerrada. Se usa
+       opacity + visibility (no display: none) para que siga ocupando su
+       lugar y la carpeta no salte al aparecer o desaparecer la barra. */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s linear 0.4s;
+}
+
+.carpeta--abierta ~ .filtros {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.4s ease 0.35s, transform 0.4s ease 0.35s, visibility 0s linear 0.35s;
 }
 
 .filtros__titulo {
@@ -278,6 +292,362 @@ body {
     color: #f3e9cf;
     background-color: #8a0303;
     border-color: #8a0303;
+}
+
+/* Restaurar no es un filtro más: contorno punteado y sin relleno para que
+   se distinga de los otros tres a simple vista. */
+.filtros__boton--restaurar {
+    color: #c9bc98;
+    background-color: transparent;
+    border: 2px dashed #c9bc98;
+}
+
+.filtros__boton--restaurar:hover {
+    color: #1a1508;
+    background-color: #c9bc98;
+}
+
+/* --- Fichas laterales (ataque a la izquierda, tipo a la derecha) --- */
+/* Base compartida: papel manila, cinta, título y sello. Cada ficha solo
+   agrega su lado (left / right) y su contenido propio.
+   position: fixed las clava a la ventana: quedan en su lugar aunque se
+   haga scroll. El left/right las pega al costado de la carpeta: 50% es el
+   centro, menos media carpeta (190px), menos el ancho de la ficha (200px),
+   menos 2rem de separación. */
+.ficha-lateral {
+    /* --desliz y --giro arman el transform. Cada ficha y cada estado
+       (cerrada/abierta) cambian solo la variable, no el transform entero. */
+    --desliz: 0px;
+    --giro: 0deg;
+    position: fixed;
+    top: 50%;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    width: 200px;
+    padding: 1.6rem 1.1rem 1.1rem;
+    /* Mismo papel manila que la tapa, para que se lea como otra ficha del archivo */
+    background: linear-gradient(170deg, #cdb87f 0%, #b89b5e 100%);
+    border-radius: 3px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7);
+    font-family: "Special Elite", monospace;
+    color: #1a1508;
+    /* translate: --desliz en X, -50% en Y (centra en vertical). El rotate
+       las deja apenas torcidas, como fichas pegadas a mano. */
+    transform: translate(var(--desliz), -50%) rotate(var(--giro));
+
+    /* Con la carpeta cerrada no se ven. visibility: hidden (además de
+       opacity: 0) evita que se puedan clickear o enfocar con Tab estando
+       invisibles. Al cerrar, visibility espera 0.4s (el delay) para que
+       primero termine el fade. */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s linear 0.4s;
+}
+
+/* "~" es el combinador de hermanos: elige las .ficha-lateral que vienen
+   DESPUÉS de una .carpeta--abierta con el mismo padre (#raiz). Así el JS
+   que abre la carpeta no necesita saber que las fichas existen. El delay
+   de 0.35s las hace entrar cuando la tapa ya va girando. */
+.carpeta--abierta ~ .ficha-lateral {
+    --desliz: 0px;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s ease 0.35s, transform 0.4s ease 0.35s, visibility 0s linear 0.35s;
+}
+
+/* Cinta adhesiva semitransparente que "sostiene" la ficha */
+.ficha-lateral::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 72px;
+    height: 22px;
+    background-color: rgba(243, 233, 207, 0.55);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transform: translateX(-50%) rotate(-4deg);
+}
+
+.ficha-lateral__titulo {
+    font-family: "Creepster", cursive;
+    font-size: 1.3rem;
+    letter-spacing: 0.04em;
+    color: #8a0303;
+}
+
+/* Sello ovalado con lo elegido, como el sello de la tapa */
+.ficha-lateral__sello {
+    min-width: 5.5rem;
+    padding: 0.3rem 0.8rem;
+    border: 3px double #8a0303;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    font-weight: bold;
+    text-align: center;
+    color: #8a0303;
+    transform: rotate(-8deg);
+}
+
+/* Ficha de ataque: a la izquierda, entra deslizándose desde la izquierda */
+.ataque {
+    --thumb: 16px;
+    --desde: 0;
+    --hasta: 100;
+    --desliz: -24px;
+    --giro: -1.5deg;
+    left: calc(50% - 190px - 200px - 2rem);
+}
+
+/* Ficha de tipo: a la derecha, espejada (entra desde la derecha y se
+   tuerce para el otro lado) */
+.tipo {
+    --desliz: 24px;
+    --giro: 1.5deg;
+    right: calc(50% - 190px - 200px - 2rem);
+    gap: 0.8rem;
+}
+
+.tipo__etiqueta {
+    align-self: flex-start;
+    margin-top: 0.4rem;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #4a3f26;
+}
+
+/* La flecha del select se dibuja aparte, en el ::after de esta caja:
+   un <select> no admite ::before/::after propios. pointer-events: none
+   deja que el click en la flecha llegue igual al select. */
+.tipo__caja {
+    position: relative;
+    width: 100%;
+}
+
+.tipo__caja::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0.7rem;
+    border: 5px solid transparent;
+    border-top-color: #8a0303;
+    transform: translateY(-25%);
+    pointer-events: none;
+}
+
+/* appearance: none borra la flecha y el estilo del sistema, así el select
+   toma el papel claro y la tipografía del resto. El padding-right deja
+   lugar a la flecha propia. */
+.tipo__select {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    padding: 0.55rem 2rem 0.55rem 0.6rem;
+    font-family: "Special Elite", monospace;
+    font-size: 0.72rem;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #1a1508;
+    background-color: #ecdfc0;
+    border: 2px solid #1a1508;
+    border-radius: 2px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+}
+
+.tipo__select:hover {
+    background-color: #f3e9cf;
+}
+
+.tipo__select:focus-visible {
+    outline: 2px solid #8a0303;
+    outline-offset: 2px;
+}
+
+/* La lista abierta la dibuja el sistema operativo: color y fondo de las
+   <option> sí se respetan en la mayoría de navegadores, casi nada más. */
+.tipo__select option {
+    color: #1a1508;
+    background-color: #ecdfc0;
+}
+
+/* Contenedor de los dos inputs. margin-top deja lugar a las burbujas,
+   que viven encima de la pista. */
+.ataque__rango {
+    position: relative;
+    width: 100%;
+    height: 20px;
+    margin-top: 1.4rem;
+}
+
+/* La pista: oscura afuera del rango y roja entre --desde y --hasta.
+   El centro de una manija no llega a los bordes (la manija no se sale
+   del input), así que la posición real es:
+   mitad de manija + (ancho - manija) × porcentaje / 100.
+   La misma fórmula se repite en burbujas y marcas para que todo coincida. */
+.ataque__rango::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    transform: translateY(-50%);
+    border-radius: 2px;
+    background: linear-gradient(
+        to right,
+        rgba(26, 21, 8, 0.25) calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--desde) / 100),
+        #8a0303 calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--desde) / 100),
+        #8a0303 calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--hasta) / 100),
+        rgba(26, 21, 8, 0.25) calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--hasta) / 100)
+    );
+}
+
+/* Los dos inputs ocupan exactamente el mismo lugar. Su pista propia se
+   vuelve transparente (se ve la del ::before) y pointer-events: none hace
+   que los clicks los atraviesen: solo las manijas reciben el mouse, si no
+   el input de arriba taparía por completo al de abajo. */
+.ataque__input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background: transparent;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.ataque__input--arriba {
+    z-index: 1;
+}
+
+/* Las manijas se estilan dos veces: ::-webkit- para Chrome/Edge/Safari y
+   ::-moz- para Firefox. Un navegador descarta la regla entera si no
+   entiende el selector, por eso no se pueden juntar con coma. */
+.ataque__input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: var(--thumb);
+    height: var(--thumb);
+    background-color: #f3e9cf;
+    border: 2px solid #1a1508;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    cursor: grab;
+    pointer-events: auto;
+}
+
+.ataque__input::-moz-range-thumb {
+    box-sizing: border-box;
+    width: var(--thumb);
+    height: var(--thumb);
+    background-color: #f3e9cf;
+    border: 2px solid #1a1508;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    cursor: grab;
+    pointer-events: auto;
+}
+
+.ataque__input:active::-webkit-slider-thumb {
+    cursor: grabbing;
+    background-color: #8a0303;
+}
+
+.ataque__input:active::-moz-range-thumb {
+    cursor: grabbing;
+    background-color: #8a0303;
+}
+
+.ataque__input:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid #8a0303;
+    outline-offset: 2px;
+}
+
+.ataque__input:focus-visible::-moz-range-thumb {
+    outline: 2px solid #8a0303;
+    outline-offset: 2px;
+}
+
+/* Burbuja con el número, encima de su manija. translateX(-50%) la centra
+   sobre el punto calculado. */
+.ataque__burbuja {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    transform: translateX(-50%);
+    padding: 0.15rem 0.35rem;
+    font-size: 0.68rem;
+    font-weight: bold;
+    color: #f3e9cf;
+    background-color: #1a1508;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+/* Piquito de la burbuja apuntando a la manija */
+.ataque__burbuja::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #1a1508;
+}
+
+.ataque__burbuja--desde {
+    left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--desde) / 100);
+}
+
+.ataque__burbuja--hasta {
+    left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--hasta) / 100);
+}
+
+/* Regla: una marca por carta, en la posición de su ataque */
+.ataque__regla {
+    position: relative;
+    width: 100%;
+    height: 10px;
+}
+
+.ataque__marca {
+    position: absolute;
+    top: 0;
+    left: calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--p) / 100);
+    width: 2px;
+    height: 7px;
+    background-color: rgba(26, 21, 8, 0.35);
+    transform: translateX(-50%);
+    transition: background-color 0.15s ease, height 0.15s ease;
+}
+
+.ataque__marca--activa {
+    height: 10px;
+    background-color: #8a0303;
+}
+
+.ataque__limites {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.6rem;
+    color: #4a3f26;
+}
+
+.ataque__contador {
+    width: 100%;
+    padding-top: 0.5rem;
+    border-top: 1px dashed rgba(26, 21, 8, 0.4);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    text-align: center;
+    text-transform: uppercase;
 }
 
 /* --- Carta individual --- */
@@ -614,6 +984,37 @@ body {
     background-color: rgba(138, 3, 3, 0.08);
 }
 
+/* Con 8 columnas la tabla de usuarios no entra en pantallas angostas: el
+   contenedor hace scroll horizontal solo él, sin mover toda la página. */
+.gestion__tabla-scroll {
+    overflow-x: auto;
+}
+
+.gestion__titulo-seccion--separado {
+    margin-top: 2rem;
+}
+
+.gestion__exportar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #8a7a4d;
+}
+
+/* El hash son 64 caracteres sin espacios: el navegador no encuentra dónde
+   cortarlo y estira la tabla fuera de la pantalla. word-break: break-all
+   lo deja partir en cualquier letra; max-width le pone un techo a la columna. */
+.gestion__celda-hash {
+    max-width: 16rem;
+    font-family: monospace;
+    font-size: 0.64rem;
+    color: #4a3f26;
+    word-break: break-all;
+}
+
 .gestion__boton--eliminar {
     font-size: 0.62rem;
     padding: 0.35rem 0.6rem;
@@ -706,6 +1107,50 @@ body {
     color: #8a0303;
 }
 
+/* El atributo hidden solo aplica display: none "de fábrica", con la
+   prioridad más baja: el display: flex de .login le gana y la pantalla
+   seguiría viéndose. Esta regla le devuelve el poder a hidden. */
+.login[hidden] {
+    display: none;
+}
+
+/* --- Formulario de ingreso de game.html --- */
+/* Lista de requisitos de la contraseña: cada uno arranca en gris con una
+   ✗ y pasa a verde con una ✓ cuando se cumple (clase --cumplida). */
+.registro__reglas {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: -0.3rem 0 0;
+    padding: 0;
+    list-style: none;
+    font-family: "Special Elite", monospace;
+    font-size: 0.66rem;
+}
+
+.registro__regla {
+    color: #8a7a4d;
+}
+
+.registro__regla::before {
+    content: "✗ ";
+    color: #8a0303;
+}
+
+.registro__regla--cumplida {
+    color: #2f5a1f;
+}
+
+.registro__regla--cumplida::before {
+    content: "✓ ";
+    color: #2f5a1f;
+}
+
+.registro__bienvenida {
+    max-width: 420px;
+    text-align: center;
+}
+
 /* CELULAR: el sidebar pasa de columna a fila arriba del contenido */
 @media (max-width: 640px) {
     .gestion {
@@ -729,7 +1174,8 @@ body {
    con el tamaño de pantalla: separación del marco y tamaño de los botones,
    para que el texto y los controles se sigan viendo cómodos en cada caso. */
 
-/* TABLET: la carpeta se achica un poco junto con el margen del cuerpo */
+/* TABLET: la carpeta se achica un poco junto con el margen del cuerpo.
+   Las fichas laterales siguen pegadas a ella: media carpeta ahora es 170px. */
 @media (max-width: 1024px) {
     body {
         padding: 2rem 1rem;
@@ -737,6 +1183,39 @@ body {
 
     .carpeta {
         max-width: 340px;
+    }
+
+    .ataque {
+        left: calc(50% - 170px - 200px - 2rem);
+    }
+
+    .tipo {
+        right: calc(50% - 170px - 200px - 2rem);
+    }
+}
+
+/* Debajo de 900px las fichas ya no entran a los costados sin tapar la
+   carpeta: vuelven al flujo normal, una debajo de otra, después de los
+   filtros. Va DESPUÉS del bloque de tablet para que sus reglas ganen (a
+   igual especificidad, gana la última). position: relative (no static)
+   para que la cinta ::before, que es absolute, siga ubicándose respecto
+   de la ficha. Acá en vez de desvanecerse ocupan lugar en la página, así
+   que con la carpeta cerrada se sacan del todo con display: none. */
+@media (max-width: 900px) {
+    .ficha-lateral {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        transform: rotate(var(--giro));
+        width: 100%;
+        max-width: 300px;
+        margin: 2rem auto 0;
+        display: none;
+    }
+
+    .carpeta--abierta ~ .ficha-lateral {
+        display: flex;
     }
 }
 
@@ -771,5 +1250,389 @@ body {
         text-align: center;
         font-size: 0.65rem;
         margin-bottom: 0.3rem;
+    }
+}
+
+/* =========================================================================
+   Juego de memoria (game.html → memoria.js)
+   ========================================================================= */
+
+/* hidden pierde contra cualquier display del CSS (mismo problema que
+   .login[hidden]): estas reglas le devuelven el poder. */
+.memoria[hidden],
+.memoria__overlay[hidden],
+.memoria__aviso[hidden] {
+    display: none;
+}
+
+.memoria {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+/* --- HUD: misma barra oscura que los filtros de index.html --- */
+.memoria__hud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.8rem 1rem;
+    background-color: rgba(26, 21, 8, 0.9);
+    border-radius: 2px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    font-family: "Special Elite", monospace;
+}
+
+.memoria__jugador {
+    font-family: "Creepster", cursive;
+    font-size: 1.3rem;
+    letter-spacing: 0.04em;
+    color: #c9bc98;
+}
+
+.memoria__hud-datos {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.memoria__hud-item,
+.memoria__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+    min-width: 3.2rem;
+}
+
+.memoria__hud-valor {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #f3e9cf;
+    /* tabular-nums: todos los dígitos miden lo mismo, así el reloj no
+       "tiembla" cuando cambia de 1 a 8 */
+    font-variant-numeric: tabular-nums;
+}
+
+.memoria__hud-valor--peligro {
+    color: #e0503f;
+}
+
+.memoria__hud-etiqueta {
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #c9bc98;
+}
+
+.memoria__boton {
+    font-family: "Special Elite", monospace;
+    font-size: 0.68rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #c9bc98;
+    background-color: transparent;
+    border: 2px dashed #c9bc98;
+    border-radius: 2px;
+    padding: 0.4rem 0.7rem;
+    cursor: pointer;
+}
+
+.memoria__boton:hover {
+    color: #1a1508;
+    background-color: #c9bc98;
+}
+
+.memoria__instruccion {
+    font-family: "Special Elite", monospace;
+    font-size: 0.75rem;
+    text-align: center;
+    color: #c9bc98;
+}
+
+.memoria__aviso {
+    text-align: center;
+}
+
+/* --- Tablero: --columnas la pone memoria.js según cuántas cartas hay --- */
+.memoria__tablero {
+    display: grid;
+    grid-template-columns: repeat(var(--columnas, 6), 1fr);
+    gap: 0.7rem;
+}
+
+/* --- Carta (efecto 3D) ---
+   Es un <button>: se le quita todo el estilo de botón del navegador. */
+.memoria__carta {
+    aspect-ratio: 3 / 4;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    /* perspective en el padre: sin esto el giro se ve plano */
+    perspective: 1000px;
+}
+
+.memoria__carta:disabled {
+    cursor: default;
+}
+
+.memoria__carta:focus-visible {
+    outline: 3px solid #f3e9cf;
+    outline-offset: 3px;
+}
+
+/* El que gira es el interior. preserve-3d mantiene a las dos caras en el
+   espacio 3D (si no, se aplastan contra el plano del padre). */
+.memoria__carta-interior {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.memoria__carta--volteada .memoria__carta-interior,
+.memoria__carta--encontrada .memoria__carta-interior {
+    transform: rotateY(180deg);
+}
+
+/* Las dos caras, una encima de la otra. backface-visibility: hidden
+   esconde cada cara cuando queda de espaldas: así se ve una sola a la vez. */
+.memoria__cara {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 3px;
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.55);
+}
+
+/* Dorso: papel manila con sello, hecho con CSS (sin imagen externa) */
+.memoria__cara--dorso {
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: linear-gradient(170deg, #cdb87f 0%, #b89b5e 100%);
+    transition: filter 0.2s ease;
+}
+
+/* Borde punteado interno, como el margen de una ficha */
+.memoria__cara--dorso::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px dashed rgba(26, 21, 8, 0.35);
+    border-radius: 2px;
+}
+
+.memoria__carta:not(:disabled):hover .memoria__cara--dorso {
+    filter: brightness(1.08);
+}
+
+.memoria__dorso-sello {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 3px solid #8a0303;
+    border-radius: 50%;
+    font-family: "Creepster", cursive;
+    font-size: 1.4rem;
+    color: #8a0303;
+    transform: rotate(-10deg);
+}
+
+.memoria__dorso-texto {
+    font-family: "Special Elite", monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #1a1508;
+}
+
+/* Frente: arranca girado 180°, así queda de espaldas hasta que el
+   interior gira y lo trae al frente */
+.memoria__cara--frente {
+    background-color: #ecdfc0;
+    transform: rotateY(180deg);
+}
+
+.memoria__foto {
+    display: block;
+    width: 100%;
+    height: 68%;
+    object-fit: cover;
+}
+
+.memoria__info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.15rem;
+    padding: 0.3rem 0.4rem;
+    font-family: "Special Elite", monospace;
+    text-align: left;
+}
+
+.memoria__nombre {
+    font-size: 0.62rem;
+    font-weight: bold;
+    line-height: 1.15;
+    color: #1a1508;
+}
+
+.memoria__tipo {
+    font-size: 0.52rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8a0303;
+}
+
+/* Imagen rota: se esconde y el nombre ocupa toda la cara */
+.memoria__cara--sin-foto .memoria__foto {
+    display: none;
+}
+
+.memoria__cara--sin-foto .memoria__info {
+    align-items: center;
+    text-align: center;
+}
+
+.memoria__cara--sin-foto .memoria__nombre {
+    font-size: 0.8rem;
+}
+
+/* Par encontrado: borde verde */
+.memoria__carta--encontrada .memoria__cara--frente {
+    box-shadow: 0 0 0 3px #2f5a1f, 0 6px 14px rgba(0, 0, 0, 0.55);
+}
+
+.memoria__carta--encontrada .memoria__nombre {
+    color: #2f5a1f;
+}
+
+/* --- Modal de victoria --- */
+.memoria__overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background-color: rgba(10, 8, 3, 0.85);
+}
+
+/* Misma ficha manila con cinta que las fichas laterales de index.html */
+.memoria__modal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 360px;
+    padding: 2rem 1.5rem 1.5rem;
+    background: linear-gradient(170deg, #cdb87f 0%, #b89b5e 100%);
+    border-radius: 3px;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7);
+    font-family: "Special Elite", monospace;
+    color: #1a1508;
+    text-align: center;
+    animation: memoria-aparecer 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.memoria__modal::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    width: 72px;
+    height: 22px;
+    background-color: rgba(243, 233, 207, 0.55);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transform: translateX(-50%) rotate(-4deg);
+}
+
+@keyframes memoria-aparecer {
+    from {
+        opacity: 0;
+        transform: scale(0.85) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.memoria__modal-titulo {
+    font-family: "Creepster", cursive;
+    font-size: 2rem;
+    letter-spacing: 0.04em;
+    color: #8a0303;
+}
+
+.memoria__stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.4rem;
+}
+
+.memoria__stat .memoria__hud-etiqueta {
+    color: #4a3f26;
+}
+
+.memoria__stat-valor {
+    font-size: 1.3rem;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.memoria__record {
+    font-size: 0.72rem;
+    font-style: italic;
+    color: #4a3f26;
+}
+
+/* CELULAR: 3 columnas fijas (18 cartas → 3 × 6). Gana sobre la variable
+   --columnas porque reemplaza la propiedad entera. */
+@media (max-width: 640px) {
+    .memoria__tablero {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
+    .memoria__hud {
+        justify-content: center;
+    }
+
+    .memoria__hud-datos {
+        gap: 0.8rem;
+    }
+}
+
+/* Quien tiene activado "reducir movimiento" en su sistema ve el cambio de
+   cara sin la animación del giro */
+@media (prefers-reduced-motion: reduce) {
+    .memoria__carta-interior {
+        transition: none;
+    }
+
+    .memoria__modal {
+        animation: none;
     }
 }

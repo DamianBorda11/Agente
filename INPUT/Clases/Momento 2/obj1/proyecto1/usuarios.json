@@ -1,0 +1,12 @@
+{
+    "usuarios": [
+        {
+            "id": 1,
+            "nombre": "Agente de Prueba",
+            "alias": "agente",
+            "email": "agente@expedientes.com",
+            "hashContrasena": "0796f967141a99dc15eac488a05e5de33b94d8e9db2356a33327bcb753e02b71",
+            "intentos": []
+        }
+    ]
+}

@@ -41,6 +41,7 @@
                 <button class="gestion__item" data-seccion="ver" type="button">Ver uno</button>
                 <button class="gestion__item" data-seccion="actualizar" type="button">Actualizar</button>
                 <button class="gestion__item" data-seccion="eliminar" type="button">Eliminar</button>
+                <button class="gestion__item" data-seccion="usuarios" type="button">Usuarios</button>
             </nav>
         `;
     }
@@ -94,6 +95,189 @@
                 <tbody>${filas}</tbody>
             </table>
         `;
+    }
+
+    // --- Usuarios registrados desde game.html ---
+
+    // Los datos de usuarios los escribió cualquiera en game.html, así que
+    // antes de meterlos en innerHTML se "escapan": < > & " ' pasan a ser
+    // entidades (&lt; etc.) y se muestran como texto. Sin esto, un alias
+    // como <img src=x onerror=alert(1)> se ejecutaría al abrir esta tabla.
+    function escaparHtml(texto) {
+        return String(texto)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#39;");
+    }
+
+    // Leer usuarios e intentos lo hace usuarios.js (almacenUsuarios), el
+    // mismo que usa game.html: así las dos páginas nunca se desincronizan.
+
+    function formatearTiempo(totalSegundos) {
+        const mm = String(Math.floor(totalSegundos / 60)).padStart(2, "0");
+        const ss = String(totalSegundos % 60).padStart(2, "0");
+        return `${mm}:${ss}`;
+    }
+
+    // La fecha se guarda en ISO (UTC); acá se muestra en hora local y en
+    // formato colombiano: "25/09/2026, 10:42".
+    function formatearFecha(fechaIso) {
+        return new Date(fechaIso).toLocaleString("es-CO", {
+            dateStyle: "short",
+            timeStyle: "short",
+        });
+    }
+
+    // Mejor marca: menos intentos; si empatan, menos tiempo.
+    function textoMejorMarca(intentos) {
+        if (intentos.length === 0) {
+            return "—";
+        }
+        const mejor = [...intentos].sort(
+            (a, b) => a.numeroIntentos - b.numeroIntentos || a.tiempoSegundos - b.tiempoSegundos
+        )[0];
+        return `${mejor.numeroIntentos} int. · ${formatearTiempo(mejor.tiempoSegundos)}`;
+    }
+
+    function crearHtmlFilaUsuario(usuario) {
+        return `
+            <tr>
+                <td>${escaparHtml(usuario.id)}</td>
+                <td>${escaparHtml(usuario.nombre)}</td>
+                <td>${escaparHtml(usuario.alias)}</td>
+                <td>${escaparHtml(usuario.email)}</td>
+                <td class="gestion__celda-hash">${escaparHtml(usuario.hashContrasena)}</td>
+                <td>${usuario.intentos.length}</td>
+                <td>${textoMejorMarca(usuario.intentos)}</td>
+                <td>${usuario.origen}</td>
+            </tr>
+        `;
+    }
+
+    // Una fila por intento, con el alias de su usuario. Los números vienen
+    // de localStorage (se pueden editar desde la consola), así que también
+    // pasan por escaparHtml.
+    function crearHtmlFilaIntento(intento, usuario) {
+        return `
+            <tr>
+                <td>${escaparHtml(intento.id)}</td>
+                <td>${escaparHtml(usuario.alias)} (#${escaparHtml(usuario.id)})</td>
+                <td>${formatearFecha(intento.fecha)}</td>
+                <td>${escaparHtml(intento.numeroIntentos)}</td>
+                <td>${formatearTiempo(intento.tiempoSegundos)}</td>
+                <td>${escaparHtml(intento.pares)}</td>
+            </tr>
+        `;
+    }
+
+    // Arma usuarios.json completo y lo descarga. Un Blob es un "archivo en
+    // memoria"; createObjectURL le da una URL temporal, y un <a download>
+    // invisible hace que el navegador lo baje en vez de abrirlo.
+    async function descargarUsuariosJson() {
+        if (!haySesion()) {
+            return;
+        }
+        const contenido = await almacenUsuarios.generarJson();
+        const archivo = new Blob([contenido], { type: "application/json" });
+        const url = URL.createObjectURL(archivo);
+
+        const enlace = document.createElement("a");
+        enlace.href = url;
+        enlace.download = "usuarios.json";
+        enlace.click();
+
+        // La URL temporal ocupa memoria hasta que se libera. Se espera un
+        // instante para no cortar la descarga que recién empezó.
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    // Pinta en #seccion-usuarios la tabla de usuarios y el historial de
+    // intentos. Es async porque espera a fetch; mostrarSeccion la llama sin
+    // await: la sección se muestra y las tablas aparecen apenas llegan los datos.
+    async function renderizarUsuarios() {
+        const seccion = document.getElementById("seccion-usuarios");
+        seccion.innerHTML = `
+            <h2 class="gestion__titulo-seccion">Usuarios registrados</h2>
+            <p class="gestion__mensaje">Cargando…</p>
+        `;
+
+        const usuarios = await almacenUsuarios.obtenerUsuarios();
+
+        if (usuarios.length === 0) {
+            seccion.innerHTML = `
+                <h2 class="gestion__titulo-seccion">Usuarios registrados</h2>
+                <p class="gestion__mensaje">Todavía no hay usuarios registrados.</p>
+            `;
+            return;
+        }
+
+        const filasUsuarios = usuarios.map(crearHtmlFilaUsuario).join("");
+
+        // flatMap: por cada usuario, sus intentos (cada uno con su usuario al
+        // lado), todo en una sola lista. Después, del más reciente al más viejo.
+        const filasIntentos = usuarios
+            .flatMap((usuario) => usuario.intentos.map((intento) => ({ intento, usuario })))
+            .sort((a, b) => b.intento.fecha.localeCompare(a.intento.fecha))
+            .map(({ intento, usuario }) => crearHtmlFilaIntento(intento, usuario))
+            .join("");
+
+        seccion.innerHTML = `
+            <h2 class="gestion__titulo-seccion">Usuarios registrados (${usuarios.length})</h2>
+            <p class="gestion__mensaje">
+                La contraseña se muestra como quedó guardada: su hash SHA-256.
+                La contraseña original no se guarda en ningún lado.
+            </p>
+            <div class="gestion__tabla-scroll">
+                <table class="gestion__tabla">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Alias</th>
+                            <th>Email</th>
+                            <th>Contraseña (hash)</th>
+                            <th>Intentos</th>
+                            <th>Mejor marca</th>
+                            <th>Origen</th>
+                        </tr>
+                    </thead>
+                    <tbody>${filasUsuarios}</tbody>
+                </table>
+            </div>
+
+            <h2 class="gestion__titulo-seccion gestion__titulo-seccion--separado">Historial de intentos</h2>
+            ${filasIntentos === ""
+                ? `<p class="gestion__mensaje">Todavía nadie completó el juego.</p>`
+                : `
+                <div class="gestion__tabla-scroll">
+                    <table class="gestion__tabla">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Usuario</th>
+                                <th>Fecha</th>
+                                <th>Intentos</th>
+                                <th>Tiempo</th>
+                                <th>Pares</th>
+                            </tr>
+                        </thead>
+                        <tbody>${filasIntentos}</tbody>
+                    </table>
+                </div>
+            `}
+
+            <div class="gestion__exportar">
+                <button class="gestion__boton" id="btn-exportar-usuarios" type="button">Descargar usuarios.json</button>
+                <p class="gestion__mensaje">
+                    El navegador no puede escribir en usuarios.json. Descárgalo y
+                    reemplaza el archivo del proyecto para que quede actualizado.
+                </p>
+            </div>
+        `;
+
+        document.getElementById("btn-exportar-usuarios").addEventListener("click", descargarUsuariosJson);
     }
 
     // Tabla de expedientes con un botón "Eliminar" por fila (se arma de nuevo
@@ -373,6 +557,7 @@
                     <section class="gestion__seccion" id="seccion-ver" hidden></section>
                     <section class="gestion__seccion" id="seccion-actualizar" hidden></section>
                     <section class="gestion__seccion" id="seccion-eliminar" hidden></section>
+                    <section class="gestion__seccion" id="seccion-usuarios" hidden></section>
                 </main>
             </div>
         `;
@@ -433,6 +618,10 @@
 
         if (nombre === "actualizar") {
             document.getElementById("seccion-actualizar").innerHTML = crearHtmlFormularioActualizar();
+        }
+
+        if (nombre === "usuarios") {
+            renderizarUsuarios();
         }
 
         document.querySelectorAll(".gestion__seccion").forEach((seccion) => {

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de expedientes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Pantalla 1: formulario de ingreso. novalidate apaga los globos de
+         error del navegador: la validación la hace game.js con sus propios
+         mensajes. -->
+    <div class="login" id="pantalla-login">
+        <form class="gestion__formulario login__caja" id="form-registro" novalidate>
+            <h2 class="gestion__titulo-seccion">Identifícate</h2>
+
+            <label class="gestion__campo">
+                <span class="gestion__etiqueta">Nombre</span>
+                <input class="gestion__input" id="registro-nombre" type="text" autocomplete="name" required>
+            </label>
+
+            <label class="gestion__campo">
+                <span class="gestion__etiqueta">Alias</span>
+                <input class="gestion__input" id="registro-alias" type="text" autocomplete="nickname" required>
+            </label>
+
+            <!-- type="email" en celular abre el teclado con @. Como el form
+                 tiene novalidate, el navegador no lo valida: lo hace game.js. -->
+            <label class="gestion__campo">
+                <span class="gestion__etiqueta">Email</span>
+                <input class="gestion__input" id="registro-email" type="email" autocomplete="email"
+                    placeholder="nombre@dominio.com" required>
+            </label>
+
+            <label class="gestion__campo">
+                <span class="gestion__etiqueta">Contraseña</span>
+                <input class="gestion__input" id="registro-contrasena" type="password"
+                    autocomplete="new-password" aria-describedby="reglas-contrasena" required>
+            </label>
+
+            <!-- Cada requisito se marca en vivo mientras se escribe.
+                 data-regla conecta cada <li> con su regla en game.js. -->
+            <ul class="registro__reglas" id="reglas-contrasena">
+                <li class="registro__regla" data-regla="letras">Al menos 6 letras</li>
+                <li class="registro__regla" data-regla="numeros">Al menos 6 números</li>
+                <li class="registro__regla" data-regla="mayuscula">Al menos 1 mayúscula</li>
+                <li class="registro__regla" data-regla="especial">Al menos 1 carácter especial (!, #, $, …)</li>
+                <li class="registro__regla" data-regla="espacios">Sin espacios</li>
+            </ul>
+
+            <button class="gestion__boton" type="submit">Continuar</button>
+
+            <!-- aria-live hace que los lectores de pantalla lean el mensaje
+                 apenas cambia -->
+            <p class="gestion__mensaje login__error" id="registro-mensaje" aria-live="polite"></p>
+        </form>
+    </div>
+
+    <!-- Pantalla 2: bienvenida. Arranca oculta con el atributo hidden. -->
+    <div class="login" id="pantalla-bienvenida" hidden>
+        <div class="login__caja registro__bienvenida">
+            <h2 class="gestion__titulo-seccion">Bienvenido, <span id="bienvenida-alias"></span></h2>
+            <p class="gestion__mensaje" id="bienvenida-detalle"></p>
+            <button class="gestion__boton" id="btn-abrir-juego" type="button">Abrir caso</button>
+        </div>
+    </div>
+
+    <!-- Pantalla 3: juego de memoria. memoria.js arma las cartas adentro
+         de #memoria-tablero. -->
+    <div class="memoria" id="pantalla-juego" hidden>
+        <header class="memoria__hud">
+            <span class="memoria__jugador" id="memoria-jugador"></span>
+
+            <div class="memoria__hud-datos">
+                <div class="memoria__hud-item">
+                    <span class="memoria__hud-valor" id="memoria-tiempo">00:00</span>
+                    <span class="memoria__hud-etiqueta">Tiempo</span>
+                </div>
+                <div class="memoria__hud-item">
+                    <span class="memoria__hud-valor" id="memoria-intentos">0</span>
+                    <span class="memoria__hud-etiqueta">Intentos</span>
+                </div>
+                <div class="memoria__hud-item">
+                    <span class="memoria__hud-valor" id="memoria-pares">0/0</span>
+                    <span class="memoria__hud-etiqueta">Pares</span>
+                </div>
+                <button class="memoria__boton" id="memoria-reiniciar" type="button">↺ Reiniciar</button>
+            </div>
+        </header>
+
+        <p class="memoria__instruccion">Voltea los expedientes de a dos y encuentra los pares.</p>
+
+        <!-- Si no hay suficientes cartas para jugar, se muestra este aviso -->
+        <p class="login__caja gestion__mensaje memoria__aviso" id="memoria-aviso" hidden></p>
+
+        <div class="memoria__tablero" id="memoria-tablero"></div>
+
+        <!-- Modal de victoria -->
+        <div class="memoria__overlay" id="memoria-victoria" hidden>
+            <div class="memoria__modal" role="dialog" aria-modal="true" aria-labelledby="victoria-titulo">
+                <h2 class="memoria__modal-titulo" id="victoria-titulo">Caso cerrado</h2>
+                <span class="ficha-lateral__sello" id="victoria-rango"></span>
+
+                <div class="memoria__stats">
+                    <div class="memoria__stat">
+                        <span class="memoria__stat-valor" id="victoria-tiempo">--:--</span>
+                        <span class="memoria__hud-etiqueta">Tiempo</span>
+                    </div>
+                    <div class="memoria__stat">
+                        <span class="memoria__stat-valor" id="victoria-intentos">0</span>
+                        <span class="memoria__hud-etiqueta">Intentos</span>
+                    </div>
+                    <div class="memoria__stat">
+                        <span class="memoria__stat-valor" id="victoria-pares">0/0</span>
+                        <span class="memoria__hud-etiqueta">Pares</span>
+                    </div>
+                </div>
+
+                <p class="memoria__record" id="victoria-record"></p>
+                <button class="gestion__boton" id="memoria-jugar-de-nuevo" type="button">Jugar de nuevo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orden de carga:
+         data.js    → cargarCartas() (data.js o lo guardado por gestion.html)
+         login.js   → calcularHash (SHA-256), lo usa game.js
+         usuarios.js → almacenUsuarios: leer/guardar usuarios e intentos
+         game.js    → login/registro; avisa cuando hay sesión
+         memoria.js → el juego; escucha ese aviso -->
+    <script src="data.js"></script>
+    <script src="login.js"></script>
+    <script src="usuarios.js"></script>
+    <script src="game.js"></script>
+    <script src="memoria.js"></script>
+</body>
+</html>
