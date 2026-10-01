@@ -1,0 +1,21 @@
+<sitio nombre="Kazuki" url="https://kazuki-art.com">
+  <header>
+    <logo>Sin wordmark de texto; firma manuscrita "Kazuki" superpuesta en la foto del hero</logo>
+    <nav tipo="fija">
+      <enlace>About</enlace>
+      <enlace>Works (ancla #works)</enlace>
+      <enlace>Photo (ancla #photo)</enlace>
+      <enlace>Movie (ancla #movie)</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">Foto full-bleed de Kazuki con firma manuscrita superpuesta, texto "ART DIRECTOR / SINGER-SONGWRITER / STYLIST" y prompt vertical "EXPLORE"</section>
+    <section tipo="galeria">Works: grilla tipo collage con decenas de piezas comerciales (jackets de artistas, portadas, fotos de styling) cada una con link a su detalle</section>
+    <section tipo="galeria">Photo: grilla de fotografía personal (lives, exhibiciones, artist photos, portada de álbum propio)</section>
+    <section tipo="galeria">Movie: grilla de videoclips/piezas audiovisuales (MAN GIRL, RED, POP, STAR)</section>
+  </main>
+  <footer>
+    <redes>No visible en el home (enlaces a redes aparecen dentro del panel de About)</redes>
+    <contacto>No visible en el home; contacto disponible dentro del panel de About</contacto>
+  </footer>
+</sitio>

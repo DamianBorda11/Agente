@@ -1,0 +1,17 @@
+<sitio nombre="SMSY-Gen02 | Award Winning Creative Graphics Engineer" url="https://samsy.ninja">
+  <header>
+    <logo>Texto "SMSY © 26'" arriba a la izquierda, superpuesto sobre la escena 3D</logo>
+    <nav tipo="fija">
+      <enlace>EXPLORE</enlace>
+      <enlace>WORKS</enlace>
+      <enlace>ABOUT</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">Escena 3D jugable en WebGPU (ciudad cyberpunk nocturna) con avatar tipo búho controlado por teclado (flechas + SPACE para saltar); HUD superpuesto con motor/FPS/estado de conexión y textos "Creative Development & Experience Designer" / "Raised on '90s classics"</section>
+  </main>
+  <footer>
+    <redes>No visible en el home; handle @samsyyyy solo presente en metadata (twitter:site/creator)</redes>
+    <contacto>No visible en el home</contacto>
+  </footer>
+</sitio>

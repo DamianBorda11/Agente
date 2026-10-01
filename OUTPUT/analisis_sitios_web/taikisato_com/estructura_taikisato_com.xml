@@ -1,0 +1,20 @@
+<sitio nombre="TAIKI SATO Portfolio" url="https://taikisato.com">
+  <header>
+    <logo>"TAIKI SATO" en texto, arriba a la izquierda, link a home</logo>
+    <nav tipo="overlay-fullscreen">
+      <enlace>お問い合わせ (CONTACT, mailto)</enlace>
+      <enlace>制作実績 (WORKS)</enlace>
+      <enlace>私について (ABOUT)</enlace>
+      <enlace>HOME</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">Declaración personal ("I am Taiki Sato, a visual designer...") + disciplinas (WEB DESIGN / GRAPHIC DESIGN / ART DIRECTION) + nombre grande "TAIKI SATO" con esfera tipo luna renderizada en shader WebGL</section>
+    <section tipo="about-teaser">Collage de fotos (izquierda/derecha) + título "（私について）これまでのこと 嗜好と思考の話" + link MORE hacia /about</section>
+    <section tipo="galeria">Título "（制作実績）機能と情緒 作品への想い" + grilla de 5 proyectos (año, nombre, tipo de encargo, disciplinas) + link ALL WORKS/MORE hacia /works</section>
+  </main>
+  <footer>
+    <redes>X (Twitter): x.com/0521taiki1 ; Instagram: instagram.com/taikisato_/</redes>
+    <contacto>Email vía mailto (taaaaiki.mode@gmail.com), botón "GET IN CONTACT"</contacto>
+  </footer>
+</sitio>

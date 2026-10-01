@@ -1,0 +1,18 @@
+<sitio nombre="Shoya Kajita - Website Developer & CG Creator" url="https://shoya-kajita.com">
+  <header>
+    <logo>Monograma "S" en línea blanca sobre fondo negro, link a Home</logo>
+    <nav tipo="fija">
+      <enlace>HOME</enlace>
+      <enlace>ABOUT</enlace>
+      <enlace>WORKS</enlace>
+      <enlace>ARTWORK</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">Pantalla única con título glitch "HELLO WORLD", nombre "SHOYA KAJITA", rol "Developer / でべろっぱー" sobre fondo con textura oscura tipo agua/óxido en loop; incluye toggles de modo de interacción (Hand / Sound) y enlaces a instrucciones de modo mano (JA/EN)</section>
+  </main>
+  <footer>
+    <redes>Twitter/X: @sho4771k (referenciado en meta twitter:site, sin enlace visible en el footer del home)</redes>
+    <contacto>Sin datos de contacto directo en el home; copyright "© SHOYA KAJITA"</contacto>
+  </footer>
+</sitio>

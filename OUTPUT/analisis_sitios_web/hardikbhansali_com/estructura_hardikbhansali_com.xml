@@ -1,0 +1,21 @@
+<sitio nombre="Hardik Bhansali" url="https://www.hardikbhansali.com">
+  <header>
+    <logo>"HARDIK BHANSALI" en texto, con bio corta debajo ("digital experience designer who can lucid dream design concepts...")</logo>
+    <nav tipo="fija">
+      <enlace>HARDIK BHANSALI (logo, link a home)</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">Escena WebGL con animación "pinned" por scroll: "THE WORLD WITNESSED THE BIRTH OF a designer..." + fecha "22.09.2000", con badges de Webby/FWA/Awwwards superpuestos</section>
+    <section tipo="testimonios">Tagline "Born in the age of machines, to serve the world with digital design" + 3 testimonios en audio (CEO de Awwwards, colega de diseño, VP de WIX)</section>
+    <section tipo="galeria">"Featured Projects": selector de 6 proyectos (WTF - Nikhil Kamath, NoCode Shader, The Grid, Actress Becky Armstrong, Skull Crusher, Goofy Dev) con link a ver cada uno</section>
+    <section tipo="demo">"Experience Hardik's Lucid Dreams": experiencia interactiva que usa la cámara del usuario para controlar una escena 3D con gestos de mano (orbitar, puño para avanzar, mano abierta para detener)</section>
+    <section tipo="about">Declaración de identidad: "He never thought of being a designer / he was always destined to be one"</section>
+    <section tipo="stats">Logros: "45 websites design awwwards" y "founded LUCERRÁ studio"</section>
+    <section tipo="personal">"A peek into Hardik's personal life": música favorita (Raam katha/bhajan) y videojuegos favoritos (Black Myth Wukong, Super Mario Bros., Mortal Kombat 1, Contra)</section>
+  </main>
+  <footer>
+    <redes>LinkedIn (linkedin.com/in/hardik-bhansali) y Twitter/X (@thehardikdesign)</redes>
+    <contacto>Email vía mailto (hardik@lucerra.co)</contacto>
+  </footer>
+</sitio>

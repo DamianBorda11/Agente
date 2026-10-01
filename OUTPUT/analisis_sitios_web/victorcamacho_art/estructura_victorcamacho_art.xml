@@ -1,0 +1,25 @@
+<sitio nombre="Víctor Camacho | Vic.justlikethat" url="https://www.victorcamacho.art">
+  <header>
+    <logo>"Vic.justlikethat" en texto, con ícono circular a la izquierda, link a home</logo>
+    <nav tipo="fija">
+      <enlace>Galería</enlace>
+      <enlace>Patreon</enlace>
+      <enlace>Contacto</enlace>
+      <enlace>Trabajemos juntos (CTA)</enlace>
+    </nav>
+  </header>
+  <main>
+    <section tipo="hero">"¡Hola! Soy Vic" + bio corta (diseñador, ilustrador y programador) + CTA "Trabajemos juntos" + foto/collage de ilustraciones</section>
+    <section tipo="trabajos">"Creo proyectos que transforman": casos destacados (Zurich 2025, Better Self, Más allá del espejo) con descripción breve de cada uno</section>
+    <section tipo="galeria">"Proyectos artísticos": cita personal + grilla de pinturas/ilustraciones (ej. Jardines azules, El beso, Mariposas) + link a galería completa</section>
+    <section tipo="proceso">"Mi proceso creativo" basado en design thinking: Empatía, Definición, Ideación, Prototipado, Evaluación</section>
+    <section tipo="cta">"Si lo puedes imaginar, podemos hacerlo juntos" + link a contacto</section>
+    <section tipo="servicios">Cuatro tarjetas de servicio: Ilustraciones, Diseño Web, Diseño de Interfaces, Consultorías</section>
+    <section tipo="patreon">"Mis secretos para crecer como artistas": promoción de contenido en Patreon + lista de últimos episodios</section>
+    <section tipo="contacto">"Estoy abierto a nuevos proyectos": formulario con nombre, correo, selector de intención y mensaje</section>
+  </main>
+  <footer>
+    <redes>Instagram, TikTok, LinkedIn y email (vic.justlikethat@gmail.com)</redes>
+    <contacto>Formulario de suscripción a email list + mailto vic.justlikethat@gmail.com; copyright "© 2026 Vic.justlikethat"</contacto>
+  </footer>
+</sitio>
