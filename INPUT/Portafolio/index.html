@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Damián Borda — Arte como herramienta de transformación</title>
+  <meta name="description" content="Portafolio de Damián Borda: ilustración, diseño de producto UX/UI y creación audiovisual desde Colombia.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700&family=Rubik+Glitch&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="container header__inner">
+      <a href="index.html" class="header__logo">DAMIÁN<span>.</span>BORDA</a>
+
+      <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-nav">
+        <span></span>
+      </button>
+
+      <nav class="nav" id="main-nav" aria-label="Principal">
+        <ul class="nav__list">
+          <li><a href="works.html" class="nav__link">Trabajos</a></li>
+          <li><a href="cine.html" class="nav__link">Cine</a></li>
+        </ul>
+        <a href="#contact" class="btn btn--solid">Trabajemos juntos</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== 1. Hero ===== -->
+    <section class="hero" id="top" data-channel="00" data-channel-name="Inicio">
+      <div class="container">
+        <p class="hero__rec"><span><span class="dot">●</span> REC</span><span>Cinta 01</span><span>CO</span></p>
+        <h1 class="hero__title">
+          <span class="glitch" data-text="Damián">Damián</span><br>
+          <span class="glitch" data-text="Borda">Borda</span>
+        </h1>
+        <ul class="hero__roles">
+          <li>Artista / Ilustrador</li>
+          <li>Diseñador UX/UI</li>
+          <li>Creador audiovisual</li>
+        </ul>
+        <p class="hero__motto">Uso el arte como <em>herramienta de transformación</em>: imágenes, interfaces y películas que cuentan historias.</p>
+        <div class="hero__actions">
+          <a href="works.html" class="btn btn--solid">Ver trabajos</a>
+          <a href="#contact" class="btn">Trabajemos juntos</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 2. Works ===== -->
+    <section class="section" id="works" data-channel="01" data-channel-name="Trabajos">
+      <div class="container">
+        <div class="section__header">
+          <div>
+            <p class="section__tag">CH 01 ▸ Trabajos</p>
+            <h2 class="section__title">Tres identidades,<br>una historia</h2>
+          </div>
+          <a href="works.html" class="btn">Ver todo el archivo →</a>
+        </div>
+
+        <!-- Rendered by js/main.js from the projects with featured: true -->
+        <div class="card-grid" id="featured-grid"></div>
+      </div>
+    </section>
+
+    <!-- ===== 3. Cinema ===== -->
+    <section class="section" id="cine" data-channel="02" data-channel-name="Cine">
+      <div class="container">
+        <div class="section__header">
+          <div>
+            <p class="section__tag">CH 02 ▸ Cine</p>
+            <h2 class="section__title">Películas que hago</h2>
+          </div>
+          <a href="cine.html" class="btn">Ver todo el cine →</a>
+        </div>
+
+        <!-- Rendered by js/main.js from the films with featured: true -->
+        <div class="card-grid" id="film-grid"></div>
+      </div>
+    </section>
+
+    <!-- ===== 4. Creative process ===== -->
+    <section class="section" id="process" data-channel="03" data-channel-name="Proceso">
+      <div class="container">
+        <div class="section__header">
+          <div>
+            <p class="section__tag">CH 03 ▸ Proceso creativo</p>
+            <h2 class="section__title">Cómo trabajo</h2>
+          </div>
+          <p class="section__lead">Cada proyecto pasa por un proceso de design thinking. No empiezo por el estilo: empiezo por la persona y la historia.</p>
+        </div>
+
+        <ol class="process">
+          <li class="process__step">
+            <h3 class="process__title">Empatía</h3>
+            <p class="process__text">Escucho a quién va dirigido el proyecto y qué necesita sentir.</p>
+          </li>
+          <li class="process__step">
+            <h3 class="process__title">Definición</h3>
+            <p class="process__text">Convierto lo escuchado en un problema claro y una narrativa.</p>
+          </li>
+          <li class="process__step">
+            <h3 class="process__title">Ideación</h3>
+            <p class="process__text">Bocetos, referencias y muchas ideas antes de elegir una.</p>
+          </li>
+          <li class="process__step">
+            <h3 class="process__title">Prototipado</h3>
+            <p class="process__text">Llevo la idea a algo que se pueda ver, tocar o probar.</p>
+          </li>
+          <li class="process__step">
+            <h3 class="process__title">Evaluación</h3>
+            <p class="process__text">Pruebo con personas reales y ajusto hasta que funcione.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== 5. Mid CTA ===== -->
+    <section class="cta-band">
+      <div class="container">
+        <h2 class="section__title">¿Tienes una historia que contar?</h2>
+        <p>Ilustración, interfaces o una pieza audiovisual: hablemos de cómo darle forma.</p>
+        <a href="#contact" class="btn">Trabajemos juntos</a>
+      </div>
+    </section>
+
+    <!-- ===== 6. Services ===== -->
+    <section class="section" id="services" data-channel="04" data-channel-name="Servicios">
+      <div class="container">
+        <div class="section__header">
+          <div>
+            <p class="section__tag">CH 04 ▸ Servicios</p>
+            <h2 class="section__title">Qué puedo hacer por ti</h2>
+          </div>
+        </div>
+
+        <div class="services">
+          <article class="service">
+            <p class="service__icon">[01]</p>
+            <h3 class="service__title">Ilustración</h3>
+            <p class="service__text">Pintura digital, portadas, personajes y piezas por encargo con enfoque narrativo.</p>
+          </article>
+          <article class="service">
+            <p class="service__icon">[02]</p>
+            <h3 class="service__title">Diseño web</h3>
+            <p class="service__text">Sitios con identidad propia, responsive y pensados para contar tu historia.</p>
+          </article>
+          <article class="service">
+            <p class="service__icon">[03]</p>
+            <h3 class="service__title">Diseño de interfaces</h3>
+            <p class="service__text">UX/UI para apps y productos digitales, desde la investigación hasta el prototipo.</p>
+          </article>
+          <article class="service">
+            <p class="service__icon">[04]</p>
+            <h3 class="service__title">Consultoría</h3>
+            <p class="service__text">Acompañamiento creativo para definir la narrativa visual de tu marca o proyecto.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 7. Contact ===== -->
+    <section class="section" id="contact" data-channel="05" data-channel-name="Contacto">
+      <div class="container contact">
+        <div>
+          <p class="section__tag">CH 05 ▸ Contacto</p>
+          <h2 class="section__title">Trabajemos juntos</h2>
+          <p class="section__lead">Cuéntame quién eres y qué tienes en mente. Elegir una opción me ayuda a responderte mejor.</p>
+        </div>
+
+        <form class="form" id="contact-form" novalidate>
+          <div class="form__row">
+            <div class="form__field">
+              <label class="form__label" for="contact-name">Nombre</label>
+              <input class="form__input" type="text" id="contact-name" name="name" autocomplete="name">
+              <p class="form__error" aria-live="polite"></p>
+            </div>
+            <div class="form__field">
+              <label class="form__label" for="contact-email">Email</label>
+              <input class="form__input" type="email" id="contact-email" name="email" autocomplete="email">
+              <p class="form__error" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <div class="form__field">
+            <label class="form__label" for="contact-intent">¿Qué te trae por aquí?</label>
+            <select class="form__input" id="contact-intent" name="intent">
+              <option value="">Elige una opción</option>
+              <option value="company">Soy una empresa</option>
+              <option value="painting">Quiero una pintura</option>
+              <option value="web">Busco diseño web o de interfaces</option>
+              <option value="film">Quiero colaborar en un film</option>
+              <option value="other">Otro</option>
+            </select>
+            <p class="form__error" aria-live="polite"></p>
+          </div>
+
+          <div class="form__field">
+            <label class="form__label" for="contact-message">Mensaje</label>
+            <textarea class="form__input" id="contact-message" name="message"></textarea>
+            <p class="form__error" aria-live="polite"></p>
+          </div>
+
+          <button type="submit" class="btn btn--solid">Enviar mensaje</button>
+          <p class="form__status" role="status"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lightbox: native <dialog>, filled by js/main.js; Esc closes it -->
+  <dialog class="lightbox" aria-labelledby="lightbox-title">
+    <div class="lightbox__media"></div>
+    <div class="lightbox__caption">
+      <div>
+        <p class="lightbox__meta"></p>
+        <h2 class="lightbox__title" id="lightbox-title"></h2>
+        <p class="lightbox__text"></p>
+      </div>
+      <button class="lightbox__close" type="button" aria-label="Cerrar">✕ ESC</button>
+    </div>
+  </dialog>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <h2 class="footer__title">Damián Borda</h2>
+          <p class="footer__text">Desarrollador web, creador e ilustrador colombiano. Arte como herramienta de transformación.</p>
+        </div>
+        <div>
+          <h2 class="footer__title">Redes</h2>
+          <ul class="footer__social">
+            <li><a href="#">Instagram ↗</a></li>
+            <li><a href="#">Behance ↗</a></li>
+            <li><a href="#">YouTube ↗</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="footer__title">Lista de correo</h2>
+          <p class="footer__text">Proyectos nuevos, procesos y estrenos. Sin spam.</p>
+          <form class="newsletter" novalidate>
+            <label class="sr-only" for="newsletter-email">Email</label>
+            <input class="form__input" type="email" id="newsletter-email" placeholder="tu@email.com" autocomplete="email">
+            <button type="submit" class="btn btn--solid">Suscribirme</button>
+          </form>
+          <p class="form__error newsletter__feedback" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span data-year>2026</span> Damián Borda</span>
+        <span><a href="#top">▲ Volver arriba</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

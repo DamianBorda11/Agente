@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cine — Damián Borda</title>
+  <meta name="description" content="Cortometrajes de Damián Borda como director, guionista y editor.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;700&family=Rubik+Glitch&family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="container header__inner">
+      <a href="index.html" class="header__logo">DAMIÁN<span>.</span>BORDA</a>
+
+      <button class="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-nav">
+        <span></span>
+      </button>
+
+      <nav class="nav" id="main-nav" aria-label="Principal">
+        <ul class="nav__list">
+          <li><a href="works.html" class="nav__link">Trabajos</a></li>
+          <li><a href="cine.html" class="nav__link is-current" aria-current="page">Cine</a></li>
+        </ul>
+        <a href="index.html#contact" class="btn btn--solid">Trabajemos juntos</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero" id="top" data-channel="02" data-channel-name="Cine">
+      <div class="container">
+        <p class="section__tag">CH 02 ▸ Filmografía</p>
+        <h1 class="section__title">Cine</h1>
+        <p class="section__lead">Cortometrajes que escribo, dirijo y edito. Filtra por mi rol en cada uno o haz clic para ver la ficha.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <!-- Filter buttons and cards are rendered by js/main.js from js/data.js -->
+        <div class="filters" id="film-filters" role="group" aria-label="Filtrar por rol"></div>
+        <div class="masonry" id="films-grid" aria-live="polite"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lightbox: native <dialog>, filled by js/main.js; Esc closes it -->
+  <dialog class="lightbox" aria-labelledby="lightbox-title">
+    <div class="lightbox__media"></div>
+    <div class="lightbox__caption">
+      <div>
+        <p class="lightbox__meta"></p>
+        <h2 class="lightbox__title" id="lightbox-title"></h2>
+        <p class="lightbox__text"></p>
+      </div>
+      <button class="lightbox__close" type="button" aria-label="Cerrar">✕ ESC</button>
+    </div>
+  </dialog>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <h2 class="footer__title">Damián Borda</h2>
+          <p class="footer__text">Desarrollador web, creador e ilustrador colombiano. Arte como herramienta de transformación.</p>
+        </div>
+        <div>
+          <h2 class="footer__title">Redes</h2>
+          <ul class="footer__social">
+            <li><a href="#">Instagram ↗</a></li>
+            <li><a href="#">Behance ↗</a></li>
+            <li><a href="#">YouTube ↗</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="footer__title">Lista de correo</h2>
+          <p class="footer__text">Proyectos nuevos, procesos y estrenos. Sin spam.</p>
+          <form class="newsletter" novalidate>
+            <label class="sr-only" for="newsletter-email">Email</label>
+            <input class="form__input" type="email" id="newsletter-email" placeholder="tu@email.com" autocomplete="email">
+            <button type="submit" class="btn btn--solid">Suscribirme</button>
+          </form>
+          <p class="form__error newsletter__feedback" aria-live="polite"></p>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span data-year>2026</span> Damián Borda</span>
+        <span><a href="#top">▲ Volver arriba</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
