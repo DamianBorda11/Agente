@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entregas — Supabase</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app">
+        <h1>Entregas de talleres</h1>
+
+        <form id="entrega-form" class="entrega-form">
+            <input name="taller" placeholder="Taller" required>
+            <input name="titulo" placeholder="Título de la entrega" required>
+            <input name="fecha_entrega" type="date" required>
+            <select name="estado">
+                <option value="pendiente">Pendiente</option>
+                <option value="en_progreso">En progreso</option>
+                <option value="entregada">Entregada</option>
+            </select>
+            <button type="submit">Agregar</button>
+        </form>
+
+        <p id="mensaje" class="mensaje" role="status"></p>
+
+        <table class="entregas">
+            <thead>
+                <tr>
+                    <th>Taller</th>
+                    <th>Título</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="entregas-body"></tbody>
+        </table>
+    </main>
+
+    <!-- El orden importa: cada script usa algo que definió el anterior. -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> <!-- 1° crea window.supabase -->
+    <script src="js/supabaseClient.js"></script>  <!-- 2° crea supabaseClient -->
+    <script src="js/datos.js"></script>           <!-- 3° funciones CRUD -->
+    <script src="js/gestion.js"></script>         <!-- 4° DOM + eventos -->
+</body>
+</html>

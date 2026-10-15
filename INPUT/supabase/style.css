@@ -1,0 +1,48 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: #f4f4f5;
+    color: #18181b;
+}
+
+.app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.entrega-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.entrega-form input,
+.entrega-form select,
+.entrega-form button {
+    padding: 8px 10px;
+    font: inherit;
+}
+
+.mensaje {
+    min-height: 1.4em;
+    color: #b91c1c;
+}
+
+.entregas {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.entregas th,
+.entregas td {
+    padding: 8px;
+    border-bottom: 1px solid #e4e4e7;
+    text-align: left;
+}
