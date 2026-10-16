@@ -5,6 +5,99 @@
        scripts — sin esta línea, "supabase.createClient" no existiría
        todavía cuando supabaseClient.js intente usarlo -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Sin esta línea el celular "simula" una pantalla de PC y todo se ve diminuto -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* Paleta oscura: grises casi negros en vez de negro puro, y texto
+       gris claro en vez de blanco puro, para no cansar la vista */
+    :root {
+      --bg: #141416;
+      --surface: #1a1b1e;
+      --border: #2a2b30;
+      --text: #e4e4e7;
+      --muted: #9a9aa3;
+      --green: #4ca758;
+      --red: #e5484d;
+      --amber: #f59e0b;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    #btn-traer {
+      padding: 10px 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* auto-fill + minmax: el navegador decide cuántas columnas caben.
+       En el celular cabe 1; en el PC, 3 o más — sin media queries */
+    .galeria {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    /* aspect-ratio + object-fit: todas las fotos del mismo tamaño,
+       recortadas en vez de estiradas */
+    .card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      background: var(--border);
+    }
+
+    .card-body { padding: 14px; }
+    .card h2 { margin: 8px 0 4px; font-size: 1.1rem; }
+    .descripcion { margin: 0 0 10px; color: var(--muted); font-size: 0.9rem; }
+    .precio { margin: 0; font-size: 1.2rem; font-weight: 600; }
+    .precio s { color: var(--muted); font-size: 0.85rem; font-weight: 400; }
+    .descuento { color: var(--amber); font-size: 0.85rem; }
+    .unidades { margin: 4px 0 10px; color: var(--muted); font-size: 0.85rem; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+    .badge-on  { color: var(--green); background: rgb(76 167 88 / 0.15); }
+    .badge-off { color: var(--red);   background: rgb(229 72 77 / 0.15); }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .chips li {
+      padding: 2px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+  </style>
 </head>
 <body>
 
