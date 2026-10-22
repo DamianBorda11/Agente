@@ -92,4 +92,35 @@ const productoPrueba = {
 
 }
 
+
+// ANTES (si lo hubieras hecho con localStorage, como en la semana 7):
+function agregarProducto(datos) {
+  const nuevo = { id: siguienteId, ...datos };
+  siguienteId++;
+  productos.push(nuevo);
+  guardarProductos();
+  return nuevo;
+}
+
+// AHORA (Supabase):
+async function agregarProducto(datos) {
+
+  const { data, error } = await db
+    .from('practica-productos')  // la tabla
+    .insert([datos])             // insert() siempre recibe un ARRAY de objetos,
+                                  // aunque insertes uno solo
+    .select();                    // .select() le pide a Supabase que te
+                                   // devuelva la fila ya creada (con su id
+                                   // nuevo) — sin esto, insert() no te
+                                   // devuelve nada útil
+
+  if (error) {
+    console.log("Error al agregar:", error);
+    return null;
+  }
+
+  return data[0];   // data siempre es un array — tomamos el primer
+                     // elemento, que es la fila recién creada
+    }
+
 });
