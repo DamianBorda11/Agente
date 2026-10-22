@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- CDN: trae la librería de Supabase ANTES que nuestros propios
+       scripts — sin esta línea, "supabase.createClient" no existiría
+       todavía cuando supabaseClient.js intente usarlo -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Sin esta línea el celular "simula" una pantalla de PC y todo se ve diminuto -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+
+<body>
+
+  <button id="btn-traer">Traer productos</button>
+  <div id="resultado"></div>
+  <div id="resultado2"></div>
+  <div id="descripcion"></div>
+  <div id="precio"></div>
+  <div id="unidades"></div>
+
+  <!-- supabaseClient.js crea "db" (sección 4.3): el cliente ya
+       conectado a tu proyecto de Supabase. Lo vamos a usar en
+       prueba2.js, por eso tiene que cargarse ANTES que ese archivo -->
+  <script src="js/supabaseClient.js"></script>
+  <!-- prueba2.js: aquí escribes el código de los Pasos 2, 3 y 4 -->
+  <script src="js/prueba2.js"></script>
+</body>
+</html>
