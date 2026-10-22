@@ -87,19 +87,9 @@ const productoPrueba = {
   unidades: 10,
   descuento: 0.1,
   disponible: true,
-  categorias: ['tecnologia', 'accesorios'],
+  categorias: ["tecnologia",  "accesorios"],
   'img-url': "https://www.omega-store.co/wp-content/uploads/2025/03/MS6610BK.png",
 
-}
-
-
-// ANTES (si lo hubieras hecho con localStorage, como en la semana 7):
-function agregarProducto(datos) {
-  const nuevo = { id: siguienteId, ...datos };
-  siguienteId++;
-  productos.push(nuevo);
-  guardarProductos();
-  return nuevo;
 }
 
 // AHORA (Supabase):
@@ -121,6 +111,17 @@ async function agregarProducto(datos) {
 
   return data[0];   // data siempre es un array — tomamos el primer
                      // elemento, que es la fila recién creada
+}
+
+document.getElementById('btn-agregar-obj').addEventListener('click', async () => {
+    const respuesta = await agregarProducto(productoPrueba);
+    if (respuesta) {
+        console.log("Producto agregado:", respuesta);
+        document.getElementById('notificacion').textContent = 'Producto agregado: ' + JSON.stringify(respuesta, null, 2);
+    } else {
+        document.getElementById('notificacion').textContent = 'Error al agregar el producto.';
     }
+
+});
 
 });

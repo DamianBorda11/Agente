@@ -36,3 +36,24 @@ Abre `index.html` con Live Server (o directo en el navegador). Si algo falla, ab
 | La tabla sale vacía sin error | RLS activo sin política de `select` |
 | `new row violates row-level security policy` | Falta la política de `insert` |
 | `Invalid API key` | URL o anon key mal copiadas |
+
+## Permitir crear productos solo a usuarios autenticados
+
+El error `42501: new row violates row-level security policy` significa que RLS está
+bloqueando el `INSERT`. Para `practica-productos`, ejecuta este SQL en **SQL Editor**
+si no existe ya una política equivalente:
+
+```sql
+grant insert on table public."practica-productos" to authenticated;
+
+create policy "authenticated users can insert products"
+on public."practica-productos"
+for insert
+to authenticated
+with check (auth.uid() is not null);
+```
+
+Esta política permite insertar a cualquier usuario con una sesión autenticada; no
+crea un flujo de inicio de sesión por sí sola. La página debe iniciar sesión con
+Supabase Auth antes de llamar a `insert()`. No desactives RLS ni uses la `service_role`
+en el navegador.
