@@ -8,25 +8,80 @@
   <!-- Sin esta línea el celular "simula" una pantalla de PC y todo se ve diminuto -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Fuentes: Metal Mania (títulos), Orbitron (interfaz futurista), Oswald (texto) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Orbitron:wght@500;700&family=Oswald:wght@400;700&display=swap">
+  <!-- Estilos de esta página (metal + cyberpunk, modo oscuro y claro) -->
+  <link rel="stylesheet" href="css/prueba2.css">
 </head>
 
 <body>
 
-  <button id="btn-traer">Traer productos</button>
-  <div id="resultado"></div>
-  <div id="resultado2"></div>
-  <div id="descripcion"></div>
-  <div id="precio"></div>
-  <div id="unidades"></div>
+  <header class="header">
+    <!-- data-text: el CSS copia este texto en dos capas (roja y blanca) para el glitch -->
+    <h1 data-text="Videoclub">Videoclub</h1>
+    <button id="btn-tema" type="button">☀ Modo claro</button>
+  </header>
 
-  <div id="form-container"></div>
+  <!-- Dos columnas: estantería a la izquierda, formulario a la derecha -->
+  <main class="columnas">
 
-  <section id="resultado-busqueda" style="margin-top: 20px;">
-    <h3>Resultados de búsqueda por nombre</h3>
-    <div id="resultado-busqueda-contenido"></div>
-  </section>
+    <section class="col-productos">
+      <button id="btn-traer">Ver estantería</button>
+      <!-- JSON crudo, cerrado por defecto: se abre solo para depurar -->
+      <details id="json-crudo" hidden>
+        <summary>Ver JSON</summary>
+        <pre id="resultado"></pre>
+      </details>
+      <!-- Filtros del catálogo (el único buscador): aparecen al abrir la estantería -->
+      <div id="filtros" class="filtros" hidden>
+        <label class="filtro-texto">Buscar
+          <input type="search" id="filtro-texto" placeholder="Título, director o sinopsis">
+        </label>
+        <label>Género
+          <select id="filtro-categoria">
+            <option value="">Todos</option>
+          </select>
+        </label>
+        <label>Disponibilidad
+          <select id="filtro-disponible">
+            <option value="">Todas</option>
+            <option value="si">En estante</option>
+            <option value="no">Rentadas</option>
+          </select>
+        </label>
+        <label>Renta mín. (COP)
+          <input type="number" id="filtro-precio-min" min="0" step="500" placeholder="0">
+        </label>
+        <label>Renta máx. (COP)
+          <input type="number" id="filtro-precio-max" min="0" step="500" placeholder="∞">
+        </label>
+        <label>Ordenar
+          <select id="filtro-orden">
+            <option value="id">Por defecto</option>
+            <option value="precio-asc">Renta: menor a mayor</option>
+            <option value="precio-desc">Renta: mayor a menor</option>
+            <option value="nombre">Título (A–Z)</option>
+          </select>
+        </label>
+        <button type="button" id="btn-limpiar-filtros">Limpiar</button>
+        <p id="contador-productos"></p>
+      </div>
 
-  <div id="notificacion"></div>
+      <!-- Aquí se pintan las cajas VHS de "Ver estantería" -->
+      <div id="lista-productos"></div>
+    </section>
+
+    <section class="col-formulario">
+      <h3>Mostrador</h3>
+      <!-- prueba2.js crea aquí el formulario -->
+      <div id="form-container"></div>
+
+      <div id="notificacion"></div>
+    </section>
+
+  </main>
 
   <!-- supabaseClient.js crea "db" (sección 4.3): el cliente ya
        conectado a tu proyecto de Supabase. Lo vamos a usar en

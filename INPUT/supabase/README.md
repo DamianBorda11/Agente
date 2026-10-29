@@ -57,3 +57,41 @@ Esta política permite insertar a cualquier usuario con una sesión autenticada;
 crea un flujo de inicio de sesión por sí sola. La página debe iniciar sesión con
 Supabase Auth antes de llamar a `insert()`. No desactives RLS ni uses la `service_role`
 en el navegador.
+
+## Permitir modificar productos solo a usuarios autenticados
+
+Si `modificarProducto()` devuelve `null` sin error en consola, RLS está filtrando el
+`UPDATE` (no hay error, solo 0 filas afectadas). Ejecuta en **SQL Editor**:
+
+```sql
+grant update on table public."practica-productos" to authenticated;
+
+create policy "authenticated users can update products"
+on public."practica-productos"
+for update
+to authenticated
+using (auth.uid() is not null)
+with check (auth.uid() is not null);
+```
+
+`using` decide qué filas puedes ver para modificar; `with check` valida cómo quedan
+después del cambio.
+
+## Permitir eliminar productos solo a usuarios autenticados
+
+Si `eliminarProducto()` devuelve `false` sin error en consola, RLS está filtrando el
+`DELETE` (0 filas borradas). Ejecuta en **SQL Editor**:
+
+```sql
+grant delete on table public."practica-productos" to authenticated;
+
+create policy "authenticated users can delete products"
+on public."practica-productos"
+for delete
+to authenticated
+using (auth.uid() is not null);
+```
+
+`delete` solo lleva `using`: no queda fila nueva que validar con `with check`.
+Como `eliminarProducto()` usa `.select()` para contar lo borrado, también necesitas
+la política de `select`.

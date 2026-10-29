@@ -1,0 +1,1011 @@
+/* =====================================================================
+   prueba2.css — estética metal + cyberpunk, con modo oscuro y claro.
+   Todos los colores viven en variables: el modo claro solo las cambia.
+   - Metal: rojo sangre, título cromado, fuente Metal Mania.
+   - Cyberpunk: neón rojo, glitch, líneas CRT, cuadrícula 3D.
+   Paleta: solo rojos, negros y grises oscuros.
+   ===================================================================== */
+
+/* ---------- Modo oscuro (por defecto) ---------- */
+:root {
+  --bg: #050505;
+  --surface: rgba(18, 18, 18, 0.9);
+  --surface-2: #161616;
+  --text: #ececec;
+  --text-muted: #8c8c8c;
+  --accent: #b3001b;                       /* rojo metal (botones, bordes) */
+  --accent-hover: #ff1f3d;
+  --accent-glow: rgba(255, 31, 61, 0.5);
+  --neon: #ff2a2a;                         /* rojo neón brillante (efectos de luz) */
+  --neon-glow: rgba(255, 42, 42, 0.45);
+  --sangre: #7a0010;                       /* rojo sangre oscuro (sombras, glitch) */
+  --sangre-glow: rgba(160, 0, 20, 0.5);
+  --glitch-2: #ffffff;                     /* segunda capa del glitch del título */
+  --border: #2a2a2a;
+  --chrome: linear-gradient(180deg, #ffffff 0%, #c8c8c8 35%, #6e6e6e 50%, #d9d9d9 65%, #8a8a8a 100%);
+  --console-bg: #080808;
+  --console-text: #ff6b6b;
+  --ok: #f0f0f0;
+  --grid-line: rgba(255, 30, 50, 0.3);
+  --overlay-bg: rgba(6, 6, 6, 0.94);
+  --scanlines: 1; /* 1 = se ven las líneas CRT, 0 = apagadas */
+}
+
+/* ---------- Modo claro: acero con acentos rojos ---------- */
+[data-theme="light"] {
+  --bg: #d9d9d9;
+  --surface: rgba(248, 248, 248, 0.92);
+  --surface-2: #ececec;
+  --text: #0d0d0d;
+  --text-muted: #555555;
+  --accent: #9a0017;
+  --accent-hover: #c4001f;
+  --accent-glow: rgba(196, 0, 31, 0.3);
+  --neon: #c4001f;
+  --neon-glow: rgba(196, 0, 31, 0.3);
+  --sangre: #6b000e;
+  --sangre-glow: rgba(107, 0, 14, 0.25);
+  --glitch-2: #000000;
+  --border: #a3a3a3;
+  --chrome: linear-gradient(180deg, #3a3a3a 0%, #111111 45%, #5a5a5a 55%, #1a1a1a 100%);
+  --console-bg: #141414;
+  --console-text: #ff6b6b;
+  --ok: #0d0d0d;
+  --grid-line: rgba(0, 0, 0, 0.12);
+  --overlay-bg: rgba(242, 242, 242, 0.95);
+  --scanlines: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px 16px 48px;
+  max-width: 1300px;
+  margin-inline: auto;
+  font-family: 'Oswald', system-ui, sans-serif;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  background-color: var(--bg);
+  /* Resplandor rojo sangre en el "horizonte" y rojo neón arriba, fijos al hacer scroll */
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% 100%, var(--sangre-glow), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 50% 0%, var(--neon-glow), transparent 70%);
+  background-attachment: fixed;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* ---------- Fondo inmersivo: piso de cuadrícula neón en perspectiva ---------- */
+/* Es una capa fija detrás de todo (z-index: -1). rotateX la "acuesta" como un
+   piso y la animación mueve las líneas hacia ti, como si avanzaras. */
+body::before {
+  content: '';
+  position: fixed;
+  left: -50%;
+  bottom: 0;
+  width: 200%;
+  height: 55vh;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 60px 60px;
+  transform: perspective(300px) rotateX(70deg);
+  transform-origin: bottom;
+  /* mask: la cuadrícula se desvanece hacia el horizonte */
+  -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+  mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+  animation: avanzar-cuadricula 2.5s linear infinite;
+}
+
+@keyframes avanzar-cuadricula {
+  to { background-position: 0 60px; }
+}
+
+/* ---------- Líneas de escaneo CRT encima de toda la página ---------- */
+html::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  pointer-events: none; /* no bloquea clics */
+  opacity: calc(var(--scanlines) * 0.5);
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0 1px,
+    transparent 1px 3px
+  );
+  animation: parpadeo-crt 6s steps(1) infinite;
+}
+
+@keyframes parpadeo-crt {
+  0%, 100% { opacity: calc(var(--scanlines) * 0.5); }
+  97%      { opacity: calc(var(--scanlines) * 0.8); }
+}
+
+/* ---------- Encabezado ---------- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+  /* Línea inferior que pasa de rojo metal a neón */
+  border-bottom: 3px solid;
+  border-image: linear-gradient(90deg, var(--accent), var(--sangre), var(--neon)) 1;
+}
+
+h1,
+h3 {
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-weight: 400;
+  margin: 0;
+  /* Texto cromado: el degradado se "recorta" con la forma de las letras */
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+h1 {
+  position: relative; /* para ubicar las capas del glitch encima */
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  line-height: 1;
+}
+
+h3 {
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+}
+
+/* Etiquetas de interfaz en fuente futurista */
+button,
+summary,
+label,
+dt,
+.estado,
+.tarjeta-producto h4,
+.categorias {
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+}
+
+/* ---------- Botones ---------- */
+/* Botón principal: relleno rojo con esquinas cortadas en diagonal (clip-path) */
+button {
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 12px 22px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--accent-hover), var(--accent));
+  border: none;
+  cursor: pointer;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition: transform 0.1s, filter 0.2s;
+}
+
+button:hover {
+  filter: brightness(1.2);
+  text-shadow: 0 0 8px #ffffff;
+  animation: neon-parpadeo 0.4s steps(1);
+}
+
+button:active {
+  transform: translateY(2px);
+}
+
+/* clip-path corta también el outline: lo metemos hacia adentro para que se vea */
+button:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: -5px;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--neon);
+  box-shadow: 0 0 0 1px var(--neon), 0 0 14px var(--neon-glow);
+}
+
+/* Botones secundarios: contorno neón, rectangulares (sin clip-path) para que
+   el borde y el resplandor se vean completos */
+#btn-tema,
+#btn-cancelar,
+.btn-editar,
+.btn-eliminar,
+.btn-cancelar-eliminar {
+  clip-path: none;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+#btn-tema:hover,
+#btn-cancelar:hover,
+.btn-editar:hover,
+.btn-cancelar-eliminar:hover {
+  border-color: var(--neon);
+  color: var(--neon);
+  text-shadow: 0 0 8px var(--neon-glow);
+  box-shadow: 0 0 12px var(--neon-glow), inset 0 0 12px var(--neon-glow);
+}
+
+#btn-tema {
+  padding: 8px 14px;
+}
+
+.btn-editar,
+.btn-eliminar {
+  margin-top: 10px;
+  padding: 8px 14px;
+  font-size: 0.7rem;
+}
+
+/* Eliminar: contorno rojo, se rellena al pasar el mouse (acción peligrosa) */
+.btn-eliminar {
+  margin-left: 6px;
+  color: var(--accent-hover);
+  border-color: var(--accent);
+}
+
+.btn-eliminar:hover {
+  color: #ffffff;
+  background: var(--accent);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+/* ---------- Dos columnas ---------- */
+/* 2fr 1fr = la columna de productos mide el doble que la del formulario */
+.columnas {
+  display: grid;
+  /* minmax(0, ...) en vez de solo "fr": sin esto, un texto largo sin espacios
+     (como la URL de la imagen en la notificación) ensancha la columna y
+     empuja todo el diseño. Con 0 de mínimo, la columna nunca crece de más. */
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+  /* Cualquier texto largo baja de línea en vez de desbordar su caja */
+  overflow-wrap: anywhere;
+}
+
+/* En pantallas angostas vuelve a una sola columna */
+@media (max-width: 800px) {
+  .columnas {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Formulario ---------- */
+#form-producto {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 20px;
+}
+
+/* El JS mete <br> entre campos; con grid ya no hacen falta */
+#form-producto br {
+  display: none;
+}
+
+#form-producto {
+  display: grid;
+  gap: 14px;
+}
+
+#form-producto label {
+  display: grid;
+  gap: 6px;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--neon);
+}
+
+/* La etiqueta del checkbox va en una sola línea */
+#form-producto label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+input,
+textarea {
+  font-family: 'Oswald', system-ui, sans-serif;
+  font-size: 1rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+
+.form-acciones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Modo edición: borde neón y etiqueta tipo sistema */
+#form-producto.editando {
+  border: 1px solid var(--neon);
+  animation: pulso-neon 1.6s ease-in-out infinite;
+}
+
+#form-producto.editando::before {
+  content: '▶ Modo edición';
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--neon);
+  text-shadow: 0 0 10px var(--neon-glow);
+}
+
+
+/* ---------- Resultados ---------- */
+/* JSON crudo: desplegable cerrado, se ve como consola al abrirlo */
+#json-crudo {
+  margin-top: 16px;
+}
+
+#json-crudo summary {
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+#json-crudo summary:hover {
+  color: var(--neon);
+}
+
+#resultado {
+  margin: 10px 0 0;
+  padding: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere; /* las URLs largas bajan de línea en vez de desbordar */
+  color: var(--console-text);
+  background: var(--console-bg);
+  border: 1px solid var(--border);
+}
+
+/* ---------- Barra de filtros del catálogo ---------- */
+/* Grid con auto-fit: los filtros se acomodan solos en varias filas
+   según el ancho disponible, sin media queries. */
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+}
+
+/* [hidden] necesita ganarle a display: grid, si no el bloque no se oculta */
+.filtros[hidden] {
+  display: none;
+}
+
+.filtros label {
+  display: grid;
+  gap: 6px;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: var(--neon);
+}
+
+/* El buscador de texto ocupa toda la primera fila */
+.filtros .filtro-texto {
+  grid-column: 1 / -1;
+}
+
+.filtros input,
+.filtros select {
+  width: 100%;
+  min-width: 0;
+}
+
+select {
+  font-family: 'Oswald', system-ui, sans-serif;
+  font-size: 1rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+select:focus-visible {
+  outline: none;
+  border-color: var(--neon);
+  box-shadow: 0 0 0 1px var(--neon), 0 0 14px var(--neon-glow);
+}
+
+#btn-limpiar-filtros {
+  padding: 11px 16px;
+}
+
+#contador-productos {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+
+/* Mensaje cuando ningún producto coincide: ocupa todo el ancho de la cuadrícula */
+.sin-resultados {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+}
+
+/* Cuadrícula de tarjetas: auto-fill mete tantas columnas como quepan,
+   cada una de mínimo 240px. En celular queda una sola columna. */
+#lista-productos {
+  display: grid;
+  /* min(240px, 100%): si la columna mide menos de 240px, la tarjeta no se sale */
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.tarjeta-producto {
+  position: relative; /* para el borde holográfico y la capa de confirmación */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  min-width: 0; /* deja que la tarjeta se encoja aunque su contenido sea ancho */
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.tarjeta-producto:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 22px var(--sangre-glow), 0 0 4px var(--neon-glow);
+}
+
+/* Borde holográfico: un degradado de rojos (metal, sangre, neón) que recorre el contorno.
+   La máscara (mask-composite: exclude) deja visible solo el borde de 1px. */
+.tarjeta-producto::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(120deg, var(--accent), var(--sangre), var(--neon), var(--accent));
+  background-size: 300% 100%;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tarjeta-producto:hover::before {
+  opacity: 1;
+  animation: recorrer-borde 2s linear infinite;
+}
+
+/* El marco tiene tamaño fijo (2:3, la proporción de un póster o caja VHS)
+   SIEMPRE, haya imagen o no: así todas las tarjetas quedan alineadas. */
+.tarjeta-imagen {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* La imagen llena el marco sin deformarse, sea vertical, horizontal o gigante.
+   contain = se ve completa (puede dejar franjas); cover = llena todo (recorta bordes). */
+.tarjeta-imagen img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Brillo holográfico que cruza la imagen al pasar el mouse */
+.tarjeta-imagen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 42, 42, 0.22) 45%, rgba(255, 255, 255, 0.15) 55%, transparent 70%);
+  transform: translateX(-100%);
+}
+
+.tarjeta-producto:hover .tarjeta-imagen::before {
+  animation: brillo-holografico 0.9s ease-out;
+}
+
+/* Si no hay póster o la URL está rota, el JS agrega .sin-imagen:
+   se oculta la <img> y se ve la carátula VHS dibujada con CSS. */
+.tarjeta-imagen.sin-imagen img {
+  display: none;
+}
+
+/* ---------- Carátula VHS (cuando no hay póster) ---------- */
+.caratula-vhs {
+  position: absolute;
+  inset: 0;
+  display: none; /* oculta si hay póster */
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px;
+  text-align: left;
+  /* Franjas diagonales rojas sobre negro: el clásico lomo de cinta de alquiler */
+  background:
+    linear-gradient(to bottom, transparent 55%, rgba(0, 0, 0, 0.85)),
+    repeating-linear-gradient(135deg, #0a0a0a 0 18px, var(--sangre) 18px 22px, #0a0a0a 22px 40px),
+    #0a0a0a;
+  border: 2px solid #000000;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.tarjeta-imagen.sin-imagen .caratula-vhs {
+  display: flex;
+}
+
+.vhs-logo {
+  align-self: flex-start;
+  padding: 2px 8px;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #000000;
+  background: #ececec;
+  transform: skewX(-12deg); /* inclinado como los logos de los 80 */
+}
+
+.vhs-titulo {
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-size: 1.7rem;
+  line-height: 1.05;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-shadow: 2px 2px 0 var(--accent), 0 0 14px var(--accent-glow);
+}
+
+.vhs-genero {
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  color: var(--accent-hover);
+}
+
+/* ---------- Sticker de la tienda ---------- */
+.sticker-rebobinar {
+  align-self: flex-start;
+  margin: 0;
+  padding: 4px 10px;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ffffff !important; /* le gana al color gris de ".tarjeta-producto p" */
+  background: var(--accent);
+  border: 1px dashed rgba(255, 255, 255, 0.6);
+  transform: rotate(-3deg); /* pegado un poco chueco, como en la tienda */
+}
+
+.tarjeta-producto h4 {
+  margin: 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-hover);
+  text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.tarjeta-producto p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* Precio, unidades y descuento en dos columnas: etiqueta | valor */
+.tarjeta-producto dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.tarjeta-producto dt {
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  align-self: center;
+}
+
+.tarjeta-producto dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--neon);
+  text-shadow: 0 0 8px var(--neon-glow);
+}
+
+.tarjeta-producto .categorias {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-hover);
+}
+
+/* margin-top: auto empuja la etiqueta al fondo: todas quedan alineadas */
+.estado {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 3px 10px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid currentColor;
+}
+
+.estado.disponible {
+  color: var(--ok);
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.estado.agotado {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+/* Editar y Eliminar en fila, al fondo de la tarjeta */
+.tarjeta-acciones {
+  display: flex;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.tarjeta-acciones button {
+  flex: 1;
+  margin: 0;
+}
+
+/* ---------- Capa "¿Seguro?" dentro de la tarjeta ---------- */
+.confirmar-eliminar {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  text-align: center;
+  /* Fondo oscuro con líneas finas tipo monitor */
+  background:
+    repeating-linear-gradient(to bottom, rgba(255, 30, 50, 0.07) 0 1px, transparent 1px 3px),
+    var(--overlay-bg);
+  border: 1px solid var(--neon);
+  box-shadow: inset 0 0 30px var(--sangre-glow);
+  animation: abrir-alerta 0.35s steps(1);
+}
+
+.confirmar-alerta {
+  margin: 0;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--neon);
+  text-shadow: 0 0 10px var(--sangre-glow);
+  animation: alerta-parpadeo 1s steps(2) infinite;
+}
+
+.confirmar-pregunta {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.confirmar-nota {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.confirmar-botones {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.confirmar-botones button {
+  padding: 10px 16px;
+  font-size: 0.7rem;
+}
+
+/* ---------- Notificación: salida de terminal ---------- */
+#notificacion:not(:empty) {
+  margin-top: 20px;
+  padding: 14px 16px;
+  white-space: pre-wrap;
+  color: var(--console-text);
+  background: var(--console-bg);
+  border: 1px solid var(--neon);
+  box-shadow: 0 0 14px var(--neon-glow);
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+}
+
+/* Prompt "> " al inicio y cursor que parpadea al final */
+#notificacion:not(:empty)::before {
+  content: '> ';
+  color: var(--neon);
+}
+
+#notificacion:not(:empty)::after {
+  content: '█';
+  margin-left: 2px;
+  animation: alerta-parpadeo 1s steps(2) infinite;
+}
+
+/* =====================================================================
+   ANIMACIONES CYBERPUNK
+   Regla de oro: animar sobre todo transform, opacity, filter y clip-path.
+   Son las propiedades que el navegador mueve sin recalcular el diseño,
+   así que se ven fluidas.
+   ===================================================================== */
+
+/* ---------- Título: glitch RGB ---------- */
+/* Dos copias del texto (attr(data-text) lee el atributo del HTML), una roja y
+   otra blanca (negra en modo claro). Casi todo el tiempo están ocultas; cada pocos segundos aparecen
+   cortadas en franjas (clip-path) y desplazadas, como señal dañada. */
+h1::before,
+h1::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  background: none;
+  pointer-events: none;
+  clip-path: inset(100% 0 0 0); /* oculta por defecto */
+}
+
+h1::before {
+  color: var(--accent-hover);
+  animation: glitch-capa 4s steps(1) infinite;
+}
+
+h1::after {
+  color: var(--glitch-2);
+  animation: glitch-capa 4s steps(1) 0.05s infinite reverse;
+}
+
+@keyframes glitch-capa {
+  0%, 88%, 100% { clip-path: inset(100% 0 0 0); transform: none; }
+  89% { clip-path: inset(10% 0 60% 0); transform: translate(-4px, 1px); }
+  91% { clip-path: inset(55% 0 20% 0); transform: translate(4px, -1px); }
+  93% { clip-path: inset(30% 0 45% 0); transform: translate(-3px, 0); }
+  95% { clip-path: inset(75% 0 5% 0);  transform: translate(3px, 1px); }
+  97% { clip-path: inset(0 0 85% 0);   transform: translate(-2px, 0); }
+}
+
+/* El resplandor del título "respira" entre rojo metal y rojo neón */
+@keyframes respirar-neon {
+  0%, 100% { filter: drop-shadow(0 2px 0 var(--accent)) drop-shadow(0 0 6px var(--accent-glow)); }
+  50%      { filter: drop-shadow(0 2px 0 var(--accent)) drop-shadow(0 0 18px var(--neon-glow)); }
+}
+
+h1 {
+  animation: respirar-neon 3s ease-in-out infinite;
+}
+
+/* ---------- Botones: parpadeo de tubo de neón al pasar el mouse ---------- */
+@keyframes neon-parpadeo {
+  0%   { filter: brightness(1.8); }
+  20%  { filter: brightness(0.6); }
+  40%  { filter: brightness(1.6); }
+  60%  { filter: brightness(0.9); }
+  100% { filter: brightness(1.2); }
+}
+
+/* ---------- Tarjetas: se materializan con una línea de escaneo ---------- */
+@keyframes materializar {
+  0%   { clip-path: inset(0 0 100% 0); opacity: 0.4; filter: brightness(2) hue-rotate(90deg); }
+  60%  { clip-path: inset(0 0 0 0);    opacity: 1;   filter: brightness(1.5) hue-rotate(0deg); }
+  70%  { opacity: 0.5; }
+  80%  { opacity: 1; }
+  100% { clip-path: inset(0 0 0 0);    opacity: 1;   filter: none; }
+}
+
+@keyframes linea-escaneo {
+  0%   { top: 0;    opacity: 1; }
+  60%  { top: 100%; opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* "backwards" = aplica el estado inicial durante el retraso, pero al terminar
+   suelta las propiedades: así el :hover de la tarjeta sigue funcionando. */
+.animar-entrada .tarjeta-producto {
+  animation: materializar 0.7s ease-out backwards;
+  animation-delay: calc(var(--i) * 90ms);
+}
+
+/* La línea roja neón que "dibuja" la tarjeta de arriba a abajo */
+.animar-entrada .tarjeta-producto::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  background: var(--neon);
+  box-shadow: 0 0 12px 2px var(--neon-glow);
+  animation: linea-escaneo 0.7s ease-out both;
+  animation-delay: calc(var(--i) * 90ms);
+}
+
+/* ---------- Borde holográfico y brillo de la imagen ---------- */
+@keyframes recorrer-borde {
+  to { background-position: 300% 0; }
+}
+
+@keyframes brillo-holografico {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+/* ---------- Eliminar: falla digital ---------- */
+/* La tarjeta se corta en franjas que saltan de lado, cambia de color
+   y al final colapsa en una línea, como un monitor que se apaga. */
+@keyframes falla-digital {
+  0%   { clip-path: inset(0);           transform: none;                       filter: none; opacity: 1; }
+  10%  { clip-path: inset(10% 0 60% 0); transform: translateX(-10px);          filter: hue-rotate(90deg); }
+  20%  { clip-path: inset(50% 0 20% 0); transform: translateX(10px);  }
+  30%  { clip-path: inset(0 0 80% 0);   transform: translateX(-6px) skewX(10deg); filter: hue-rotate(-90deg) saturate(3); }
+  45%  { clip-path: inset(30% 0 30% 0); transform: translateX(14px); }
+  60%  { clip-path: inset(70% 0 5% 0);  transform: translateX(-14px) skewX(-15deg); opacity: 0.8; }
+  /* desde aquí la transición es suave: el colapso final */
+  75%  { clip-path: inset(0);           transform: scaleY(1);                  filter: brightness(3); opacity: 1;
+         animation-timing-function: ease-in; }
+  100% { clip-path: inset(50% 0 50% 0); transform: scaleY(0.02) scaleX(1.2);   filter: brightness(4); opacity: 0; }
+}
+
+/* El #id le da más especificidad que ".animar-entrada .tarjeta-producto":
+   si no, la animación de entrada "gana" y la de borrado nunca se vería. */
+#lista-productos .desintegrando {
+  /* steps(1) = cada fotograma salta de golpe, sin suavizar: efecto glitch */
+  animation: falla-digital 0.7s steps(1) forwards;
+  pointer-events: none; /* que no se pueda volver a hacer clic mientras se borra */
+}
+
+/* ---------- Capa de confirmación: aparece con interferencia ---------- */
+@keyframes abrir-alerta {
+  0%   { clip-path: inset(45% 0 45% 0); opacity: 0.5; }
+  25%  { clip-path: inset(20% 0 60% 0); transform: translateX(-4px); }
+  50%  { clip-path: inset(0 0 30% 0);   transform: translateX(4px); }
+  75%  { clip-path: inset(0);           transform: none; opacity: 1; }
+}
+
+@keyframes alerta-parpadeo {
+  50% { opacity: 0; }
+}
+
+/* ---------- Formulario en modo edición: pulso de rojo neón ---------- */
+@keyframes pulso-neon {
+  0%, 100% { box-shadow: 0 0 10px var(--neon-glow); }
+  50%      { box-shadow: 0 0 26px var(--accent-glow); }
+}
+
+/* ---------- Notificación: se "imprime" línea por línea ---------- */
+/* clip-path revela el texto de arriba a abajo en saltos (steps),
+   como una terminal que va escribiendo. */
+@keyframes imprimir-terminal {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0); }
+}
+
+#notificacion.transmision {
+  animation: imprimir-terminal 0.6s steps(8, end);
+}
+
+/* ---------- Cambio de tema: interferencia de pantalla completa ---------- */
+/* Capa encima de todo con franjas rojas y blancas que saltan, como estática. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none; /* no bloquea clics */
+  opacity: 0;
+  background:
+    repeating-linear-gradient(to bottom,
+      rgba(200, 0, 20, 0.55) 0 4px,
+      transparent 4px 9px,
+      rgba(255, 255, 255, 0.3) 9px 11px,
+      transparent 11px 23px),
+    rgba(0, 0, 0, 0.4);
+}
+
+@keyframes interferencia {
+  0%   { opacity: 0;   background-position: 0 0; }
+  10%  { opacity: 0.9; background-position: 0 -40px; }
+  20%  { opacity: 0.2; background-position: 0 30px; }
+  30%  { opacity: 0.8; background-position: 0 -10px; }
+  45%  { opacity: 0.3; background-position: 0 60px; }
+  60%  { opacity: 0.6; background-position: 0 -25px; }
+  100% { opacity: 0;   background-position: 0 0; }
+}
+
+body.interferencia::after {
+  animation: interferencia 0.55s steps(1);
+}
+
+/* ---------- Accesibilidad ---------- */
+/* Si la persona activó "reducir movimiento" en su sistema, apagamos todo.
+   Las animaciones fuertes (sobre todo los parpadeos) pueden marear
+   a algunas personas. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
