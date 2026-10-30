@@ -66,7 +66,7 @@ function crearFormularioProducto() {
     { id: 'precio-input', label: 'Renta por noche (COP)', type: 'number', step: '100', min: '0', required: true, placeholder: '5000' },
     { id: 'unidades-input', label: 'Copias', type: 'number', min: '0', required: true, placeholder: '2' },
     { id: 'descuento', label: 'Descuento (0 a 1)', type: 'number', step: '0.01', min: '0', max: '1', placeholder: '0.1' },
-    { id: 'categorias', label: 'Géneros', type: 'text', placeholder: 'terror, anime' },
+    { id: 'categorias', label: 'Géneros', type: 'text', placeholder: 'terror, romance' },
     { id: 'img-url', label: 'URL del póster', type: 'url', placeholder: 'https://example.com/poster.jpg' }
   ];
 
@@ -335,7 +335,7 @@ function pintarTarjetas(productos, animar = false) {
 
     return `
     <article class="tarjeta-producto" data-id="${producto.id}" style="--i: ${i}">
-      <div class="tarjeta-imagen ${producto['img-url'] ? '' : 'sin-imagen'}">
+      <div class="tarjeta-imagen ${producto['img-url'] ? '' : 'sin-imagen'} ${producto.disponible ? '' : 'rentada'}">
         ${producto['img-url']
           ? `<img src="${producto['img-url']}" alt="Póster de ${producto.nombre}" onerror="this.parentElement.classList.add('sin-imagen')">`
           : ''}
@@ -345,6 +345,8 @@ function pintarTarjetas(productos, animar = false) {
           <span class="vhs-titulo">${producto.nombre}</span>
           <span class="vhs-genero">${generos.join(' / ')}</span>
         </div>
+        <!-- Sello sobre la carátula: solo se dibuja si la película está rentada -->
+        ${producto.disponible ? '' : '<span class="sello-rentada">Rentada</span>'}
       </div>
       <h4>${producto.nombre}</h4>
       <p>${producto.descripcion}</p>

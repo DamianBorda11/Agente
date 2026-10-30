@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mi cuenta</title>
+<link rel="stylesheet" href="css/cliente.css" />
+<!-- CDN: la librería supabase-js (crea la global "supabase"), no la API del proyecto -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<section id="panel-cuenta">
+<h2>Mi cuenta</h2>
+<p id="estado-sesion">No has iniciado sesión.</p>
+<form id="form-registro">
+<h3>Registrarme</h3>
+<label for="registro-nombre">Nombre</label>
+<input id="registro-nombre" type="text" required />
+<label for="registro-correo">Correo</label>
+<input id="registro-correo" type="email" required />
+<label for="registro-password">Contraseña</label>
+<input id="registro-password" type="password" minlength="6" required />
+<button type="submit">Crear cuenta</button>
+</form>
+<form id="form-login">
+<h3>Iniciar sesión</h3>
+<label for="login-correo">Correo</label>
+<input id="login-correo" type="email" required />
+<label for="login-password">Contraseña</label>
+<input id="login-password" type="password" required />
+<button type="submit">Iniciar sesión</button>
+</form>
+</section>
+
+<!-- Panel con sesión: oculto hasta que cliente.js verifique el login -->
+<div id="app-cliente" hidden>
+<aside class="sidebar">
+<p class="sidebar-titulo">Mi cuenta</p>
+<p id="sidebar-usuario"></p>
+<!-- data-vista = id de la sección que muestra cada ítem.
+     Para agregar un ítem: un botón aquí + una <section class="vista"> en el main -->
+<nav class="sidebar-nav">
+<button type="button" class="sidebar-item activo" data-vista="vista-perfil">Actualizar datos</button>
+</nav>
+<button id="btn-logout" type="button">Cerrar sesión</button>
+</aside>
+
+<main class="contenido">
+<section id="vista-perfil" class="vista">
+<form id="form-perfil">
+<h3>Mis datos</h3>
+<label for="perfil-nombre">Nombre</label>
+<input id="perfil-nombre" type="text" required />
+<label for="perfil-correo">Correo</label>
+<!-- readonly: se ve pero no se edita (tiene que coincidir con el de Auth) -->
+<input id="perfil-correo" type="email" readonly />
+<label for="perfil-telefono">Teléfono</label>
+<input id="perfil-telefono" type="tel" placeholder="300 123 4567" />
+<label for="perfil-direccion">Dirección</label>
+<input id="perfil-direccion" type="text" placeholder="Calle 10 # 5-20" />
+<label for="perfil-rol">Rol</label>
+<!-- readonly: el rol lo asigna el sistema, el cliente no puede cambiárselo -->
+<input id="perfil-rol" type="text" readonly />
+<button type="submit">Guardar cambios</button>
+<p id="perfil-mensaje"></p>
+</form>
+</section>
+</main>
+</div>
+<script src="js/supabaseClient.js"></script>
+<script src="js/cliente.js"></script>
+</body>
+</html>

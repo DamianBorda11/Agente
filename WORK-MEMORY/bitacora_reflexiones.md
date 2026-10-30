@@ -59,3 +59,14 @@ cada intento (id, fecha ISO, número de intentos, tiempo) con ids autogenerados 
 del JSON.
 
 "El juego y el orden de los datos está interesante."
+
+## 2026-10-30
+
+Sesión en `INPUT/supabase`: catálogo del videoclub (`prueba2`) con 18 películas (Tim Burton,
+anime, terror y romance), fichas tipo catálogo de alquiler, pósters de Wikipedia y sello
+"RENTADA" sobre la carátula. Luego `cliente.html`: registro e inicio de sesión con Supabase Auth.
+Se corrigieron el `<script>` que cargaba la API en vez de la librería, la URL con `/rest/v1/`
+de más y una llave mal cerrada que dejaba el login anidado dentro del registro. Estilo oscuro
+simple en `cliente.css`.
+
+"Hasta aquí logré logearme con cliente en Supabase."

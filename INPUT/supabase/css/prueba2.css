@@ -625,6 +625,35 @@ select:focus-visible {
   color: var(--accent-hover);
 }
 
+/* ---------- Sello "Rentada" sobre la carátula ---------- */
+/* El póster (o la carátula VHS) se apaga para que el sello se lea encima */
+.tarjeta-imagen.rentada img,
+.tarjeta-imagen.rentada .caratula-vhs {
+  filter: grayscale(0.7) brightness(0.45);
+}
+
+/* position: absolute + inset: 0 + margin: auto = centrado sobre la imagen.
+   Ojo: va DESPUÉS de .caratula-vhs en el HTML, por eso queda encima. */
+.sello-rentada {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: fit-content;
+  height: fit-content;
+  padding: 6px 16px;
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-size: 1.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--neon);
+  border: 4px double var(--neon);
+  background: rgba(0, 0, 0, 0.55);
+  text-shadow: 0 0 10px var(--neon-glow);
+  box-shadow: 0 0 14px var(--neon-glow);
+  transform: rotate(-14deg); /* chueco, como un timbre de tinta */
+  pointer-events: none;
+}
+
 /* ---------- Sticker de la tienda ---------- */
 .sticker-rebobinar {
   align-self: flex-start;
