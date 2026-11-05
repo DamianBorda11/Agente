@@ -70,3 +70,36 @@ de más y una llave mal cerrada que dejaba el login anidado dentro del registro.
 simple en `cliente.css`.
 
 "Hasta aquí logré logearme con cliente en Supabase."
+
+## 2026-11-05
+
+Sesión de seguridad sobre la tabla `clientes_practica` en Supabase: comprobamos que **no tenía RLS
+(Row Level Security)** activado, así que la `anon key` pública (visible en `js/supabaseClient.js` y
+en el inspector → Network/Sources) daba acceso total a leer, escribir y borrar desde fuera de la
+app. La idea clave: la `anon key` no es una contraseña de admin, solo identifica el rol `anon`;
+quien decide qué puede hacer ese rol es RLS. Sin RLS, PostgREST deja pasar todo.
+
+Comandos usados para observar la vulnerabilidad (PowerShell, `curl.exe`; `$KEY` = anon key):
+
+```powershell
+# LEER todos los clientes (SELECT)
+curl.exe -s "https://evvlbrkbftqoifhuloki.supabase.co/rest/v1/clientes_practica?select=*" `
+  -H "apikey: $KEY" -H "Authorization: Bearer $KEY"
+
+# ESCRIBIR una fila de prueba (POST) — confirmó que la tabla aceptaba escritura sin sesión
+curl.exe -s -X POST "https://evvlbrkbftqoifhuloki.supabase.co/rest/v1/clientes_practica" `
+  -H "apikey: $KEY" -H "Authorization: Bearer $KEY" `
+  -H "Content-Type: application/json" -H "Prefer: return=representation" `
+  -d '{\"id\": \"<uuid>\", \"nombre\": \"TEST borrar\", \"correo\": \"test-rls@ejemplo.com\", \"rol\": \"cliente\"}'
+
+# BORRAR la fila de prueba (DELETE) — siempre con filtro ?id=eq.<uuid>, nunca sin él
+curl.exe -s -X DELETE "https://evvlbrkbftqoifhuloki.supabase.co/rest/v1/clientes_practica?id=eq.<uuid>" `
+  -H "apikey: $KEY" -H "Authorization: Bearer $KEY"
+```
+
+Desde la consola del navegador (`db` es global): `await db.from('clientes_practica').select('*')`.
+Se insertó una sola fila de prueba y se borró enseguida (verificado con `[]`): efecto neto cero
+sobre los datos reales. Pendiente: aplicar `alter table ... enable row level security` + políticas
+con `auth.uid() = id` para cerrar la fuga.
+
+_(Reflexión del estudiante pendiente de anotar.)_
