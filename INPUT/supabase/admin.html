@@ -13,10 +13,44 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Orbitron:wght@500;700&family=Oswald:wght@400;700&display=swap">
   <!-- Estilos de esta página (metal + cyberpunk, modo oscuro y claro) -->
-  <link rel="stylesheet" href="css/prueba2.css">
+  <link rel="stylesheet" href="css/admin.css">
 </head>
 
 <body>
+
+  <section id="zona-acceso-admin">
+  <p id="estado-sesion-admin" role="status">No has iniciado sesión.</p>
+
+  <form id="form-registro-admin">
+    <h3>Registrar administrador</h3>
+    <label for="admin-registro-nombre">Nombre</label>
+    <input id="admin-registro-nombre" type="text" required>
+
+    <label for="admin-registro-correo">Correo</label>
+    <input id="admin-registro-correo" type="email" required>
+
+    <label for="admin-registro-password">Contraseña</label>
+    <input id="admin-registro-password" type="password" minlength="6" required>
+
+    <button type="submit">Crear cuenta de administrador</button>
+  </form>
+
+  <form id="form-login-admin">
+    <h3>Iniciar sesión</h3>
+    <label for="admin-login-correo">Correo</label>
+    <input id="admin-login-correo" type="email" required>
+
+    <label for="admin-login-password">Contraseña</label>
+    <input id="admin-login-password" type="password" required>
+
+    <button type="submit">Iniciar sesión</button>
+  </form>
+</section>
+
+<button id="btn-logout-admin" type="button" hidden>Cerrar sesión</button>
+
+<!-- el panel real (catálogo, mis clientes...) debe quedar oculto hasta
+     que admin.js confirme sesión iniciada Y que existe fila en admins_practica -->
 
   <header class="header">
     <!-- data-text: el CSS copia este texto en dos capas (roja y blanca) para el glitch -->
@@ -24,6 +58,9 @@
     <button id="btn-tema" type="button">☀ Modo claro</button>
   </header>
 
+  <!-- panel-admin: oculto por defecto; admin.js lo muestra solo si hay
+       sesión iniciada Y fila en admins_practica (ver mostrarEstadoSesionAdmin) -->
+  <div id="panel-admin" hidden>
   <!-- Dos columnas: estantería a la izquierda, formulario a la derecha -->
   <main class="columnas">
 
@@ -75,19 +112,20 @@
 
     <section class="col-formulario">
       <h3>Mostrador</h3>
-      <!-- prueba2.js crea aquí el formulario -->
+      <!-- admin.js crea aquí el formulario -->
       <div id="form-container"></div>
 
       <div id="notificacion"></div>
     </section>
 
   </main>
+  </div>
 
   <!-- supabaseClient.js crea "db" (sección 4.3): el cliente ya
        conectado a tu proyecto de Supabase. Lo vamos a usar en
-       prueba2.js, por eso tiene que cargarse ANTES que ese archivo -->
+       admin.js, por eso tiene que cargarse ANTES que ese archivo -->
   <script src="js/supabaseClient.js"></script>
-  <!-- prueba2.js: aquí escribes el código de los Pasos 2, 3 y 4 -->
-  <script src="js/prueba2.js"></script>
+  <!-- admin.js: aquí escribes el código de los Pasos 2, 3 y 4 -->
+  <script src="js/admin.js"></script>
 </body>
 </html>

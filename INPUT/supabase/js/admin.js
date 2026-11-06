@@ -1,3 +1,107 @@
+document.getElementById('form-registro-admin').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const form = evento.target;
+
+  const { data, error } = await db.auth.signUp({
+    email: form.elements['admin-registro-correo'].value,
+    password: form.elements['admin-registro-password'].value,
+  });
+
+  if (error) {
+    document.getElementById('estado-sesion-admin').innerText = 'Error al registrar: ' + error.message;
+    return;
+  }
+
+  const { error: errorPerfil } = await db.from('admins_practica').insert([{
+    id: data.user.id,
+    nombre: form.elements['admin-registro-nombre'].value.trim(),
+    correo: form.elements['admin-registro-correo'].value.trim(),
+  }]);
+
+  if (errorPerfil) {
+    document.getElementById('estado-sesion-admin').innerText = 'Cuenta creada, pero falló el perfil: ' + errorPerfil.message;
+    return;
+  }
+
+  document.getElementById('estado-sesion-admin').innerText = 'Cuenta de administrador creada. Ya puedes iniciar sesión.';
+  form.reset();
+});
+
+document.getElementById('form-login-admin').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  const form = evento.target;
+
+  const { error } = await db.auth.signInWithPassword({
+    email: form.elements['admin-login-correo'].value,
+    password: form.elements['admin-login-password'].value,
+  });
+
+  if (error) {
+    document.getElementById('estado-sesion-admin').innerText = 'Error al iniciar sesión: ' + error.message;
+    return;
+  }
+
+  form.reset();
+  mostrarEstadoSesionAdmin();
+});
+
+async function mostrarEstadoSesionAdmin() {
+  const { data } = await db.auth.getUser();
+  const estado = document.getElementById('estado-sesion-admin');
+
+  // Importante: tener sesión no basta — confirmamos que además exista
+  // su fila en admins_practica. Sin sesión ni siquiera preguntamos.
+  let perfil = null;
+  if (data.user) {
+    const respuesta = await db.from('admins_practica').select('nombre').eq('id', data.user.id).single();
+    perfil = respuesta.data;
+  }
+
+  // Un solo booleano decide qué se ve: acceso (registro/login) o panel CRUD.
+  const esAdmin = Boolean(data.user && perfil);
+  document.getElementById('zona-acceso-admin').hidden = esAdmin;
+  document.getElementById('panel-admin').hidden = !esAdmin;
+  // Logout visible con CUALQUIER sesión: así quien entró sin perfil de admin puede salir.
+  document.getElementById('btn-logout-admin').hidden = !data.user;
+
+  if (!data.user) {
+    estado.innerText = 'No has iniciado sesión.';
+  } else if (esAdmin) {
+    estado.innerText = 'Sesión iniciada como ' + perfil.nombre + ' (admin).';
+  } else {
+    estado.innerText = 'Sesión iniciada, pero sin perfil de administrador.';
+  }
+}
+
+document.getElementById('btn-logout-admin').addEventListener('click', async () => {
+  await db.auth.signOut();
+  limpiarPanelAdmin();
+  mostrarEstadoSesionAdmin();
+});
+
+// Al cerrar sesión, borra los datos ya pintados: ocultar con hidden no los
+// quita del DOM, seguirían visibles en el inspector (F12).
+function limpiarPanelAdmin() {
+  productosCargados = [];
+  document.getElementById('lista-productos').innerHTML = '';
+  document.getElementById('resultado').textContent = '';
+  document.getElementById('json-crudo').hidden = true;
+  document.getElementById('filtros').hidden = true;
+  document.getElementById('notificacion').textContent = '';
+  terminarEdicion();
+}
+
+mostrarEstadoSesionAdmin();
+
+
+
+
+
+
+
+
+
+
 // =====================================================================
 // VIDEOCLUB — catálogo de películas en renta (CRUD con Supabase)
 // Usa la tabla "practica-productos". Cada columna guarda un dato de la película:
