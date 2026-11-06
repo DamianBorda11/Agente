@@ -1,0 +1,360 @@
+/* =====================================================================
+   galeria.css — solo lo que la vista del cliente agrega sobre admin.css:
+   botón de carrito, control de noches, estados y panel lateral.
+   Usa las mismas variables (--accent, --neon...), así el modo claro
+   funciona sin escribir nada extra.
+   ===================================================================== */
+
+/* ---------- Header ---------- */
+.header-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Burbuja con el número de películas en el carrito */
+#contador-carrito {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  height: 1.7em;
+  margin-left: 6px;
+  padding: 0 4px;
+  font-size: 0.75rem;
+  letter-spacing: 0;
+  color: var(--accent);
+  background: #ffffff;
+  border-radius: 999px;
+}
+
+/* galeria.js pone esta clase al agregar una renta: la burbuja "salta" */
+#contador-carrito.rebote {
+  animation: rebote-contador 0.4s ease-out;
+}
+
+@keyframes rebote-contador {
+  40% { transform: scale(1.5); }
+}
+
+/* ---------- Título de la sección ---------- */
+.intro-galeria h2 {
+  margin: 0 0 4px;
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-weight: 400;
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.intro-galeria p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* ---------- Bloque de renta dentro de la tarjeta ---------- */
+/* margin-top: auto lo empuja al fondo: todas las tarjetas quedan alineadas */
+.tarjeta-renta {
+  display: grid;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+/* − [ 2 noches ] +  : tres columnas, los botones de ancho fijo */
+.control-noches {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  align-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.btn-noches {
+  height: 40px;
+  padding: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0;
+  color: var(--text);
+  background: transparent;
+  clip-path: none;
+}
+
+.btn-noches:hover:not(:disabled) {
+  color: var(--neon);
+  text-shadow: 0 0 8px var(--neon-glow);
+}
+
+.noches-valor {
+  text-align: center;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* Subtotal: etiqueta a la izquierda, valor a la derecha */
+.tarjeta-producto .subtotal-tarjeta,
+.item-carrito .item-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.tarjeta-producto .subtotal-tarjeta {
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.tarjeta-producto .subtotal-tarjeta strong {
+  font-size: 0.95rem;
+  color: var(--neon);
+  text-shadow: 0 0 8px var(--neon-glow);
+}
+
+/* Precio original tachado cuando hay descuento */
+.tarjeta-producto dd s {
+  margin-right: 6px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-shadow: none;
+}
+
+.btn-rentar {
+  width: 100%;
+}
+
+/* Feedback de 1,2 s después de rentar */
+.btn-rentar.agregada {
+  color: var(--neon);
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--neon);
+}
+
+/* Cualquier botón desactivado: apagado y sin efectos de hover */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+  filter: none;
+  text-shadow: none;
+  animation: none;
+  transform: none;
+}
+
+/* ---------- Tarjeta que ya está en el carrito ---------- */
+.tarjeta-producto.en-carrito {
+  border-color: var(--neon);
+  border-top-color: var(--neon);
+  box-shadow: 0 0 14px var(--neon-glow);
+}
+
+/* .tarjeta-producto p pinta gris; con dos clases le ganamos */
+.tarjeta-producto .marca-carrito {
+  align-self: flex-start;
+  padding: 3px 10px;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--neon);
+  border: 1px solid var(--neon);
+}
+
+/* ---------- Overlay y panel lateral ---------- */
+/* Truco de visibility: al CERRAR espera 0.3 s (lo que dura el fade) antes
+   de ocultarse; al ABRIR se hace visible de inmediato. Oculto con
+   visibility, nadie puede llegarle con Tab. */
+#overlay-carrito {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(0, 0, 0, 0.65);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0s 0.3s;
+}
+
+#overlay-carrito.activo {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s;
+}
+
+#panel-carrito {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 901;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100%);
+  height: 100vh;
+  height: 100dvh; /* dvh = alto real en celular, sin contar la barra del navegador */
+  background: var(--bg);
+  border-left: 3px solid var(--accent);
+  box-shadow: -10px 0 40px var(--sangre-glow);
+  transform: translateX(100%); /* fuera de la pantalla, a la derecha */
+  visibility: hidden;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.35s;
+}
+
+#panel-carrito.abierto {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Con el panel abierto la página de atrás no hace scroll */
+body.carrito-abierto {
+  overflow: hidden;
+}
+
+.carrito-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.carrito-cabecera h3 {
+  margin: 0;
+}
+
+/* Botones pequeños de contorno: cerrar y quitar */
+#btn-cerrar-carrito,
+.btn-quitar {
+  padding: 6px 10px;
+  letter-spacing: 0;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  clip-path: none;
+}
+
+#btn-cerrar-carrito:hover,
+.btn-quitar:hover {
+  color: var(--neon);
+  border-color: var(--neon);
+  box-shadow: 0 0 10px var(--neon-glow);
+}
+
+/* La lista es lo único que hace scroll; cabecera y pie quedan fijos */
+#lista-carrito {
+  flex: 1;
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.carrito-vacio {
+  margin: 0;
+  padding: 32px 12px;
+  text-align: center;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+  border: 1px dashed var(--border);
+}
+
+.item-carrito {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+}
+
+.item-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 10px;
+}
+
+.item-carrito h4 {
+  margin: 0;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-hover);
+}
+
+.item-carrito p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.item-carrito .item-fila .control-noches {
+  flex: 1;
+  max-width: 200px;
+}
+
+.item-carrito .item-subtotal {
+  font-weight: 700;
+  color: var(--neon);
+}
+
+.carrito-pie {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.carrito-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+#total-carrito {
+  font-size: 1.4rem;
+  letter-spacing: 0.05em;
+  color: var(--neon);
+  text-shadow: 0 0 10px var(--neon-glow);
+}
+
+#btn-pagar {
+  width: 100%;
+}
+
+#mensaje-carrito {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--console-text);
+}
+
+#mensaje-carrito:empty {
+  display: none;
+}
+
+/* ---------- Celular ---------- */
+@media (max-width: 480px) {
+  .header-acciones {
+    width: 100%;
+  }
+
+  .header-acciones button {
+    flex: 1;
+  }
+}

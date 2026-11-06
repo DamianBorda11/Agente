@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <!-- Sin esta línea el celular "simula" una pantalla de PC y todo se ve diminuto -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Videoclub — Estantería</title>
+
+  <!-- Mismas fuentes que admin.html: Metal Mania, Orbitron, Oswald -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Orbitron:wght@500;700&family=Oswald:wght@400;700&display=swap">
+
+  <!-- admin.css trae la estética y las cajas VHS; galeria.css solo agrega
+       lo nuevo (control de noches, carrito). El orden importa: galeria.css
+       va DESPUÉS para poder ajustar reglas de admin.css. -->
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/galeria.css">
+</head>
+
+<body>
+
+  <header class="header">
+    <!-- data-text: el CSS copia este texto en dos capas para el glitch -->
+    <h1 data-text="Videoclub">Videoclub</h1>
+    <div class="header-acciones">
+      <button id="btn-tema" type="button">☀ Modo claro</button>
+      <!-- aria-expanded le dice al lector de pantalla si el panel está abierto -->
+      <button id="btn-carrito" type="button" aria-controls="panel-carrito" aria-expanded="false">
+        🎞 Mis rentas <span id="contador-carrito">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro-galeria">
+      <h2>Estantería</h2>
+      <p>Elige cuántas noches quieres cada película y agrégala a tus rentas.</p>
+    </section>
+
+    <!-- galeria.js pinta aquí las cajas VHS -->
+    <div id="lista-productos"></div>
+  </main>
+
+  <!-- Fondo oscuro detrás del panel: clic aquí = cerrar -->
+  <div id="overlay-carrito"></div>
+
+  <!-- Panel lateral del carrito de rentas -->
+  <aside id="panel-carrito" role="dialog" aria-modal="true" aria-labelledby="titulo-carrito">
+    <div class="carrito-cabecera">
+      <h3 id="titulo-carrito">Mis rentas</h3>
+      <button id="btn-cerrar-carrito" type="button" aria-label="Cerrar mis rentas">✕</button>
+    </div>
+
+    <div id="lista-carrito"></div>
+
+    <div class="carrito-pie">
+      <div class="carrito-total">
+        <span>Total</span>
+        <strong id="total-carrito">$ 0</strong>
+      </div>
+      <button id="btn-pagar" type="button">Pagar rentas →</button>
+      <p id="mensaje-carrito" role="status"></p>
+    </div>
+  </aside>
+
+  <!-- Primero los datos (crea obtenerProductos), después la lógica que los usa -->
+  <script src="js/catalogo-local.js"></script>
+  <script src="js/galeria.js"></script>
+</body>
+</html>
