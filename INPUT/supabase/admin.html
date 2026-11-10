@@ -18,45 +18,50 @@
 
 <body>
 
+  <header class="header">
+    <!-- data-text: el CSS copia este texto en dos capas (roja y blanca) para el glitch -->
+    <h1 data-text="Videoclub">Videoclub</h1>
+    <button id="btn-tema" type="button">☀ Modo claro</button>
+  </header>
+
   <section id="zona-acceso-admin">
-  <p id="estado-sesion-admin" role="status">No has iniciado sesión.</p>
+  <div class="tarjeta-acceso">
+    <p id="estado-sesion-admin" role="status">No has iniciado sesión.</p>
 
-  <form id="form-registro-admin">
-    <h3>Registrar administrador</h3>
-    <label for="admin-registro-nombre">Nombre</label>
-    <input id="admin-registro-nombre" type="text" required>
+    <div class="tabs-acceso" role="tablist">
+      <button type="button" class="tab-acceso" data-tab="login" role="tab" aria-selected="true">Iniciar sesión</button>
+      <button type="button" class="tab-acceso" data-tab="registro" role="tab" aria-selected="false">Registrarme</button>
+    </div>
 
-    <label for="admin-registro-correo">Correo</label>
-    <input id="admin-registro-correo" type="email" required>
+    <form id="form-login-admin" class="form-tab" data-tab="login">
+      <label for="admin-login-correo">Correo</label>
+      <input id="admin-login-correo" type="email" required>
 
-    <label for="admin-registro-password">Contraseña</label>
-    <input id="admin-registro-password" type="password" minlength="6" required>
+      <label for="admin-login-password">Contraseña</label>
+      <input id="admin-login-password" type="password" required>
 
-    <button type="submit">Crear cuenta de administrador</button>
-  </form>
+      <button type="submit">Iniciar sesión</button>
+    </form>
 
-  <form id="form-login-admin">
-    <h3>Iniciar sesión</h3>
-    <label for="admin-login-correo">Correo</label>
-    <input id="admin-login-correo" type="email" required>
+    <form id="form-registro-admin" class="form-tab" data-tab="registro" hidden>
+      <label for="admin-registro-nombre">Nombre</label>
+      <input id="admin-registro-nombre" type="text" required>
 
-    <label for="admin-login-password">Contraseña</label>
-    <input id="admin-login-password" type="password" required>
+      <label for="admin-registro-correo">Correo</label>
+      <input id="admin-registro-correo" type="email" required>
 
-    <button type="submit">Iniciar sesión</button>
-  </form>
+      <label for="admin-registro-password">Contraseña</label>
+      <input id="admin-registro-password" type="password" minlength="6" required>
+
+      <button type="submit">Crear cuenta de administrador</button>
+    </form>
+  </div>
 </section>
 
 <button id="btn-logout-admin" type="button" hidden>Cerrar sesión</button>
 
 <!-- el panel real (catálogo, mis clientes...) debe quedar oculto hasta
      que admin.js confirme sesión iniciada Y que existe fila en admins_practica -->
-
-  <header class="header">
-    <!-- data-text: el CSS copia este texto en dos capas (roja y blanca) para el glitch -->
-    <h1 data-text="Videoclub">Videoclub</h1>
-    <button id="btn-tema" type="button">☀ Modo claro</button>
-  </header>
 
   <!-- panel-admin: oculto por defecto; admin.js lo muestra solo si hay
        sesión iniciada Y fila en admins_practica (ver mostrarEstadoSesionAdmin) -->
@@ -65,29 +70,31 @@
   <main class="columnas">
 
     <section class="col-productos">
-      <button id="btn-traer">Ver estantería</button>
       <!-- JSON crudo, cerrado por defecto: se abre solo para depurar -->
       <details id="json-crudo" hidden>
         <summary>Ver JSON</summary>
         <pre id="resultado"></pre>
       </details>
-      <!-- Filtros del catálogo (el único buscador): aparecen al abrir la estantería -->
+      <!-- Filtros del catálogo (el único buscador): aparecen en cuanto cargan las películas -->
       <div id="filtros" class="filtros" hidden>
         <label class="filtro-texto">Buscar
           <input type="search" id="filtro-texto" placeholder="Título, director o sinopsis">
         </label>
-        <label>Género
-          <select id="filtro-categoria">
-            <option value="">Todos</option>
-          </select>
-        </label>
-        <label>Disponibilidad
-          <select id="filtro-disponible">
-            <option value="">Todas</option>
-            <option value="si">En estante</option>
-            <option value="no">Rentadas</option>
-          </select>
-        </label>
+        <div class="filtro-pills">
+          <span class="filtro-pills-etiqueta">Género</span>
+          <!-- admin.js llena esto con un botón por género que exista en los datos -->
+          <div class="pills" id="filtro-categoria-pills">
+            <button type="button" class="pill activo" data-valor="">Todos</button>
+          </div>
+        </div>
+        <div class="filtro-pills">
+          <span class="filtro-pills-etiqueta">Disponibilidad</span>
+          <div class="pills" id="filtro-disponible-pills">
+            <button type="button" class="pill activo" data-valor="">Todas</button>
+            <button type="button" class="pill" data-valor="si">En estante</button>
+            <button type="button" class="pill" data-valor="no">Rentadas</button>
+          </div>
+        </div>
         <label>Renta mín. (COP)
           <input type="number" id="filtro-precio-min" min="0" step="500" placeholder="0">
         </label>
@@ -103,17 +110,27 @@
           </select>
         </label>
         <button type="button" id="btn-limpiar-filtros">Limpiar</button>
-        <p id="contador-productos"></p>
+        <div class="filtros-pie">
+          <p id="contador-productos"></p>
+          <div class="vista-toggle" role="group" aria-label="Vista del catálogo">
+            <button type="button" id="btn-vista-grid" aria-pressed="true">▦ Cuadrícula</button>
+            <button type="button" id="btn-vista-lista" aria-pressed="false">☰ Lista</button>
+          </div>
+        </div>
       </div>
 
-      <!-- Aquí se pintan las cajas VHS de "Ver estantería" -->
+      <!-- Aquí se pintan las cajas VHS del catálogo -->
       <div id="lista-productos"></div>
     </section>
 
     <section class="col-formulario">
-      <h3>Mostrador</h3>
-      <!-- admin.js crea aquí el formulario -->
-      <div id="form-container"></div>
+      <div class="mostrador-cabecera">
+        <h3>Mostrador</h3>
+        <button type="button" id="btn-toggle-form">+ Agregar película</button>
+      </div>
+      <!-- admin.js crea aquí el formulario; empieza oculto para no competir
+           con la lista — se abre con el botón de arriba o al editar algo -->
+      <div id="form-container" hidden></div>
 
       <div id="notificacion"></div>
     </section>

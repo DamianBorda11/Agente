@@ -1,3 +1,13 @@
+// Pestañas "Iniciar sesión" / "Registrarme": muestra un formulario y oculta el otro.
+document.querySelectorAll('.tab-acceso').forEach(tab => {
+tab.addEventListener('click', () => {
+document.querySelectorAll('.tab-acceso').forEach(t => t.setAttribute('aria-selected', String(t === tab)));
+document.querySelectorAll('.form-tab').forEach(form => {
+form.hidden = form.dataset.tab !== tab.dataset.tab;
+});
+});
+});
+
 async function registrarCliente(nombre, correo, contrasena) {
 // db.auth.signUp() NO toca ninguna tabla tuya todavía — habla directo con
 // el sistema de autenticación interno de Supabase (algo así como una
@@ -67,6 +77,7 @@ if (cliente) {
 document.getElementById('estado-sesion').textContent =
 'Cuenta creada. Ahora inicia sesión con ese correo y contraseña.';
 form.reset(); // vacía los 3 campos del formulario, para la próxima persona
+document.querySelector('.tab-acceso[data-tab="login"]').click();
 } else {
 document.getElementById('estado-sesion').textContent =
 'No se pudo crear la cuenta. Revisa la consola.';

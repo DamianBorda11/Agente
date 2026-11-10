@@ -60,6 +60,13 @@
   box-sizing: border-box;
 }
 
+/* El atributo hidden del HTML pierde contra cualquier regla que ya le
+   ponga "display" a ese mismo elemento (ej. ".header { display: flex }").
+   Con esto, hidden siempre gana y de verdad oculta el elemento. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   padding: 24px 16px 48px;
@@ -125,6 +132,79 @@ html::after {
 @keyframes parpadeo-crt {
   0%, 100% { opacity: calc(var(--scanlines) * 0.5); }
   97%      { opacity: calc(var(--scanlines) * 0.8); }
+}
+
+/* ---------- Acceso de administrador: tarjeta con pestañas ---------- */
+/* El header con el título "Videoclub" queda siempre visible arriba;
+   esta tarjeta solo centra el login/registro debajo. */
+#zona-acceso-admin {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.tarjeta-acceso {
+  width: 100%;
+  max-width: 420px;
+  display: grid;
+  gap: 16px;
+}
+
+#estado-sesion-admin {
+  margin: 0;
+  padding: 10px 14px;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-left: 3px solid var(--accent);
+}
+
+/* Pestañas: solo un formulario se ve a la vez */
+.tabs-acceso {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.tab-acceso {
+  clip-path: none;
+  margin: 0;
+  padding: 12px;
+  font-size: 0.68rem;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.tab-acceso[data-tab="login"] {
+  border-right: none;
+}
+
+.tab-acceso[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--neon);
+  border-color: var(--neon);
+  box-shadow: inset 0 0 12px var(--neon-glow);
+}
+
+.form-tab {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+}
+
+.form-tab label {
+  display: grid;
+  gap: 6px;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--neon);
 }
 
 /* ---------- Encabezado ---------- */
@@ -282,6 +362,24 @@ textarea:focus-visible {
   }
 }
 
+/* ---------- Botón para mostrar/ocultar el formulario de agregar ---------- */
+.mostrador-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.mostrador-cabecera h3 {
+  margin-bottom: 0;
+}
+
+#btn-toggle-form {
+  padding: 10px 16px;
+  font-size: 0.7rem;
+}
+
 /* ---------- Formulario ---------- */
 #form-producto {
   background: var(--surface);
@@ -409,11 +507,6 @@ input[type="checkbox"] {
   border-left: 3px solid var(--accent);
 }
 
-/* [hidden] necesita ganarle a display: grid, si no el bloque no se oculta */
-.filtros[hidden] {
-  display: none;
-}
-
 .filtros label {
   display: grid;
   gap: 6px;
@@ -432,6 +525,48 @@ input[type="checkbox"] {
 .filtros select {
   width: 100%;
   min-width: 0;
+}
+
+/* ---------- Género y disponibilidad: filtros rápidos en botones ---------- */
+/* Más rápidos de usar que un <select> para revisar la lista: un clic
+   filtra, sin abrir ningún desplegable. */
+.filtro-pills {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.filtro-pills-etiqueta {
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--neon);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  clip-path: none;
+  margin: 0;
+  padding: 7px 14px;
+  font-size: 0.65rem;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.pill.activo {
+  background: var(--surface);
+  color: var(--neon);
+  border-color: var(--neon);
+  box-shadow: inset 0 0 10px var(--neon-glow);
 }
 
 select {
@@ -456,14 +591,49 @@ select:focus-visible {
   padding: 11px 16px;
 }
 
-#contador-productos {
+/* Fila final de los filtros: contador a la izquierda, toggle de vista a la derecha */
+.filtros-pie {
   grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+#contador-productos {
   margin: 0;
   font-family: 'Orbitron', 'Oswald', sans-serif;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--text-muted);
+}
+
+/* ---------- Toggle de vista: cuadrícula o lista ---------- */
+.vista-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.vista-toggle button {
+  clip-path: none;
+  padding: 8px 14px;
+  font-size: 0.65rem;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.vista-toggle button:hover {
+  border-color: var(--neon);
+  color: var(--neon);
+}
+
+.vista-toggle button[aria-pressed="true"] {
+  color: var(--neon);
+  border-color: var(--neon);
+  box-shadow: 0 0 10px var(--neon-glow), inset 0 0 10px var(--neon-glow);
 }
 
 /* Mensaje cuando ningún producto coincide: ocupa todo el ancho de la cuadrícula */
@@ -501,6 +671,14 @@ select:focus-visible {
   border-top: 3px solid var(--accent);
   min-width: 0; /* deja que la tarjeta se encoja aunque su contenido sea ancho */
   transition: transform 0.2s, box-shadow 0.3s;
+}
+
+/* Todo lo que no es la carátula (título, datos, acciones) va junto en esta columna */
+.tarjeta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
 
 .tarjeta-producto:hover {
@@ -747,6 +925,122 @@ select:focus-visible {
 .tarjeta-acciones button {
   flex: 1;
   margin: 0;
+}
+
+/* ---------- Precio compacto: solo se ve en la vista de lista ---------- */
+.precio-lista {
+  display: none;
+  margin: 0;
+  font-weight: 700;
+  color: var(--neon);
+  text-shadow: 0 0 8px var(--neon-glow);
+  white-space: nowrap;
+}
+
+/* ---------- Vista de lista: una fila angosta por película, sin detalles ---------- */
+/* La idea es que sea rápida de revisar: título, precio, estado y acciones.
+   La sinopsis, los géneros, las copias y el sticker se quedan solo en la cuadrícula. */
+#lista-productos.vista-lista {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+#lista-productos.vista-lista .tarjeta-producto {
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+}
+
+/* La carátula se encoge a una miniatura fija en vez de llenar el ancho de la tarjeta */
+#lista-productos.vista-lista .tarjeta-imagen {
+  width: 48px;
+  flex: 0 0 auto;
+}
+
+#lista-productos.vista-lista .tarjeta-info {
+  /* Sin esto, el bloque medía solo lo que su contenido necesitaba, y ese
+     ancho cambiaba de una tarjeta a otra: por eso la fila de Editar/
+     Eliminar (alineada a la derecha) no terminaba siempre en el mismo
+     punto. Con flex: 1 ocupa SIEMPRE el resto del ancho de la tarjeta. */
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Ancho fijo + una sola línea (con "...") para el título: así todas las
+   filas miden lo mismo, sin importar si el título es corto o larguísimo. */
+#lista-productos.vista-lista .tarjeta-info h4 {
+  flex: 1 1 160px;
+  min-width: 0; /* sin esto, flexbox no deja que el texto se recorte */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ancho fijo también para el precio, para que esa columna quede
+   alineada entre una fila y otra (igual que en una tabla). */
+#lista-productos.vista-lista .precio-lista {
+  display: block;
+  flex: 0 0 110px;
+  text-align: right;
+}
+
+/* El estado hereda "margin-top: auto" de la cuadrícula (ahí empuja la
+   etiqueta al fondo de la tarjeta); en una fila eso la descuadra hacia
+   abajo. Aquí se cancela y se le da un ancho fijo, como otra columna. */
+#lista-productos.vista-lista .tarjeta-info .estado {
+  flex: 0 0 110px;
+  margin-top: 0;
+  align-self: center;
+  text-align: center;
+  white-space: nowrap; /* "En estante" no cabía en una línea y se partía en dos */
+}
+
+/* La sinopsis, los géneros, el desglose (renta/copias/descuento) y el
+   sticker no caben en una fila angosta: se quedan solo en la cuadrícula. */
+#lista-productos.vista-lista .tarjeta-info > p:not([class]),
+#lista-productos.vista-lista .tarjeta-info .categorias,
+#lista-productos.vista-lista .tarjeta-info .sticker-rebobinar,
+#lista-productos.vista-lista .tarjeta-info dl {
+  display: none;
+}
+
+/* flex-basis: 100% obliga a que las acciones siempre empiecen una fila
+   nueva dentro de ".tarjeta-info" (que tiene flex-wrap): quedan abajo del
+   todo en cada tarjeta, sin excepción, sin importar qué tan largo sea el
+   título o si el precio ocupa más o menos espacio. */
+#lista-productos.vista-lista .tarjeta-acciones {
+  flex: 1 0 100%;
+  justify-content: flex-end;
+  border-top: none;
+  padding-top: 0;
+}
+
+/* Los botones heredan "flex: 1" de la cuadrícula: en una fila angosta eso
+   los encoge hasta cortar el texto ("Eliminar") contra el corte diagonal.
+   Mismo ancho fijo para los dos ("Editar" y "Eliminar" no miden lo mismo
+   de texto): así quedan parejos en vez de uno más angosto que el otro. */
+#lista-productos.vista-lista .tarjeta-acciones button {
+  flex: 0 0 112px;
+  margin-top: 0;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  /* En celular una fila ya no cabe: la lista vuelve a apilar cada tarjeta */
+  #lista-productos.vista-lista .tarjeta-producto {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #lista-productos.vista-lista .tarjeta-imagen {
+    width: 100%;
+  }
 }
 
 /* ---------- Capa "¿Seguro?" dentro de la tarjeta ---------- */

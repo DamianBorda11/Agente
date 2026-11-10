@@ -10,10 +10,24 @@
 </head>
 <body>
 <section id="panel-cuenta">
+<div class="tarjeta-acceso">
 <h2>Mi cuenta</h2>
-<p id="estado-sesion">No has iniciado sesión.</p>
-<form id="form-registro">
-<h3>Registrarme</h3>
+<p id="estado-sesion" role="status">No has iniciado sesión.</p>
+
+<div class="tabs-acceso" role="tablist">
+<button type="button" class="tab-acceso" data-tab="login" role="tab" aria-selected="true">Iniciar sesión</button>
+<button type="button" class="tab-acceso" data-tab="registro" role="tab" aria-selected="false">Registrarme</button>
+</div>
+
+<form id="form-login" class="form-tab" data-tab="login">
+<label for="login-correo">Correo</label>
+<input id="login-correo" type="email" required />
+<label for="login-password">Contraseña</label>
+<input id="login-password" type="password" required />
+<button type="submit">Iniciar sesión</button>
+</form>
+
+<form id="form-registro" class="form-tab" data-tab="registro" hidden>
 <label for="registro-nombre">Nombre</label>
 <input id="registro-nombre" type="text" required />
 <label for="registro-correo">Correo</label>
@@ -22,14 +36,7 @@
 <input id="registro-password" type="password" minlength="6" required />
 <button type="submit">Crear cuenta</button>
 </form>
-<form id="form-login">
-<h3>Iniciar sesión</h3>
-<label for="login-correo">Correo</label>
-<input id="login-correo" type="email" required />
-<label for="login-password">Contraseña</label>
-<input id="login-password" type="password" required />
-<button type="submit">Iniciar sesión</button>
-</form>
+</div>
 </section>
 
 <!-- Panel con sesión: oculto hasta que cliente.js verifique el login -->

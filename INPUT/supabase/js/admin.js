@@ -1,3 +1,13 @@
+// Pestañas "Iniciar sesión" / "Registrarme": muestra un formulario y oculta el otro.
+document.querySelectorAll('.tab-acceso').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab-acceso').forEach(t => t.setAttribute('aria-selected', String(t === tab)));
+    document.querySelectorAll('.form-tab').forEach(form => {
+      form.hidden = form.dataset.tab !== tab.dataset.tab;
+    });
+  });
+});
+
 document.getElementById('form-registro-admin').addEventListener('submit', async (evento) => {
   evento.preventDefault();
   const form = evento.target;
@@ -25,6 +35,7 @@ document.getElementById('form-registro-admin').addEventListener('submit', async 
 
   document.getElementById('estado-sesion-admin').innerText = 'Cuenta de administrador creada. Ya puedes iniciar sesión.';
   form.reset();
+  document.querySelector('.tab-acceso[data-tab="login"]').click();
 });
 
 document.getElementById('form-login-admin').addEventListener('submit', async (evento) => {
@@ -68,6 +79,9 @@ async function mostrarEstadoSesionAdmin() {
     estado.innerText = 'No has iniciado sesión.';
   } else if (esAdmin) {
     estado.innerText = 'Sesión iniciada como ' + perfil.nombre + ' (admin).';
+    // Ya no hace falta un botón "Ver estantería": en cuanto se confirma el
+    // acceso de admin, el catálogo se trae solo.
+    cargarProductos(true);
   } else {
     estado.innerText = 'Sesión iniciada, pero sin perfil de administrador.';
   }
@@ -327,7 +341,7 @@ async function cargarProductos(animar = false) {
   // Guardamos las películas en memoria: los filtros trabajan sobre esta copia
   // sin volver a consultar a Supabase.
   productosCargados = data;
-  llenarSelectCategorias(data);
+  llenarPillsCategorias(data);
   aplicarFiltros(animar);
 }
 
@@ -346,25 +360,48 @@ function normalizar(texto) {
     .replace(/[̀-ͯ]/g, '');
 }
 
-// Llena el <select> con los géneros que existen, sin repetir.
+// Género y disponibilidad son botones (pills), no <select>: no tienen un
+// ".value" propio, así que guardamos la selección actual de cada uno aquí.
+const filtrosPill = { categoria: '', disponible: '' };
+
+// Un solo clic marca ese botón como activo (y solo ese) dentro de su grupo,
+// guarda el valor elegido y vuelve a filtrar.
+function configurarPills(contenedorId, grupo) {
+  document.getElementById(contenedorId).addEventListener('click', (evento) => {
+    const boton = evento.target.closest('.pill');
+    if (!boton) return;
+
+    filtrosPill[grupo] = boton.dataset.valor;
+    document.querySelectorAll(`#${contenedorId} .pill`).forEach(p => p.classList.toggle('activo', p === boton));
+    aplicarFiltros();
+  });
+}
+
+configurarPills('filtro-categoria-pills', 'categoria');
+configurarPills('filtro-disponible-pills', 'disponible');
+
+// Rellena los botones de género con los que existen en los datos, sin repetir.
 // Set = colección que descarta duplicados automáticamente.
-function llenarSelectCategorias(productos) {
-  const select = document.getElementById('filtro-categoria');
-  const seleccionActual = select.value; // para no perder la elección al refrescar
+function llenarPillsCategorias(productos) {
+  const contenedor = document.getElementById('filtro-categoria-pills');
+  const seleccionActual = filtrosPill.categoria; // para no perder la elección al refrescar
 
   const categorias = new Set(productos.flatMap(p => Array.isArray(p.categorias) ? p.categorias : []));
 
-  select.innerHTML = '<option value="">Todos</option>' +
-    [...categorias].sort().map(c => `<option value="${c}">${c}</option>`).join('');
+  contenedor.innerHTML = '<button type="button" class="pill" data-valor="">Todos</button>' +
+    [...categorias].sort().map(c => `<button type="button" class="pill" data-valor="${c}">${c}</button>`).join('');
 
-  if (categorias.has(seleccionActual)) select.value = seleccionActual;
+  // Si el género ya no existe (se borró esa película), vuelve a "Todos".
+  const valorValido = categorias.has(seleccionActual) ? seleccionActual : '';
+  filtrosPill.categoria = valorValido;
+  contenedor.querySelectorAll('.pill').forEach(p => p.classList.toggle('activo', p.dataset.valor === valorValido));
 }
 
 // Lee los filtros, filtra, ordena y pinta. Se llama en cada cambio de un filtro.
 function aplicarFiltros(animar = false) {
   const texto = normalizar(document.getElementById('filtro-texto').value.trim());
-  const categoria = document.getElementById('filtro-categoria').value;
-  const disponibilidad = document.getElementById('filtro-disponible').value;
+  const categoria = filtrosPill.categoria;
+  const disponibilidad = filtrosPill.disponible;
   const precioMin = document.getElementById('filtro-precio-min').value;
   const precioMax = document.getElementById('filtro-precio-max').value;
   const orden = document.getElementById('filtro-orden').value;
@@ -413,7 +450,34 @@ document.getElementById('btn-limpiar-filtros').addEventListener('click', () => {
     campo.value = '';
   });
   document.getElementById('filtro-orden').value = 'id';
+
+  filtrosPill.categoria = '';
+  filtrosPill.disponible = '';
+  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('activo', p.dataset.valor === ''));
+
   aplicarFiltros();
+});
+
+// ---------------------------------------------------------------------
+// VISTA DEL CATÁLOGO: CUADRÍCULA O LISTA
+// La preferencia se guarda en localStorage, igual que el tema claro/oscuro.
+// ---------------------------------------------------------------------
+function aplicarVistaCatalogo(vista) {
+  document.getElementById('lista-productos').classList.toggle('vista-lista', vista === 'lista');
+  document.getElementById('btn-vista-grid').setAttribute('aria-pressed', String(vista === 'grid'));
+  document.getElementById('btn-vista-lista').setAttribute('aria-pressed', String(vista === 'lista'));
+}
+
+aplicarVistaCatalogo(localStorage.getItem('vista-catalogo') || 'grid');
+
+document.getElementById('btn-vista-grid').addEventListener('click', () => {
+  localStorage.setItem('vista-catalogo', 'grid');
+  aplicarVistaCatalogo('grid');
+});
+
+document.getElementById('btn-vista-lista').addEventListener('click', () => {
+  localStorage.setItem('vista-catalogo', 'lista');
+  aplicarVistaCatalogo('lista');
 });
 
 // Dibuja las tarjetas (cajas VHS) de las películas que recibe.
@@ -452,30 +516,29 @@ function pintarTarjetas(productos, animar = false) {
         <!-- Sello sobre la carátula: solo se dibuja si la película está rentada -->
         ${producto.disponible ? '' : '<span class="sello-rentada">Rentada</span>'}
       </div>
-      <h4>${producto.nombre}</h4>
-      <p>${producto.descripcion}</p>
-      <dl>
-        <dt>Renta</dt><dd>${formatoPesos.format(producto.precio)} / noche</dd>
-        <dt>Copias</dt><dd>${producto.unidades}</dd>
-        ${producto.descuento ? `<dt>Descuento</dt><dd>${Math.round(producto.descuento * 100)}%</dd>` : ''}
-      </dl>
-      ${generos.length ? `<p class="categorias">${generos.join(' · ')}</p>` : ''}
-      <span class="estado ${producto.disponible ? 'disponible' : 'agotado'}">
-        ${producto.disponible ? 'En estante' : 'Rentada'}
-      </span>
-      <p class="sticker-rebobinar">¡Rebobine antes de devolver!</p>
-      <div class="tarjeta-acciones">
-        <button type="button" class="btn-editar" data-id="${producto.id}">Editar</button>
-        <button type="button" class="btn-eliminar" data-id="${producto.id}" data-nombre="${producto.nombre}">Eliminar</button>
+      <div class="tarjeta-info">
+        <h4>${producto.nombre}</h4>
+        <p class="precio-lista">${formatoPesos.format(producto.precio)} / noche</p>
+        <p>${producto.descripcion}</p>
+        <dl>
+          <dt>Renta</dt><dd>${formatoPesos.format(producto.precio)} / noche</dd>
+          <dt>Copias</dt><dd>${producto.unidades}</dd>
+          ${producto.descuento ? `<dt>Descuento</dt><dd>${Math.round(producto.descuento * 100)}%</dd>` : ''}
+        </dl>
+        ${generos.length ? `<p class="categorias">${generos.join(' · ')}</p>` : ''}
+        <span class="estado ${producto.disponible ? 'disponible' : 'agotado'}">
+          ${producto.disponible ? 'En estante' : 'Rentada'}
+        </span>
+        <p class="sticker-rebobinar">¡Rebobine antes de devolver!</p>
+        <div class="tarjeta-acciones">
+          <button type="button" class="btn-editar" data-id="${producto.id}">Editar</button>
+          <button type="button" class="btn-eliminar" data-id="${producto.id}" data-nombre="${producto.nombre}">Eliminar</button>
+        </div>
       </div>
     </article>
   `;
   }).join('');
 }
-
-// Flecha en vez de pasar cargarProductos directo: si no, recibiría el "event"
-// como primer argumento y "animar" sería un objeto en vez de true.
-document.getElementById('btn-traer').addEventListener('click', () => cargarProductos(true));
 
 // Cada vez que cambia el texto de la notificación, reinicia su animación.
 // Quitar la clase, forzar un reflow (offsetWidth) y volver a ponerla
@@ -489,6 +552,26 @@ new MutationObserver(() => {
 
 // Generamos el formulario al cargar la página (vacío, listo para escribir).
 const formularioProducto = crearFormularioProducto();
+
+// ---------------------------------------------------------------------
+// MOSTRAR/OCULTAR EL FORMULARIO ("Mostrador")
+// ---------------------------------------------------------------------
+// Empieza oculto (ver admin.html) para que la lista tenga todo el espacio;
+// se abre con este botón o solo al editar una película.
+function abrirFormulario() {
+  document.getElementById('form-container').hidden = false;
+  document.getElementById('btn-toggle-form').textContent = '✕ Cerrar formulario';
+}
+
+function cerrarFormulario() {
+  document.getElementById('form-container').hidden = true;
+  document.getElementById('btn-toggle-form').textContent = '+ Agregar película';
+}
+
+document.getElementById('btn-toggle-form').addEventListener('click', () => {
+  const abierto = !document.getElementById('form-container').hidden;
+  if (abierto) cerrarFormulario(); else abrirFormulario();
+});
 
 // ---------------------------------------------------------------------
 // MODO EDICIÓN
@@ -512,10 +595,11 @@ async function empezarEdicion(id) {
   document.getElementById('btn-guardar').textContent = 'Actualizar película';
   document.getElementById('btn-cancelar').hidden = false;
   formularioProducto.classList.add('editando');
+  abrirFormulario();
   formularioProducto.scrollIntoView({ behavior: 'smooth' });
 }
 
-// Vuelve a modo "crear" y limpia el formulario.
+// Vuelve a modo "crear", limpia el formulario y lo oculta de nuevo.
 function terminarEdicion() {
   idEnEdicion = null;
   formularioProducto.reset();
@@ -524,6 +608,7 @@ function terminarEdicion() {
   document.getElementById('btn-guardar').textContent = 'Agregar película';
   document.getElementById('btn-cancelar').hidden = true;
   formularioProducto.classList.remove('editando');
+  cerrarFormulario();
 }
 
 // Escucha el envío del formulario: actualiza si hay id en edición, si no, agrega.
@@ -565,7 +650,7 @@ if (formularioProducto) {
 }
 
 // Después de crear, actualizar o borrar, recarga las tarjetas
-// (solo si ya se abrió la estantería) para que se vean los datos nuevos.
+// (solo si el catálogo ya se cargó alguna vez) para que se vean los datos nuevos.
 function refrescarCatalogo() {
   if (!document.getElementById('json-crudo').hidden) cargarProductos();
 }
