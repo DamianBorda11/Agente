@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Mi cuenta</title>
+<title>Mi cuenta — Videoclub</title>
+
+<!-- Mismas fuentes que admin.html y galeria.html -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Orbitron:wght@500;700&family=Oswald:wght@400;700&display=swap">
+
+<!-- Orden: admin.css (estética + cajas VHS) → galeria.css (noches, carrito)
+     → cliente.css (solo el layout de esta página: login y sidebar) -->
+<link rel="stylesheet" href="css/admin.css" />
+<link rel="stylesheet" href="css/galeria.css" />
 <link rel="stylesheet" href="css/cliente.css" />
 <!-- CDN: la librería supabase-js (crea la global "supabase"), no la API del proyecto -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -47,13 +57,31 @@
 <!-- data-vista = id de la sección que muestra cada ítem.
      Para agregar un ítem: un botón aquí + una <section class="vista"> en el main -->
 <nav class="sidebar-nav">
-<button type="button" class="sidebar-item activo" data-vista="vista-perfil">Actualizar datos</button>
+<button type="button" class="sidebar-item activo" data-vista="vista-productos">Productos</button>
+<button type="button" class="sidebar-item" data-vista="vista-ajustes">Ajustes</button>
 </nav>
+
+<!-- Mismos ids que en galeria.html: galeria.js los busca por id -->
+<button id="btn-carrito" type="button" aria-controls="panel-carrito" aria-expanded="false">
+🎞 Mis rentas <span id="contador-carrito">0</span>
+</button>
+<button id="btn-tema" type="button">☀ Modo claro</button>
 <button id="btn-logout" type="button">Cerrar sesión</button>
 </aside>
 
 <main class="contenido">
-<section id="vista-perfil" class="vista">
+<!-- Productos: la estantería VHS de galeria.js, con datos de Supabase -->
+<section id="vista-productos" class="vista">
+<section class="intro-galeria">
+<h2>Estantería</h2>
+<p>Elige cuántas noches quieres cada película y agrégala a tus rentas.</p>
+</section>
+<!-- galeria.js pinta aquí las cajas VHS -->
+<div id="lista-productos"></div>
+</section>
+
+<!-- Ajustes: empieza oculta, la sidebar la muestra -->
+<section id="vista-ajustes" class="vista" hidden>
 <form id="form-perfil">
 <h3>Mis datos</h3>
 <label for="perfil-nombre">Nombre</label>
@@ -74,7 +102,33 @@
 </section>
 </main>
 </div>
+
+<!-- Carrito: copiado de galeria.html. Va FUERA de #app-cliente para que
+     bloquearFondo() (galeria.js) pueda dejar inerte todo lo demás. -->
+<div id="overlay-carrito"></div>
+
+<aside id="panel-carrito" role="dialog" aria-modal="true" aria-labelledby="titulo-carrito">
+<div class="carrito-cabecera">
+<h3 id="titulo-carrito">Mis rentas</h3>
+<button id="btn-cerrar-carrito" type="button" aria-label="Cerrar mis rentas">✕</button>
+</div>
+
+<div id="lista-carrito"></div>
+
+<div class="carrito-pie">
+<div class="carrito-total">
+<span>Total</span>
+<strong id="total-carrito">$ 0</strong>
+</div>
+<button id="btn-pagar" type="button">Pagar rentas →</button>
+<p id="mensaje-carrito" role="status"></p>
+</div>
+</aside>
+
+<!-- Orden: db (supabaseClient) → lógica del carrito (galeria) → login y vistas (cliente).
+     cliente.js va al final porque llama iniciarGaleria(), definida en galeria.js -->
 <script src="js/supabaseClient.js"></script>
+<script src="js/galeria.js"></script>
 <script src="js/cliente.js"></script>
 </body>
 </html>

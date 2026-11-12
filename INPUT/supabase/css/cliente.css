@@ -1,207 +1,97 @@
 /* =====================================================================
-   MI CUENTA — estilo oscuro simple
-   Mismo rojo que el videoclub (admin.css) para que combinen.
+   cliente.css — SOLO el layout de "Mi cuenta": acceso, sidebar y ajustes.
+   Colores, fuentes, botones, cajas VHS y carrito vienen de admin.css y
+   galeria.css (se cargan antes). Aquí no hay :root propio: se usan sus
+   variables (--surface, --neon...), así el modo claro funciona solo.
    ===================================================================== */
 
-/* Variables: si quieres cambiar un color, se cambia solo aquí */
-:root {
-  --bg: #0b0b0d;
-  --surface: #151518;
-  --border: #2a2a30;
-  --text: #e8e8ea;
-  --text-muted: #8a8a93;
-  --accent: #b3001b;
-  --accent-hover: #e0102e;
-  --radius: 8px;
-}
-
-/* El atributo hidden del HTML pierde contra "form { display: flex }" de abajo
-   (los estilos propios le ganan a los del navegador). Con esto, hidden siempre oculta. */
-[hidden] {
-  display: none !important;
-}
-
-/* box-sizing: el padding y el borde quedan DENTRO del ancho, no se suman */
-* {
-  box-sizing: border-box;
-}
-
+/* admin.css le pone max-width: 1300px al body; aquí lo queremos igual
+   pero con más aire arriba */
 body {
-  margin: 0;
-  min-height: 100vh;
-  padding: 40px 16px;
-  background: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-  line-height: 1.5;
+  padding-top: 40px;
 }
 
-/* Página de acceso propia: ocupa toda la pantalla, centrada */
+/* ---------- Pantalla de acceso ---------- */
 #panel-cuenta {
-  min-height: 100vh;
+  min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px 16px;
-}
-
-.tarjeta-acceso {
-  width: 100%;
-  max-width: 420px;
-  display: grid;
-  gap: 20px;
+  padding: 24px 0;
 }
 
 .tarjeta-acceso h2 {
+  margin: 0;
   text-align: center;
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-weight: 400;
+  font-size: clamp(2rem, 6vw, 2.8rem);
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-/* Pestañas: un solo formulario visible a la vez, no uno debajo del otro */
-.tabs-acceso {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.tab-acceso {
-  margin: 0;
-  padding: 12px;
-  background: var(--bg);
-  color: var(--text-muted);
-  border: none;
-  border-radius: 0;
-}
-
-.tab-acceso[aria-selected="true"] {
-  background: var(--accent);
-  color: #ffffff;
-}
-
-h2 {
-  margin: 0;
-  font-size: 1.6rem;
-  letter-spacing: 0.04em;
-}
-
-h3 {
-  margin: 0 0 4px;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent-hover);
-}
-
-/* Mensaje de estado: franja con borde rojo a la izquierda */
+/* Mismo estilo que #estado-sesion-admin en admin.css */
 #estado-sesion {
   margin: 0;
   padding: 10px 14px;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
   background: var(--surface);
   border-left: 3px solid var(--accent);
-  border-radius: var(--radius);
-  color: var(--text-muted);
 }
 
-/* Cada formulario es una tarjeta */
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 20px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-}
-
-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-input {
-  width: 100%;
-  padding: 10px 12px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text);
-  font: inherit;
-}
-
-/* :focus = el campo donde está escribiendo. outline se quita, pero se
-   reemplaza con borde rojo para no perder la señal de dónde estás. */
-input:focus {
-  outline: none;
-  border-color: var(--accent-hover);
-}
-
-/* Campo de solo lectura (correo del perfil): se ve apagado para que no parezca editable */
-input[readonly] {
-  color: var(--text-muted);
-  border-style: dashed;
-  cursor: not-allowed;
-}
-
-#perfil-mensaje {
-  margin: 0;
-  min-height: 1.5em; /* reserva el espacio: el formulario no "salta" al aparecer el texto */
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-button {
-  margin-top: 8px;
-  padding: 10px 16px;
-  background: var(--accent);
-  border: none;
-  border-radius: var(--radius);
-  color: #ffffff;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-button:hover {
-  background: var(--accent-hover);
+/* En admin.html el input va DENTRO del label; aquí van separados
+   (label for="..."), así que les damos el mismo look a mano */
+.form-tab label,
+#form-perfil label {
+  margin-bottom: -8px; /* pega el label a su input (el gap del grid los separa) */
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--neon);
 }
 
 /* ---------- Panel con sesión: sidebar + contenido ---------- */
-/* Grid de dos columnas: 220px fijos para la sidebar, el resto (1fr) para el contenido */
+/* Grid de dos columnas: 230px fijos para la sidebar, el resto (1fr) para el contenido */
 #app-cliente {
-  max-width: 860px;
-  margin: 0 auto;
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 24px;
+  grid-template-columns: 230px 1fr;
+  gap: 28px;
   align-items: start;
 }
 
 .sidebar {
-  /* sticky: se queda pegada arriba mientras el contenido hace scroll */
+  /* sticky: se queda pegada arriba mientras la estantería hace scroll */
   position: sticky;
-  top: 40px;
+  top: 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   padding: 20px 12px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-top: 3px solid var(--accent);
 }
 
 .sidebar-titulo {
   margin: 0 8px;
-  font-size: 1.2rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-size: 1.6rem;
+  background: var(--chrome);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* El correo puede ser largo: se corta con "..." en vez de romper la sidebar */
 #sidebar-usuario {
-  margin: 0 8px 12px;
-  font-size: 0.8rem;
+  margin: 0 8px 8px;
+  font-size: 0.85rem;
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -212,39 +102,83 @@ button:hover {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-bottom: 8px;
 }
 
-/* Los ítems son <button>, pero se ven como enlaces de menú, no como botones rojos */
+/* Los ítems son <button>: les quitamos el relleno rojo y las esquinas
+   cortadas (clip-path) que les pone admin.css, para que parezcan menú */
 .sidebar-item {
-  margin: 0;
   padding: 10px 12px;
   text-align: left;
+  color: var(--text-muted);
   background: transparent;
   border-left: 3px solid transparent;
-  border-radius: 0 var(--radius) var(--radius) 0;
-  color: var(--text-muted);
-  font-weight: 400;
+  clip-path: none;
 }
 
 .sidebar-item:hover {
-  background: var(--bg);
   color: var(--text);
+  background: var(--surface-2);
+  text-shadow: none;
+  animation: none;
 }
 
-/* Ítem activo: barra roja a la izquierda, como en la mayoría de paneles */
+/* Ítem activo: barra neón a la izquierda */
 .sidebar-item.activo {
-  background: var(--bg);
-  border-left-color: var(--accent-hover);
+  color: var(--neon);
+  background: var(--surface-2);
+  border-left-color: var(--neon);
+}
+
+/* Botones de la sidebar a lo ancho */
+.sidebar > button {
+  width: 100%;
+}
+
+/* Cerrar sesión: solo contorno, para que no compita con "Mis rentas" */
+#btn-logout {
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  clip-path: none;
+}
+
+#btn-logout:hover {
   color: var(--text);
-  font-weight: 600;
+  border-color: var(--neon);
 }
 
 .contenido {
-  min-width: 0; /* sin esto, un input largo puede estirar la columna 1fr fuera de la pantalla */
+  min-width: 0; /* sin esto, la estantería puede estirar la columna 1fr fuera de la pantalla */
 }
 
-/* Celular: la sidebar pasa a ser una barra arriba, una sola columna */
-@media (max-width: 700px) {
+/* ---------- Vista Ajustes ---------- */
+#form-perfil {
+  display: grid;
+  gap: 14px;
+  max-width: 520px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+}
+
+/* Campo de solo lectura (correo, rol): se ve apagado para que no parezca editable */
+input[readonly] {
+  color: var(--text-muted);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+#perfil-mensaje {
+  margin: 0;
+  min-height: 1.5em; /* reserva el espacio: el formulario no "salta" al aparecer el texto */
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ---------- Celular: la sidebar pasa a ser un bloque arriba ---------- */
+@media (max-width: 760px) {
   #app-cliente {
     grid-template-columns: 1fr;
   }
@@ -257,18 +191,4 @@ button:hover {
     flex-direction: row;
     flex-wrap: wrap;
   }
-}
-
-/* Cerrar sesión: botón secundario (solo borde) para que no compita con los otros */
-#btn-logout {
-  align-self: flex-start;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-}
-
-#btn-logout:hover {
-  border-color: var(--accent-hover);
-  color: var(--text);
-  background: transparent;
 }

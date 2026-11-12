@@ -139,6 +139,10 @@ document.getElementById('app-cliente').hidden = !conSesion;
 if (conSesion) {
 estado.textContent = `Sesión iniciada como ${data.user.email}`;
 document.getElementById('sidebar-usuario').textContent = data.user.email;
+mostrarVista('vista-productos'); // al entrar, siempre arranca en Productos
+// galeria.js pinta la estantería y el carrito; leerProductos (abajo) le da
+// los datos de Supabase. Va sin paréntesis: le pasamos la función, no su resultado.
+iniciarGaleria(leerProductos);
 // Primero LEER, después mostrar: los campos se llenan con lo que hay en la tabla.
 const perfil = await leerPerfil(data.user.id);
 if (perfil) {
@@ -217,6 +221,26 @@ mensaje.textContent = 'No se pudo actualizar (revisa la consola y la política R
 }
 });
 // ---------------------------------------------------------------------
+// PRODUCTOS: el cliente solo LEE practica-productos (nada de editar/borrar).
+// La estantería, las noches y el carrito viven en galeria.js.
+// ---------------------------------------------------------------------
+
+// Misma consulta que cargarProductos() en admin.js, pero solo select.
+// Ojo RLS: si la tabla no tiene una política de select para "authenticated",
+// NO llega error — llega data = [] y la lista se ve vacía.
+async function leerProductos() {
+const { data, error } = await db
+.from('practica-productos')
+.select('*') // '*' evita pelear con el guion de la columna img-url
+.order('id', { ascending: true });
+if (error) {
+console.log('Error al leer productos:', error);
+return null;
+}
+return data;
+}
+
+// ---------------------------------------------------------------------
 // SIDEBAR: cada ítem muestra la sección (.vista) cuyo id está en data-vista
 // ---------------------------------------------------------------------
 
@@ -241,6 +265,7 @@ if (item) mostrarVista(item.dataset.vista);
 mostrarEstadoSesion();
 
 document.getElementById('btn-logout').addEventListener('click', async () => {
+cerrarCarrito(); // (galeria.js) por si quedó abierto: si no, la pantalla de login queda inerte
 await db.auth.signOut();
 mostrarEstadoSesion();
 });

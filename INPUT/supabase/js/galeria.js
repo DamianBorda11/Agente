@@ -1,7 +1,8 @@
 // =====================================================================
-// galeria.js — vista del CLIENTE: estantería VHS + carrito de rentas.
-// Sin Supabase por ahora: los datos llegan de obtenerProductos()
-// (js/catalogo-local.js). Estructura:
+// galeria.js — estantería VHS + carrito de rentas.
+// Lo usan dos páginas: galeria.html (datos de js/catalogo-local.js) y
+// cliente.html (datos de Supabase). Cada una llama iniciarGaleria(fuente)
+// con su propia fuente de productos. Estructura:
 //   1. Constantes y estado
 //   2. Tema oscuro / claro
 //   3. Utilidades (precios, búsquedas)
@@ -331,12 +332,19 @@ const panelCarrito = document.getElementById('panel-carrito');
 const overlayCarrito = document.getElementById('overlay-carrito');
 const botonCarrito = document.getElementById('btn-carrito');
 
+// Todo lo que está directo en <body> MENOS el panel y su fondo. Así sirve
+// igual en galeria.html (header + main) y en cliente.html (sidebar + main),
+// sin depender de que la página tenga un <header>.
+function bloquearFondo(bloquear) {
+  document.querySelectorAll('body > :not(#panel-carrito):not(#overlay-carrito):not(script)')
+    .forEach(elemento => { elemento.inert = bloquear; });
+}
+
 function abrirCarrito() {
   panelCarrito.classList.add('abierto');
   overlayCarrito.classList.add('activo');
   document.body.classList.add('carrito-abierto');
-  document.querySelector('header').inert = true;
-  document.querySelector('main').inert = true;
+  bloquearFondo(true);
   botonCarrito.setAttribute('aria-expanded', 'true');
   document.getElementById('btn-cerrar-carrito').focus();
 }
@@ -347,8 +355,7 @@ function cerrarCarrito() {
   panelCarrito.classList.remove('abierto');
   overlayCarrito.classList.remove('activo');
   document.body.classList.remove('carrito-abierto');
-  document.querySelector('header').inert = false;
-  document.querySelector('main').inert = false;
+  bloquearFondo(false);
   botonCarrito.setAttribute('aria-expanded', 'false');
   document.getElementById('mensaje-carrito').textContent = '';
   botonCarrito.focus(); // el foco vuelve a donde estaba antes de abrir
@@ -402,8 +409,14 @@ document.getElementById('btn-pagar').addEventListener('click', () => {
     '> El pago se conectará con Supabase más adelante.';
 });
 
-async function iniciarGaleria() {
-  productos = await obtenerProductos();
+// fuenteProductos = la función que trae el catálogo. Se pasa SIN paréntesis
+// (la función misma, no su resultado), y aquí adentro se llama con await:
+//   galeria.html → iniciarGaleria(obtenerProductos)  (catálogo local)
+//   cliente.html → iniciarGaleria(leerProductos)     (Supabase)
+// Este archivo ya no arranca solo: cada página decide cuándo llamarla
+// (cliente.html, por ejemplo, solo después de iniciar sesión).
+async function iniciarGaleria(fuenteProductos) {
+  productos = (await fuenteProductos()) || []; // si la fuente falla y da null, queda vacía
   productos.forEach(producto => { nochesSeleccionadas[producto.id] = NOCHES_MIN; });
 
   carrito = leerCarrito();
@@ -414,5 +427,3 @@ async function iniciarGaleria() {
   pintarGaleria();
   pintarCarrito();
 }
-
-iniciarGaleria();
