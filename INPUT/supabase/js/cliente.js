@@ -140,11 +140,11 @@ if (conSesion) {
 estado.textContent = `Sesión iniciada como ${data.user.email}`;
 document.getElementById('sidebar-usuario').textContent = data.user.email;
 mostrarVista('vista-productos'); // al entrar, siempre arranca en Productos
-// galeria.js pinta la estantería y el carrito; leerProductos (abajo) le da
+// galeria.js pinta el catálogo y el carrito; leerProductos (abajo) le da
 // los datos de Supabase. Va sin paréntesis: le pasamos la función, no su resultado.
 await iniciarGaleria(leerProductos);
 // El carrito de este cliente puede ya existir en Supabase (pedidos +
-// detalles_pedidos): se reconstruye DESPUÉS de pintar la estantería.
+// detalles_pedidos): se reconstruye DESPUÉS de pintar el catálogo.
 await cargarCarritoDesdeBD();
 // Primero LEER, después mostrar: los campos se llenan con lo que hay en la tabla.
 const perfil = await leerPerfil(data.user.id);
@@ -226,7 +226,7 @@ mensaje.textContent = 'No se pudo actualizar (revisa la consola y la política R
 });
 // ---------------------------------------------------------------------
 // PRODUCTOS: el cliente solo LEE practica-productos (nada de editar/borrar).
-// La estantería, las noches y el carrito viven en galeria.js.
+// El catálogo, las cantidades y el carrito viven en galeria.js.
 // ---------------------------------------------------------------------
 
 // Misma consulta que cargarProductos() en admin.js, pero solo select.

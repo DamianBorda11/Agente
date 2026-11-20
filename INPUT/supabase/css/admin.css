@@ -135,7 +135,7 @@ html::after {
 }
 
 /* ---------- Acceso de administrador: tarjeta con pestañas ---------- */
-/* El header con el título "Videoclub" queda siempre visible arriba;
+/* El header con el título "Mr. Somniel" queda siempre visible arriba;
    esta tarjeta solo centra el login/registro debajo. */
 #zona-acceso-admin {
   display: flex;
@@ -708,11 +708,11 @@ select:focus-visible {
   animation: recorrer-borde 2s linear infinite;
 }
 
-/* El marco tiene tamaño fijo (2:3, la proporción de un póster o caja VHS)
+/* El marco tiene tamaño fijo (3:4, la proporción de las ilustraciones)
    SIEMPRE, haya imagen o no: así todas las tarjetas quedan alineadas. */
 .tarjeta-imagen {
   position: relative;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   background: var(--surface-2);
   display: grid;
@@ -748,13 +748,13 @@ select:focus-visible {
 }
 
 /* Si no hay póster o la URL está rota, el JS agrega .sin-imagen:
-   se oculta la <img> y se ve la carátula VHS dibujada con CSS. */
+   se oculta la <img> y se ve la carátula de respaldo dibujada con CSS. */
 .tarjeta-imagen.sin-imagen img {
   display: none;
 }
 
-/* ---------- Carátula VHS (cuando no hay póster) ---------- */
-.caratula-vhs {
+/* ---------- Carátula de respaldo (cuando no hay imagen) ---------- */
+.caratula-placeholder {
   position: absolute;
   inset: 0;
   display: none; /* oculta si hay póster */
@@ -771,11 +771,11 @@ select:focus-visible {
   box-shadow: inset 0 0 0 1px var(--accent);
 }
 
-.tarjeta-imagen.sin-imagen .caratula-vhs {
+.tarjeta-imagen.sin-imagen .caratula-placeholder {
   display: flex;
 }
 
-.vhs-logo {
+.placeholder-logo {
   align-self: flex-start;
   padding: 2px 8px;
   font-family: 'Orbitron', 'Oswald', sans-serif;
@@ -787,7 +787,7 @@ select:focus-visible {
   transform: skewX(-12deg); /* inclinado como los logos de los 80 */
 }
 
-.vhs-titulo {
+.placeholder-titulo {
   font-family: 'Metal Mania', 'Oswald', cursive;
   font-size: 1.7rem;
   line-height: 1.05;
@@ -797,22 +797,22 @@ select:focus-visible {
   text-shadow: 2px 2px 0 var(--accent), 0 0 14px var(--accent-glow);
 }
 
-.vhs-genero {
+.placeholder-categoria {
   font-size: 0.6rem;
   letter-spacing: 0.25em;
   color: var(--accent-hover);
 }
 
-/* ---------- Sello "Rentada" sobre la carátula ---------- */
-/* El póster (o la carátula VHS) se apaga para que el sello se lea encima */
-.tarjeta-imagen.rentada img,
-.tarjeta-imagen.rentada .caratula-vhs {
+/* ---------- Sello "Agotado" sobre la imagen ---------- */
+/* La imagen (o la carátula de respaldo) se apaga para que el sello se lea encima */
+.tarjeta-imagen.agotado img,
+.tarjeta-imagen.agotado .caratula-placeholder {
   filter: grayscale(0.7) brightness(0.45);
 }
 
 /* position: absolute + inset: 0 + margin: auto = centrado sobre la imagen.
-   Ojo: va DESPUÉS de .caratula-vhs en el HTML, por eso queda encima. */
-.sello-rentada {
+   Ojo: va DESPUÉS de .caratula-placeholder en el HTML, por eso queda encima. */
+.sello-agotado {
   position: absolute;
   inset: 0;
   margin: auto;
@@ -833,7 +833,7 @@ select:focus-visible {
 }
 
 /* ---------- Sticker de la tienda ---------- */
-.sticker-rebobinar {
+.sticker-firma {
   align-self: flex-start;
   margin: 0;
   padding: 4px 10px;
@@ -1004,7 +1004,7 @@ select:focus-visible {
    sticker no caben en una fila angosta: se quedan solo en la cuadrícula. */
 #lista-productos.vista-lista .tarjeta-info > p:not([class]),
 #lista-productos.vista-lista .tarjeta-info .categorias,
-#lista-productos.vista-lista .tarjeta-info .sticker-rebobinar,
+#lista-productos.vista-lista .tarjeta-info .sticker-firma,
 #lista-productos.vista-lista .tarjeta-info dl {
   display: none;
 }

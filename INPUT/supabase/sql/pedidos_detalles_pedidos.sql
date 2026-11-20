@@ -52,7 +52,7 @@ create table detalles_pedidos (
   created_at timestamptz not null default now(),
   pedido_id bigint not null references pedidos (id) on delete cascade,
   producto_id bigint not null references "practica-productos" (id) on delete restrict,
-  cantidad bigint not null check (cantidad > 0), -- en este proyecto, "cantidad" = noches de renta
+  cantidad bigint not null check (cantidad > 0), -- "cantidad" = unidades compradas (ver sql/somniel_productos.sql)
   precio_unitario bigint not null check (precio_unitario >= 0),
   unique (pedido_id, producto_id)
 );

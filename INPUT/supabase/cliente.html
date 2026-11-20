@@ -3,18 +3,20 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Mi cuenta — Videoclub</title>
+<title>Mi cuenta — Mr. Somniel</title>
 
 <!-- Mismas fuentes que admin.html y galeria.html -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Orbitron:wght@500;700&family=Oswald:wght@400;700&display=swap">
 
-<!-- Orden: admin.css (estética + cajas VHS) → galeria.css (noches, carrito)
+<!-- Orden: admin.css (estética + tarjetas) → galeria.css (cantidad, carrito)
      → cliente.css (solo el layout de esta página: login y sidebar) -->
 <link rel="stylesheet" href="css/admin.css" />
 <link rel="stylesheet" href="css/galeria.css" />
 <link rel="stylesheet" href="css/cliente.css" />
+<!-- gothic.css va AL FINAL: unifica todo con la estética de la landing -->
+<link rel="stylesheet" href="css/gothic.css" />
 <!-- CDN: la librería supabase-js (crea la global "supabase"), no la API del proyecto -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -62,21 +64,25 @@
 </nav>
 
 <!-- Mismos ids que en galeria.html: galeria.js los busca por id -->
-<button id="btn-carrito" type="button" aria-controls="panel-carrito" aria-expanded="false">
-🎞 Mis rentas <span id="contador-carrito">0</span>
+<button id="btn-carrito" type="button" class="btn-carrito-icono" aria-controls="panel-carrito" aria-expanded="false" aria-label="Abrir carrito">
+  <!-- Cart icon (inline SVG: takes its color from "currentColor") -->
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>
+    <path d="M2.5 3h2.6l2.4 11.6a1.6 1.6 0 0 0 1.6 1.3h8.6a1.6 1.6 0 0 0 1.6-1.2L21.5 7H6.1"/>
+  </svg>
+  <span id="contador-carrito">0</span>
 </button>
-<button id="btn-tema" type="button">☀ Modo claro</button>
 <button id="btn-logout" type="button">Cerrar sesión</button>
 </aside>
 
 <main class="contenido">
-<!-- Productos: la estantería VHS de galeria.js, con datos de Supabase -->
+<!-- Productos: el catálogo de galeria.js, con datos de Supabase -->
 <section id="vista-productos" class="vista">
 <section class="intro-galeria">
-<h2>Estantería</h2>
-<p>Elige cuántas noches quieres cada película y agrégala a tus rentas.</p>
+<h2>Galería</h2>
+<p>Posters, stickers, cómics y pines con las ilustraciones de @mr.somniel. Elige la cantidad y agrégalos al carrito.</p>
 </section>
-<!-- galeria.js pinta aquí las cajas VHS -->
+<!-- galeria.js pinta aquí las tarjetas de producto -->
 <div id="lista-productos"></div>
 </section>
 
@@ -109,8 +115,8 @@
 
 <aside id="panel-carrito" role="dialog" aria-modal="true" aria-labelledby="titulo-carrito">
 <div class="carrito-cabecera">
-<h3 id="titulo-carrito">Mis rentas</h3>
-<button id="btn-cerrar-carrito" type="button" aria-label="Cerrar mis rentas">✕</button>
+<h3 id="titulo-carrito">Tu carrito</h3>
+<button id="btn-cerrar-carrito" type="button" aria-label="Cerrar el carrito">✕</button>
 </div>
 
 <div id="lista-carrito"></div>
@@ -120,9 +126,9 @@
 <span>Total</span>
 <strong id="total-carrito">$ 0</strong>
 </div>
-<button id="btn-pagar" type="button">Pagar rentas →</button>
+<button id="btn-pagar" type="button">Ir a pagar →</button>
 
-<!-- Oculto hasta que se pulsa "Pagar rentas" con sesión iniciada -->
+<!-- Oculto hasta que se pulsa "Ir a pagar" con sesión iniciada -->
 <form id="form-checkout" hidden>
 <label class="campo-checkbox">
 <input type="checkbox" id="checkout-envio">

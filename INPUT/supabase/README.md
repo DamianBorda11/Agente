@@ -1,4 +1,26 @@
-# Entregas con Supabase
+# Mr. Somniel — Merch de artista (Supabase)
+
+Tienda online de posters, stickers, cómics y pines con las ilustraciones de @mr.somniel.
+
+| Página | Para qué |
+|---|---|
+| `index.html` | Landing (5 secciones) → botones a la galería |
+| `galeria.html` | Catálogo con datos locales (`js/catalogo-local.js`) |
+| `cliente.html` | Login del cliente + catálogo y carrito desde Supabase |
+| `admin.html` | CRUD de productos (solo admins) |
+
+## Pasar de videoclub a Mr. Somniel en Supabase
+1. **SQL Editor → New query** → pega `sql/somniel_productos.sql` → **Run**.
+   Borra los pedidos de prueba y las películas, e inserta los 5 productos.
+2. La tabla sigue llamándose `practica-productos`: políticas RLS, triggers y
+   `confirmar_pedido()` no cambian. En `detalles_pedidos`, `cantidad` ahora = unidades.
+3. Precios y stock son de ejemplo (`TODO`): cámbialos en el SQL **y** en `js/catalogo-local.js`.
+4. Las imágenes están en `assets/art/` (rutas relativas en `img-url`).
+5. Estética: `css/gothic.css` se carga al final en galería, cliente y admin para igualarlas a la landing (solo modo oscuro).
+
+---
+
+# Guía base: entregas con Supabase
 
 ## 1. Crear el proyecto
 1. Entra a https://supabase.com e inicia sesión (con GitHub sirve).

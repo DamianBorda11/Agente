@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <!-- CDN: trae la librería de Supabase ANTES que nuestros propios
        scripts — sin esta línea, "supabase.createClient" no existiría
        todavía cuando supabaseClient.js intente usarlo -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Sin esta línea el celular "simula" una pantalla de PC y todo se ve diminuto -->
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel admin — Mr. Somniel</title>
 
   <!-- Fuentes: Metal Mania (títulos), Orbitron (interfaz futurista), Oswald (texto) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,14 +16,15 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Orbitron:wght@500;700&family=Oswald:wght@400;700&display=swap">
   <!-- Estilos de esta página (metal + cyberpunk, modo oscuro y claro) -->
   <link rel="stylesheet" href="css/admin.css">
+  <!-- gothic.css va AL FINAL: unifica todo con la estética de la landing -->
+  <link rel="stylesheet" href="css/gothic.css">
 </head>
 
 <body>
 
   <header class="header">
     <!-- data-text: el CSS copia este texto en dos capas (roja y blanca) para el glitch -->
-    <h1 data-text="Videoclub">Videoclub</h1>
-    <button id="btn-tema" type="button">☀ Modo claro</button>
+    <h1 data-text="Mr. Somniel">Mr. Somniel</h1>
   </header>
 
   <section id="zona-acceso-admin">
@@ -66,7 +69,7 @@
   <!-- panel-admin: oculto por defecto; admin.js lo muestra solo si hay
        sesión iniciada Y fila en admins_practica (ver mostrarEstadoSesionAdmin) -->
   <div id="panel-admin" hidden>
-  <!-- Dos columnas: estantería a la izquierda, formulario a la derecha -->
+  <!-- Dos columnas: catálogo a la izquierda, formulario a la derecha -->
   <main class="columnas">
 
     <section class="col-productos">
@@ -75,14 +78,14 @@
         <summary>Ver JSON</summary>
         <pre id="resultado"></pre>
       </details>
-      <!-- Filtros del catálogo (el único buscador): aparecen en cuanto cargan las películas -->
+      <!-- Filtros del catálogo (el único buscador): aparecen en cuanto cargan los productos -->
       <div id="filtros" class="filtros" hidden>
         <label class="filtro-texto">Buscar
-          <input type="search" id="filtro-texto" placeholder="Título, director o sinopsis">
+          <input type="search" id="filtro-texto" placeholder="Nombre o descripción">
         </label>
         <div class="filtro-pills">
-          <span class="filtro-pills-etiqueta">Género</span>
-          <!-- admin.js llena esto con un botón por género que exista en los datos -->
+          <span class="filtro-pills-etiqueta">Categoría</span>
+          <!-- admin.js llena esto con un botón por categoría que exista en los datos -->
           <div class="pills" id="filtro-categoria-pills">
             <button type="button" class="pill activo" data-valor="">Todos</button>
           </div>
@@ -90,23 +93,23 @@
         <div class="filtro-pills">
           <span class="filtro-pills-etiqueta">Disponibilidad</span>
           <div class="pills" id="filtro-disponible-pills">
-            <button type="button" class="pill activo" data-valor="">Todas</button>
-            <button type="button" class="pill" data-valor="si">En estante</button>
-            <button type="button" class="pill" data-valor="no">Rentadas</button>
+            <button type="button" class="pill activo" data-valor="">Todos</button>
+            <button type="button" class="pill" data-valor="si">A la venta</button>
+            <button type="button" class="pill" data-valor="no">Agotados</button>
           </div>
         </div>
-        <label>Renta mín. (COP)
+        <label>Precio mín. (COP)
           <input type="number" id="filtro-precio-min" min="0" step="500" placeholder="0">
         </label>
-        <label>Renta máx. (COP)
+        <label>Precio máx. (COP)
           <input type="number" id="filtro-precio-max" min="0" step="500" placeholder="∞">
         </label>
         <label>Ordenar
           <select id="filtro-orden">
             <option value="id">Por defecto</option>
-            <option value="precio-asc">Renta: menor a mayor</option>
-            <option value="precio-desc">Renta: mayor a menor</option>
-            <option value="nombre">Título (A–Z)</option>
+            <option value="precio-asc">Precio: menor a mayor</option>
+            <option value="precio-desc">Precio: mayor a menor</option>
+            <option value="nombre">Nombre (A–Z)</option>
           </select>
         </label>
         <button type="button" id="btn-limpiar-filtros">Limpiar</button>
@@ -119,7 +122,7 @@
         </div>
       </div>
 
-      <!-- Aquí se pintan las cajas VHS del catálogo -->
+      <!-- Aquí se pintan las tarjetas del catálogo -->
       <div id="lista-productos"></div>
     </section>
 
