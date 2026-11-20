@@ -1,15 +1,15 @@
 // =====================================================================
-// galeria.js — estantería VHS + carrito de rentas.
+// galeria.js — catálogo de merch (Mr. Somniel) + carrito de compras.
 // Lo usan dos páginas: galeria.html (datos de js/catalogo-local.js) y
 // cliente.html (datos de Supabase). Cada una llama iniciarGaleria(fuente)
 // con su propia fuente de productos. Estructura:
 //   1. Constantes y estado
-//   2. Tema oscuro / claro
+//   2. Tema (solo oscuro)
 //   3. Utilidades (precios, búsquedas)
 //   4. Guardar / leer el carrito (localStorage)
-//   5. Pintar la estantería
+//   5. Pintar el catálogo
 //   6. Pintar el carrito
-//   7. Acciones: cambiar noches, rentar, quitar
+//   7. Acciones: cambiar cantidad, agregar, quitar
 //   8. Abrir / cerrar el panel
 //   9. Eventos e inicio
 //   10. Carrito en Supabase (solo con sesión; ver guia_carrito_pedidos_supabase.pdf)
@@ -19,9 +19,9 @@
 // ---------------------------------------------------------------------
 // 1. CONSTANTES Y ESTADO
 // ---------------------------------------------------------------------
-const NOCHES_MIN = 1;
-const NOCHES_MAX = 7;
-const CLAVE_CARRITO = 'videoclub-carrito';
+const CANTIDAD_MIN = 1;
+const CANTIDAD_MAX = 10;           // tope por producto; también se limita por el stock (unidades)
+const CLAVE_CARRITO = 'somniel-carrito';
 
 const formatoPesos = new Intl.NumberFormat('es-CO', {
   style: 'currency',
@@ -30,46 +30,20 @@ const formatoPesos = new Intl.NumberFormat('es-CO', {
 });
 
 let productos = [];               // el catálogo, tal como llega de obtenerProductos()
-let carrito = [];                 // las rentas: [{ id: 4, noches: 2 }, ...]
-const nochesSeleccionadas = {};   // lo que marca el −/+ de cada tarjeta: { 4: 2, 7: 1 }
+let carrito = [];                 // los productos elegidos: [{ id: 4, cantidad: 2 }, ...]
+const cantidadesSeleccionadas = {}; // lo que marca el −/+ de cada tarjeta: { 4: 2, 7: 1 }
 
 // Con sesión (cliente.html), el carrito vive en Supabase: pedidos + detalles_pedidos.
-// "cantidad" en detalles_pedidos es, en este proyecto, el número de noches.
+// "cantidad" en detalles_pedidos = unidades compradas de ese producto.
 let pedidoId = null;       // id del pedido en estado 'carrito' del cliente (null = sin sesión o aún no creado)
 const detalleIds = {};     // { producto_id: id de la fila en detalles_pedidos }
 
 // ---------------------------------------------------------------------
-// 2. TEMA OSCURO / CLARO (misma clave 'tema' que admin.js: se comparte)
+// 2. TEMA
 // ---------------------------------------------------------------------
-const botonTema = document.getElementById('btn-tema');
-
-function leerTema() {
-  try {
-    return localStorage.getItem('tema') || 'dark';
-  } catch {
-    return 'dark'; // navegador en modo privado o con almacenamiento bloqueado
-  }
-}
-
-function actualizarBotonTema() {
-  const esOscuro = document.documentElement.dataset.theme === 'dark';
-  botonTema.textContent = esOscuro ? '☀ Modo claro' : '☾ Modo oscuro';
-  botonTema.setAttribute('aria-pressed', String(!esOscuro));
-}
-
-document.documentElement.dataset.theme = leerTema();
-actualizarBotonTema();
-
-botonTema.addEventListener('click', () => {
-  const nuevoTema = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = nuevoTema;
-  try { localStorage.setItem('tema', nuevoTema); } catch { /* sin almacenamiento: solo dura esta visita */ }
-  actualizarBotonTema();
-
-  document.body.classList.remove('interferencia');
-  void document.body.offsetWidth; // reflow: permite repetir la animación
-  document.body.classList.add('interferencia');
-});
+// Solo modo oscuro: la tienda es gótica, igual que la landing (index.html).
+// Se fija aquí por si quedó guardado 'light' de la versión anterior.
+document.documentElement.dataset.theme = 'dark';
 
 // ---------------------------------------------------------------------
 // 3. UTILIDADES
@@ -82,18 +56,24 @@ function buscarEnCarrito(id) {
   return carrito.find(item => item.id === id);
 }
 
-// Math.min / Math.max = "encierra" el número entre 1 y 7
-function limitarNoches(noches) {
-  return Math.min(NOCHES_MAX, Math.max(NOCHES_MIN, noches));
+// El máximo de cada producto: CANTIDAD_MAX o el stock, lo que sea menor.
+function cantidadMaxima(id) {
+  const stock = Number(buscarProducto(id)?.unidades) || CANTIDAD_MIN;
+  return Math.max(CANTIDAD_MIN, Math.min(CANTIDAD_MAX, stock));
+}
+
+// Math.min / Math.max = "encierra" el número entre 1 y el máximo del producto
+function limitarCantidad(id, cantidad) {
+  return Math.min(cantidadMaxima(id), Math.max(CANTIDAD_MIN, cantidad));
 }
 
 // descuento 0.2 = 20 %: se paga el 80 % (1 - 0.2)
-function precioPorNoche(producto) {
+function precioUnitario(producto) {
   return Math.round(producto.precio * (1 - (producto.descuento || 0)));
 }
 
-function textoNoches(noches) {
-  return noches === 1 ? '1 noche' : `${noches} noches`;
+function textoCantidad(cantidad) {
+  return cantidad === 1 ? '1 ud.' : `${cantidad} uds.`;
 }
 
 // ---------------------------------------------------------------------
@@ -115,67 +95,67 @@ function leerCarrito() {
     const guardado = JSON.parse(localStorage.getItem(CLAVE_CARRITO));
     if (!Array.isArray(guardado)) return []; // primera visita: getItem da null
 
-    // Lo guardado puede estar viejo: descartamos películas que ya no
-    // existen o que ahora están rentadas, y corregimos noches raras.
+    // Lo guardado puede estar viejo: descartamos productos que ya no
+    // existen o que ahora están agotados, y corregimos cantidades raras.
     return guardado
       .filter(item => buscarProducto(item.id)?.disponible)
-      .map(item => ({ id: item.id, noches: limitarNoches(Number(item.noches) || NOCHES_MIN) }));
+      .map(item => ({ id: item.id, cantidad: limitarCantidad(item.id, Number(item.cantidad) || CANTIDAD_MIN) }));
   } catch {
     return [];
   }
 }
 
 // ---------------------------------------------------------------------
-// 5. PINTAR LA ESTANTERÍA
+// 5. PINTAR EL CATÁLOGO
 // Se pinta UNA vez. Después, cada cambio actualiza solo su tarjeta
 // (actualizarTarjeta): si volviéramos a pintar todo, se repetiría la
 // animación de entrada y el botón con el foco del teclado desaparecería.
 // ---------------------------------------------------------------------
 function crearTarjeta(producto, i) {
-  const generos = Array.isArray(producto.categorias) ? producto.categorias : [];
+  const etiquetas = Array.isArray(producto.categorias) ? producto.categorias : [];
   const conDescuento = producto.descuento > 0;
 
-  // Solo las películas disponibles llevan control de noches
-  const zonaRenta = producto.disponible
+  // Solo los productos disponibles llevan control de cantidad
+  const zonaCompra = producto.disponible
     ? `
-      <div class="tarjeta-renta">
-        <div class="control-noches" role="group" aria-label="Noches de renta de ${producto.nombre}">
-          <button type="button" class="btn-noches" data-accion="restar" data-id="${producto.id}" aria-label="Una noche menos">−</button>
-          <output class="noches-valor" aria-live="polite"></output>
-          <button type="button" class="btn-noches" data-accion="sumar" data-id="${producto.id}" aria-label="Una noche más">+</button>
+      <div class="tarjeta-compra">
+        <div class="control-cantidad" role="group" aria-label="Cantidad de ${producto.nombre}">
+          <button type="button" class="btn-cantidad" data-accion="restar" data-id="${producto.id}" aria-label="Una unidad menos">−</button>
+          <output class="cantidad-valor" aria-live="polite"></output>
+          <button type="button" class="btn-cantidad" data-accion="sumar" data-id="${producto.id}" aria-label="Una unidad más">+</button>
         </div>
         <p class="subtotal-tarjeta">Subtotal <strong></strong></p>
-        <button type="button" class="btn-rentar" data-accion="rentar" data-id="${producto.id}">Rentar</button>
+        <button type="button" class="btn-agregar" data-accion="agregar" data-id="${producto.id}">Agregar al carrito</button>
       </div>`
     : `
-      <div class="tarjeta-renta">
-        <button type="button" class="btn-rentar" disabled>No disponible</button>
+      <div class="tarjeta-compra">
+        <button type="button" class="btn-agregar" disabled>Agotado</button>
       </div>`;
 
   return `
     <article class="tarjeta-producto" data-id="${producto.id}" style="--i: ${i}">
-      <div class="tarjeta-imagen ${producto['img-url'] ? '' : 'sin-imagen'} ${producto.disponible ? '' : 'rentada'}">
+      <div class="tarjeta-imagen ${producto['img-url'] ? '' : 'sin-imagen'} ${producto.disponible ? '' : 'agotado'}">
         ${producto['img-url']
-          ? `<img src="${producto['img-url']}" alt="Póster de ${producto.nombre}" onerror="this.parentElement.classList.add('sin-imagen')">`
+          ? `<img src="${producto['img-url']}" alt="${producto.nombre}" onerror="this.parentElement.classList.add('sin-imagen')">`
           : ''}
-        <div class="caratula-vhs" aria-hidden="true">
-          <span class="vhs-logo">VHS</span>
-          <span class="vhs-titulo">${producto.nombre}</span>
-          <span class="vhs-genero">${generos.join(' / ')}</span>
+        <div class="caratula-placeholder" aria-hidden="true">
+          <span class="placeholder-logo">MR. SOMNIEL</span>
+          <span class="placeholder-titulo">${producto.nombre}</span>
+          <span class="placeholder-categoria">${etiquetas.join(' / ')}</span>
         </div>
-        ${producto.disponible ? '' : '<span class="sello-rentada">Rentada</span>'}
+        ${producto.disponible ? '' : '<span class="sello-agotado">Agotado</span>'}
       </div>
       <h4>${producto.nombre}</h4>
       <p>${producto.descripcion}</p>
       <dl>
-        <dt>Renta</dt>
-        <dd>${conDescuento ? `<s>${formatoPesos.format(producto.precio)}</s>` : ''}${formatoPesos.format(precioPorNoche(producto))} / noche</dd>
+        <dt>Precio</dt>
+        <dd>${conDescuento ? `<s>${formatoPesos.format(producto.precio)}</s>` : ''}${formatoPesos.format(precioUnitario(producto))} c/u</dd>
         ${conDescuento ? `<dt>Descuento</dt><dd>${Math.round(producto.descuento * 100)}%</dd>` : ''}
       </dl>
-      ${generos.length ? `<p class="categorias">${generos.join(' · ')}</p>` : ''}
-      <p class="sticker-rebobinar">¡Rebobine antes de devolver!</p>
+      ${etiquetas.length ? `<p class="categorias">${etiquetas.join(' · ')}</p>` : ''}
+      <p class="sticker-firma">Ilustrado a mano · @mr.somniel</p>
       <p class="marca-carrito" hidden></p>
-      ${zonaRenta}
+      ${zonaCompra}
     </article>
   `;
 }
@@ -184,7 +164,7 @@ function pintarGaleria() {
   const lista = document.getElementById('lista-productos');
 
   if (!productos.length) {
-    lista.innerHTML = '<p class="sin-resultados">La estantería está vacía.</p>';
+    lista.innerHTML = '<p class="sin-resultados">El catálogo está vacío.</p>';
     return;
   }
 
@@ -193,30 +173,30 @@ function pintarGaleria() {
   productos.forEach(producto => actualizarTarjeta(producto.id));
 }
 
-// Pone al día UNA tarjeta: noches, subtotal, botones y si está en el carrito.
+// Pone al día UNA tarjeta: cantidad, subtotal, botones y si está en el carrito.
 function actualizarTarjeta(id) {
   const producto = buscarProducto(id);
   const tarjeta = document.querySelector(`.tarjeta-producto[data-id="${id}"]`);
   if (!producto || !tarjeta || !producto.disponible) return;
 
-  const noches = nochesSeleccionadas[id];
+  const cantidad = cantidadesSeleccionadas[id];
   const enCarrito = buscarEnCarrito(id);
 
-  tarjeta.querySelector('.noches-valor').textContent = textoNoches(noches);
+  tarjeta.querySelector('.cantidad-valor').textContent = textoCantidad(cantidad);
   tarjeta.querySelector('.subtotal-tarjeta strong').textContent =
-    formatoPesos.format(precioPorNoche(producto) * noches);
-  tarjeta.querySelector('[data-accion="restar"]').disabled = noches <= NOCHES_MIN;
-  tarjeta.querySelector('[data-accion="sumar"]').disabled = noches >= NOCHES_MAX;
+    formatoPesos.format(precioUnitario(producto) * cantidad);
+  tarjeta.querySelector('[data-accion="restar"]').disabled = cantidad <= CANTIDAD_MIN;
+  tarjeta.querySelector('[data-accion="sumar"]').disabled = cantidad >= cantidadMaxima(id);
 
   // Si ya está en el carrito: marca visible y el botón pasa a "Actualizar"
   const marca = tarjeta.querySelector('.marca-carrito');
   tarjeta.classList.toggle('en-carrito', Boolean(enCarrito));
   marca.hidden = !enCarrito;
-  marca.textContent = enCarrito ? `✓ En tus rentas · ${textoNoches(enCarrito.noches)}` : '';
+  marca.textContent = enCarrito ? `✓ En tu carrito · ${textoCantidad(enCarrito.cantidad)}` : '';
 
-  const botonRentar = tarjeta.querySelector('.btn-rentar');
-  if (!botonRentar.classList.contains('agregada')) {
-    botonRentar.textContent = enCarrito ? 'Actualizar noches' : 'Rentar';
+  const botonAgregar = tarjeta.querySelector('.btn-agregar');
+  if (!botonAgregar.classList.contains('agregada')) {
+    botonAgregar.textContent = enCarrito ? 'Actualizar cantidad' : 'Agregar al carrito';
   }
 }
 
@@ -233,7 +213,7 @@ function pintarCarrito() {
   botonPagar.disabled = carrito.length === 0;
 
   if (!carrito.length) {
-    lista.innerHTML = '<p class="carrito-vacio">Aún no tienes rentas. Elige una película de la estantería.</p>';
+    lista.innerHTML = '<p class="carrito-vacio">Tu carrito está vacío. Elige algo del catálogo.</p>';
     total.textContent = formatoPesos.format(0);
     // Con el carrito vacío no tiene sentido seguir viendo el formulario de envío.
     document.getElementById('form-checkout').hidden = true;
@@ -243,12 +223,12 @@ function pintarCarrito() {
 
   // reduce() recorre el carrito acumulando un solo número: el total
   const suma = carrito.reduce((acumulado, item) => {
-    return acumulado + precioPorNoche(buscarProducto(item.id)) * item.noches;
+    return acumulado + precioUnitario(buscarProducto(item.id)) * item.cantidad;
   }, 0);
 
   lista.innerHTML = carrito.map(item => {
     const producto = buscarProducto(item.id);
-    const porNoche = precioPorNoche(producto);
+    const unitario = precioUnitario(producto);
 
     return `
       <article class="item-carrito" data-id="${item.id}">
@@ -256,14 +236,14 @@ function pintarCarrito() {
           <h4>${producto.nombre}</h4>
           <button type="button" class="btn-quitar" data-accion="quitar" data-id="${item.id}" aria-label="Quitar ${producto.nombre}">✕</button>
         </div>
-        <p>${formatoPesos.format(porNoche)} / noche</p>
+        <p>${formatoPesos.format(unitario)} c/u</p>
         <div class="item-fila">
-          <div class="control-noches" role="group" aria-label="Noches de renta de ${producto.nombre}">
-            <button type="button" class="btn-noches" data-accion="restar" data-id="${item.id}" aria-label="Una noche menos" ${item.noches <= NOCHES_MIN ? 'disabled' : ''}>−</button>
-            <output class="noches-valor">${textoNoches(item.noches)}</output>
-            <button type="button" class="btn-noches" data-accion="sumar" data-id="${item.id}" aria-label="Una noche más" ${item.noches >= NOCHES_MAX ? 'disabled' : ''}>+</button>
+          <div class="control-cantidad" role="group" aria-label="Cantidad de ${producto.nombre}">
+            <button type="button" class="btn-cantidad" data-accion="restar" data-id="${item.id}" aria-label="Una unidad menos" ${item.cantidad <= CANTIDAD_MIN ? 'disabled' : ''}>−</button>
+            <output class="cantidad-valor">${textoCantidad(item.cantidad)}</output>
+            <button type="button" class="btn-cantidad" data-accion="sumar" data-id="${item.id}" aria-label="Una unidad más" ${item.cantidad >= cantidadMaxima(item.id) ? 'disabled' : ''}>+</button>
           </div>
-          <p class="item-subtotal">${formatoPesos.format(porNoche * item.noches)}</p>
+          <p class="item-subtotal">${formatoPesos.format(unitario * item.cantidad)}</p>
         </div>
       </article>
     `;
@@ -277,52 +257,52 @@ function pintarCarrito() {
 // ---------------------------------------------------------------------
 
 // En la TARJETA: solo cambia la selección; el carrito no se toca
-// hasta que se presiona "Rentar".
-function cambiarNochesTarjeta(id, cambio) {
-  nochesSeleccionadas[id] = limitarNoches(nochesSeleccionadas[id] + cambio);
+// hasta que se presiona "Agregar al carrito".
+function cambiarCantidadTarjeta(id, cambio) {
+  cantidadesSeleccionadas[id] = limitarCantidad(id, cantidadesSeleccionadas[id] + cambio);
   actualizarTarjeta(id);
 }
 
-// En el CARRITO: cambia la renta de una vez, y la tarjeta se sincroniza.
+// En el CARRITO: cambia la cantidad de una vez, y la tarjeta se sincroniza.
 // Con sesión, primero lo confirma la base (RLS puede bloquear sin dar error:
 // por eso se revisa data.length) antes de tocar el estado local.
-async function cambiarNochesCarrito(id, cambio) {
+async function cambiarCantidadCarrito(id, cambio) {
   const item = buscarEnCarrito(id);
   if (!item) return;
 
-  const nuevasNoches = limitarNoches(item.noches + cambio);
+  const nuevaCantidad = limitarCantidad(id, item.cantidad + cambio);
   const usuario = await obtenerUsuario();
 
   if (usuario) {
     const { data, error } = await db
       .from('detalles_pedidos')
-      .update({ cantidad: nuevasNoches })
+      .update({ cantidad: nuevaCantidad })
       .eq('id', detalleIds[id])
       .select();
 
     if (error || data.length === 0) {
-      console.log('Error al cambiar las noches:', error);
+      console.log('Error al cambiar la cantidad:', error);
       return;
     }
   }
 
-  item.noches = nuevasNoches;
-  nochesSeleccionadas[id] = nuevasNoches;
+  item.cantidad = nuevaCantidad;
+  cantidadesSeleccionadas[id] = nuevaCantidad;
   if (!usuario) guardarCarrito();
   pintarCarrito();
   actualizarTarjeta(id);
 }
 
-// Agrega o actualiza la renta de "id" a exactamente "noches" (se reemplaza,
+// Agrega o actualiza el producto "id" a exactamente "cantidad" (se reemplaza,
 // no se suma). Sin sesión: modo demostración, solo memoria + localStorage.
 // Con sesión: inserta o actualiza en detalles_pedidos (el precio lo copia
 // un trigger de la base; nunca se envía desde aquí). Devuelve true/false.
-async function agregarAlCarrito(id, noches) {
+async function agregarAlCarrito(id, cantidad) {
   const usuario = await obtenerUsuario();
   const item = buscarEnCarrito(id);
 
   if (!usuario) {
-    if (item) item.noches = noches; else carrito.push({ id, noches });
+    if (item) item.cantidad = cantidad; else carrito.push({ id, cantidad });
     guardarCarrito();
     pintarCarrito();
     return true;
@@ -334,44 +314,44 @@ async function agregarAlCarrito(id, noches) {
   if (detalleIds[id]) {
     const { data, error } = await db
       .from('detalles_pedidos')
-      .update({ cantidad: noches })
+      .update({ cantidad })
       .eq('id', detalleIds[id])
       .select();
 
     if (error || data.length === 0) {
-      console.log('Error al actualizar la renta:', error);
+      console.log('Error al actualizar el producto:', error);
       return false;
     }
   } else {
     const { data, error } = await db
       .from('detalles_pedidos')
-      .insert([{ pedido_id: idCarrito, producto_id: Number(id), cantidad: noches }])
+      .insert([{ pedido_id: idCarrito, producto_id: Number(id), cantidad }])
       .select('id')
       .single();
 
     if (error) {
-      console.log('Error al agregar la renta:', error);
+      console.log('Error al agregar el producto:', error);
       return false;
     }
     detalleIds[id] = data.id;
   }
 
-  if (item) item.noches = noches; else carrito.push({ id, noches });
+  if (item) item.cantidad = cantidad; else carrito.push({ id, cantidad });
   pintarCarrito();
   return true;
 }
 
-// Botón "Rentar" de cada tarjeta: deshabilita mientras espera y muestra el
-// resultado (éxito o error) antes de volver a "Rentar".
-async function rentar(id, boton) {
-  const noches = nochesSeleccionadas[id];
+// Botón "Agregar al carrito" de cada tarjeta: deshabilita mientras espera y
+// muestra el resultado (éxito o error) antes de volver a su texto normal.
+async function agregar(id, boton) {
+  const cantidad = cantidadesSeleccionadas[id];
   boton.disabled = true;
 
-  const ok = await agregarAlCarrito(id, noches);
+  const ok = await agregarAlCarrito(id, cantidad);
 
   boton.disabled = false;
   boton.classList.add('agregada');
-  boton.textContent = ok ? '✓ Agregada' : 'Error';
+  boton.textContent = ok ? '✓ Agregado' : 'Error';
   setTimeout(() => {
     boton.classList.remove('agregada');
     actualizarTarjeta(id);
@@ -395,7 +375,7 @@ async function quitar(id) {
       .select();
 
     if (error || data.length === 0) {
-      console.log('Error al quitar la renta:', error);
+      console.log('Error al quitar el producto:', error);
       return; // RLS pudo bloquearlo sin error: no tocamos el carrito local
     }
     delete detalleIds[id];
@@ -450,7 +430,7 @@ function cerrarCarrito() {
 // ---------------------------------------------------------------------
 // 9. EVENTOS E INICIO
 // Delegación de eventos (como en admin.js): un solo listener por zona;
-// data-accion dice qué hacer y data-id sobre qué película.
+// data-accion dice qué hacer y data-id sobre qué producto.
 // ---------------------------------------------------------------------
 document.getElementById('lista-productos').addEventListener('click', (event) => {
   const boton = event.target.closest('button[data-accion]');
@@ -459,9 +439,9 @@ document.getElementById('lista-productos').addEventListener('click', (event) => 
   const id = Number(boton.dataset.id); // dataset siempre da texto: "4" → 4
   const accion = boton.dataset.accion;
 
-  if (accion === 'restar') cambiarNochesTarjeta(id, -1);
-  if (accion === 'sumar') cambiarNochesTarjeta(id, +1);
-  if (accion === 'rentar') rentar(id, boton);
+  if (accion === 'restar') cambiarCantidadTarjeta(id, -1);
+  if (accion === 'sumar') cambiarCantidadTarjeta(id, +1);
+  if (accion === 'agregar') agregar(id, boton);
 });
 
 document.getElementById('lista-carrito').addEventListener('click', async (event) => {
@@ -473,9 +453,9 @@ document.getElementById('lista-carrito').addEventListener('click', async (event)
 
   if (accion === 'quitar') return quitar(id);
 
-  await cambiarNochesCarrito(id, accion === 'sumar' ? +1 : -1);
+  await cambiarCantidadCarrito(id, accion === 'sumar' ? +1 : -1);
   // pintarCarrito() reemplazó el botón: devolvemos el foco al nuevo,
-  // o al de al lado si este quedó desactivado (llegó a 1 o a 7)
+  // o al de al lado si este quedó desactivado (llegó al mínimo o al máximo)
   const mismo = document.querySelector(`#lista-carrito [data-accion="${accion}"][data-id="${id}"]`);
   const otro = document.querySelector(`#lista-carrito [data-accion="${accion === 'sumar' ? 'restar' : 'sumar'}"][data-id="${id}"]`);
   (mismo && !mismo.disabled ? mismo : otro)?.focus();
@@ -497,12 +477,12 @@ document.addEventListener('keydown', (event) => {
 // (cliente.html, por ejemplo, solo después de iniciar sesión).
 async function iniciarGaleria(fuenteProductos) {
   productos = (await fuenteProductos()) || []; // si la fuente falla y da null, queda vacía
-  productos.forEach(producto => { nochesSeleccionadas[producto.id] = NOCHES_MIN; });
+  productos.forEach(producto => { cantidadesSeleccionadas[producto.id] = CANTIDAD_MIN; });
 
   carrito = leerCarrito();
-  // Las tarjetas arrancan mostrando las noches que ya tenías en el carrito
-  carrito.forEach(item => { nochesSeleccionadas[item.id] = item.noches; });
-  guardarCarrito(); // re-guarda ya limpio (sin películas que dejaron de existir)
+  // Las tarjetas arrancan mostrando la cantidad que ya tenías en el carrito
+  carrito.forEach(item => { cantidadesSeleccionadas[item.id] = item.cantidad; });
+  guardarCarrito(); // re-guarda ya limpio (sin productos que dejaron de existir)
 
   pintarGaleria();
   pintarCarrito();
@@ -511,10 +491,10 @@ async function iniciarGaleria(fuenteProductos) {
 // ---------------------------------------------------------------------
 // 10. CARRITO EN SUPABASE (solo con sesión)
 // Diseño de dos tablas: pedidos (una fila por compra, estado 'carrito'
-// mientras se arma) y detalles_pedidos (una fila por película, con su
+// mientras se arma) y detalles_pedidos (una fila por producto, con su
 // precio_unitario calculado por la base). Ver guia_carrito_pedidos_supabase.pdf.
-// galeria.html no carga supabaseClient.js, así que "db" no existe ahí:
-// obtenerUsuario() devuelve null y todo sigue en modo demostración.
+// Si "db" no existe o no hay sesión, obtenerUsuario() devuelve null y el
+// carrito vive solo en el navegador (localStorage) hasta iniciar sesión.
 // ---------------------------------------------------------------------
 
 async function obtenerUsuario() {
@@ -606,10 +586,10 @@ async function cargarCarritoDesdeBD() {
 
   pedidoId = data.id;
   data.detalles_pedidos.forEach(detalle => {
-    const noches = limitarNoches(Number(detalle.cantidad));
-    carrito.push({ id: detalle.producto_id, noches });
+    const cantidad = limitarCantidad(detalle.producto_id, Number(detalle.cantidad));
+    carrito.push({ id: detalle.producto_id, cantidad });
     detalleIds[detalle.producto_id] = detalle.id;
-    nochesSeleccionadas[detalle.producto_id] = noches;
+    cantidadesSeleccionadas[detalle.producto_id] = cantidad;
   });
 
   productos.forEach(producto => actualizarTarjeta(producto.id));
@@ -630,13 +610,16 @@ botonPagarCheckout.addEventListener('click', async () => {
   mensajeCarritoCheckout.textContent = '';
 
   if (!carrito.length) {
-    mensajeCarritoCheckout.textContent = 'Aún no tienes rentas en el carrito.';
+    mensajeCarritoCheckout.textContent = 'Tu carrito está vacío.';
     return;
   }
 
   const usuario = await obtenerUsuario();
   if (!usuario) {
-    mensajeCarritoCheckout.textContent = 'Para rentar, inicia sesion en cliente.html (Mi cuenta).';
+    // innerHTML (y no textContent) porque el mensaje lleva un enlace.
+    // Es seguro: el texto es fijo, no viene de lo que escribe el usuario.
+    mensajeCarritoCheckout.innerHTML =
+      'Para comprar, primero <a href="cliente.html">inicia sesión en Mi cuenta</a>. Tu carrito se queda guardado.';
     return;
   }
 

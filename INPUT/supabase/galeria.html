@@ -4,52 +4,63 @@
   <meta charset="UTF-8">
   <!-- Sin esta línea el celular "simula" una pantalla de PC y todo se ve diminuto -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Videoclub — Estantería</title>
+  <title>Galería — Mr. Somniel</title>
 
   <!-- Mismas fuentes que admin.html: Metal Mania, Orbitron, Oswald -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Orbitron:wght@500;700&family=Oswald:wght@400;700&display=swap">
 
-  <!-- admin.css trae la estética y las cajas VHS; galeria.css solo agrega
-       lo nuevo (control de noches, carrito). El orden importa: galeria.css
+  <!-- admin.css trae la estética y las tarjetas; galeria.css solo agrega
+       lo nuevo (control de cantidad, carrito). El orden importa: galeria.css
        va DESPUÉS para poder ajustar reglas de admin.css. -->
   <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="css/galeria.css">
+  <!-- gothic.css va AL FINAL: unifica todo con la estética de la landing -->
+  <link rel="stylesheet" href="css/gothic.css">
 </head>
 
 <body>
 
   <header class="header">
-    <!-- data-text: el CSS copia este texto en dos capas para el glitch -->
-    <h1 data-text="Videoclub">Videoclub</h1>
+    <!-- El título vuelve a la landing (index.html) -->
+    <h1 data-text="Mr. Somniel"><a href="index.html" class="link-inicio">Mr. Somniel</a></h1>
     <div class="header-acciones">
-      <button id="btn-tema" type="button">☀ Modo claro</button>
-      <!-- aria-expanded le dice al lector de pantalla si el panel está abierto -->
-      <button id="btn-carrito" type="button" aria-controls="panel-carrito" aria-expanded="false">
-        🎞 Mis rentas <span id="contador-carrito">0</span>
+      <nav class="header-nav" aria-label="Navegación">
+        <a href="index.html">Inicio</a>
+        <a href="cliente.html">Mi cuenta</a>
+      </nav>
+      <!-- aria-expanded le dice al lector de pantalla si el panel está abierto;
+           aria-label da el nombre, porque el botón solo tiene un ícono -->
+      <button id="btn-carrito" type="button" class="btn-carrito-icono" aria-controls="panel-carrito" aria-expanded="false" aria-label="Abrir carrito">
+        <!-- Cart icon (inline SVG: takes its color from "currentColor") -->
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>
+          <path d="M2.5 3h2.6l2.4 11.6a1.6 1.6 0 0 0 1.6 1.3h8.6a1.6 1.6 0 0 0 1.6-1.2L21.5 7H6.1"/>
+        </svg>
+        <span id="contador-carrito">0</span>
       </button>
     </div>
   </header>
 
   <main>
     <section class="intro-galeria">
-      <h2>Estantería</h2>
-      <p>Elige cuántas noches quieres cada película y agrégala a tus rentas.</p>
+      <h2>Galería</h2>
+      <p>Posters, stickers, cómics y pines con las ilustraciones de @mr.somniel. Elige la cantidad y agrégalos al carrito.</p>
     </section>
 
-    <!-- galeria.js pinta aquí las cajas VHS -->
+    <!-- galeria.js pinta aquí las tarjetas de producto -->
     <div id="lista-productos"></div>
   </main>
 
   <!-- Fondo oscuro detrás del panel: clic aquí = cerrar -->
   <div id="overlay-carrito"></div>
 
-  <!-- Panel lateral del carrito de rentas -->
+  <!-- Panel lateral del carrito -->
   <aside id="panel-carrito" role="dialog" aria-modal="true" aria-labelledby="titulo-carrito">
     <div class="carrito-cabecera">
-      <h3 id="titulo-carrito">Mis rentas</h3>
-      <button id="btn-cerrar-carrito" type="button" aria-label="Cerrar mis rentas">✕</button>
+      <h3 id="titulo-carrito">Tu carrito</h3>
+      <button id="btn-cerrar-carrito" type="button" aria-label="Cerrar el carrito">✕</button>
     </div>
 
     <div id="lista-carrito"></div>
@@ -59,9 +70,9 @@
         <span>Total</span>
         <strong id="total-carrito">$ 0</strong>
       </div>
-      <button id="btn-pagar" type="button">Pagar rentas →</button>
+      <button id="btn-pagar" type="button">Ir a pagar →</button>
 
-      <!-- Oculto hasta que se pulsa "Pagar rentas" con sesión iniciada -->
+      <!-- Oculto hasta que se pulsa "Ir a pagar" con sesión iniciada -->
       <form id="form-checkout" hidden>
         <label class="campo-checkbox">
           <input type="checkbox" id="checkout-envio">
@@ -86,10 +97,21 @@
     </div>
   </aside>
 
-  <!-- Primero los datos (crea obtenerProductos), después la lógica que los usa -->
+  <!-- Orden: librería de Supabase → db (supabaseClient) → datos → lógica.
+       galeria.html usa la MISMA sesión que cliente.html (Mi cuenta):
+       si ya iniciaste sesión allí, aquí el carrito se guarda en Supabase
+       y puedes pagar sin cambiar de página. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
   <script src="js/catalogo-local.js"></script>
   <script src="js/galeria.js"></script>
-  <!-- Arranca la estantería con el catálogo local (sin Supabase) -->
-  <script>iniciarGaleria(obtenerProductos);</script>
+  <script>
+    // Primero el catálogo; después, SOLO si hay sesión, el carrito guardado
+    // en la base. (cargarCarritoDesdeBD vacía el carrito local antes de
+    // leer la base: sin sesión borraría lo que el visitante ya eligió.)
+    iniciarGaleria(obtenerProductos).then(async () => {
+      if (await obtenerUsuario()) await cargarCarritoDesdeBD();
+    });
+  </script>
 </body>
 </html>

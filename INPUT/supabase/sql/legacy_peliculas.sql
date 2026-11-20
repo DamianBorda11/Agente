@@ -1,4 +1,5 @@
 -- =====================================================================
+-- ⚠ LEGACY: catálogo del videoclub. Ya NO se usa; el actual es sql/somniel_productos.sql.
 -- VIDEOCLUB: reemplaza los productos de práctica por 10 películas.
 -- Cómo usarlo: Supabase → SQL Editor → New query → pega todo → Run.
 --

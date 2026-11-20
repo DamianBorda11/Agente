@@ -79,7 +79,7 @@ async function mostrarEstadoSesionAdmin() {
     estado.innerText = 'No has iniciado sesión.';
   } else if (esAdmin) {
     estado.innerText = 'Sesión iniciada como ' + perfil.nombre + ' (admin).';
-    // Ya no hace falta un botón "Ver estantería": en cuanto se confirma el
+    // Ya no hace falta un botón "Ver catálogo": en cuanto se confirma el
     // acceso de admin, el catálogo se trae solo.
     cargarProductos(true);
   } else {
@@ -117,48 +117,23 @@ mostrarEstadoSesionAdmin();
 
 
 // =====================================================================
-// VIDEOCLUB — catálogo de películas en renta (CRUD con Supabase)
-// Usa la tabla "practica-productos". Cada columna guarda un dato de la película:
-//   nombre      → título (año)
-//   descripcion → director y sinopsis
-//   precio      → renta por noche, en pesos colombianos
-//   unidades    → copias en la tienda
-//   disponible  → true = en estante, false = rentada
-//   categorias  → géneros, ej. ['tim burton', 'terror']
-//   img-url     → póster (opcional; sin él se dibuja una carátula VHS)
+// MR. SOMNIEL — catálogo de merch de artista (CRUD con Supabase)
+// Usa la tabla "practica-productos". Cada columna guarda un dato del producto:
+//   nombre      → nombre del producto, ej. "Poster Yeyo (A3)"
+//   descripcion → material, tamaño y detalles
+//   precio      → precio por unidad, en pesos colombianos
+//   unidades    → stock disponible
+//   disponible  → true = a la venta, false = agotado
+//   categorias  → tipo de producto, ej. ['posters'], ['stickers']
+//   img-url     → imagen del producto (opcional; sin ella se dibuja una carátula de respaldo)
 // =====================================================================
 
 // ---------------------------------------------------------------------
-// MODO OSCURO / CLARO
+// TEMA
 // ---------------------------------------------------------------------
-// El tema se guarda en localStorage para recordarlo al recargar.
-// No hace falta esperar a DOMContentLoaded: este archivo se carga al final
-// del <body>, así que el botón ya existe cuando el código corre.
-document.documentElement.dataset.theme = localStorage.getItem('tema') || 'dark';
-
-const botonTema = document.getElementById('btn-tema');
-
-function actualizarBotonTema() {
-  const esOscuro = document.documentElement.dataset.theme === 'dark';
-  // El botón muestra el modo al que vas a cambiar
-  botonTema.textContent = esOscuro ? '☀ Modo claro' : '☾ Modo oscuro';
-  botonTema.setAttribute('aria-pressed', String(!esOscuro));
-}
-
-actualizarBotonTema();
-
-botonTema.addEventListener('click', () => {
-  const nuevoTema = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-  document.documentElement.dataset.theme = nuevoTema;
-  localStorage.setItem('tema', nuevoTema);
-  actualizarBotonTema();
-
-  // Interferencia de pantalla al cambiar de tema. El reflow (offsetWidth)
-  // entre quitar y poner la clase permite repetir la animación en cada clic.
-  document.body.classList.remove('interferencia');
-  void document.body.offsetWidth;
-  document.body.classList.add('interferencia');
-});
+// Solo modo oscuro: la tienda es gótica, igual que la landing (index.html).
+// Se fija aquí por si quedó guardado 'light' de la versión anterior.
+document.documentElement.dataset.theme = 'dark';
 
 // Formatea un número como pesos colombianos: 5000 → "$ 5.000".
 // Intl.NumberFormat ya conoce el formato de cada país (puntos de miles, símbolo).
@@ -179,13 +154,13 @@ function crearFormularioProducto() {
   form.id = 'form-producto';
 
   const campos = [
-    { id: 'nombre', label: 'Título (año)', type: 'text', required: true, placeholder: 'Beetlejuice (1988)' },
-    { id: 'descripcion-input', label: 'Director y sinopsis', type: 'textarea', required: true },
-    { id: 'precio-input', label: 'Renta por noche (COP)', type: 'number', step: '100', min: '0', required: true, placeholder: '5000' },
-    { id: 'unidades-input', label: 'Copias', type: 'number', min: '0', required: true, placeholder: '2' },
+    { id: 'nombre', label: 'Nombre del producto', type: 'text', required: true, placeholder: 'Poster Yeyo (A3)' },
+    { id: 'descripcion-input', label: 'Descripción (material, tamaño)', type: 'textarea', required: true },
+    { id: 'precio-input', label: 'Precio por unidad (COP)', type: 'number', step: '100', min: '0', required: true, placeholder: '35000' },
+    { id: 'unidades-input', label: 'Stock (unidades)', type: 'number', min: '0', required: true, placeholder: '10' },
     { id: 'descuento', label: 'Descuento (0 a 1)', type: 'number', step: '0.01', min: '0', max: '1', placeholder: '0.1' },
-    { id: 'categorias', label: 'Géneros', type: 'text', placeholder: 'terror, romance' },
-    { id: 'img-url', label: 'URL del póster', type: 'url', placeholder: 'https://example.com/poster.jpg' }
+    { id: 'categorias', label: 'Categorías', type: 'text', placeholder: 'posters, stickers' },
+    { id: 'img-url', label: 'URL de la imagen', type: 'text', placeholder: 'assets/art/art-01.jpg' }
   ];
 
   // Recorrer cada campo y crear sus etiquetas e inputs dinámicamente.
@@ -218,7 +193,7 @@ function crearFormularioProducto() {
 
   // Checkbox separado porque se comporta distinto a un input de texto.
   const checkWrap = document.createElement('label');
-  checkWrap.textContent = 'En estante (disponible para rentar): ';
+  checkWrap.textContent = 'A la venta (disponible): ';
 
   const disponible = document.createElement('input');
   disponible.id = 'disponible';
@@ -237,9 +212,9 @@ function crearFormularioProducto() {
   const boton = document.createElement('button');
   boton.type = 'submit';
   boton.id = 'btn-guardar';
-  boton.textContent = 'Agregar película';
+  boton.textContent = 'Agregar producto';
 
-  // Cancelar solo se muestra mientras se edita una película.
+  // Cancelar solo se muestra mientras se edita un producto.
   const cancelar = document.createElement('button');
   cancelar.type = 'button';
   cancelar.id = 'btn-cancelar';
@@ -255,7 +230,7 @@ function crearFormularioProducto() {
   return form;
 }
 
-// Rellena el formulario con los datos de una película (se usa al editar).
+// Rellena el formulario con los datos de un producto (se usa al editar).
 function llenarFormulario(producto) {
   const nombre = document.getElementById('nombre');
   const descripcion = document.getElementById('descripcion-input');
@@ -284,7 +259,7 @@ function llenarFormulario(producto) {
 function obtenerDatosFormulario() {
   const categorias = document.getElementById('categorias').value
     .split(',')
-    .map(item => item.trim().toLowerCase()) // minúsculas: "Terror" y "terror" cuentan como el mismo género
+    .map(item => item.trim().toLowerCase()) // minúsculas: "Posters" y "posters" cuentan como la misma categoría
     .filter(Boolean);
 
   return {
@@ -299,7 +274,7 @@ function obtenerDatosFormulario() {
   };
 }
 
-// Inserta una película en la tabla de Supabase.
+// Inserta un producto en la tabla de Supabase.
 async function agregarProducto(datos) {
   const { data, error } = await db
     .from('practica-productos')
@@ -314,13 +289,13 @@ async function agregarProducto(datos) {
   return data?.[0] ?? null;
 }
 
-// Trae las películas y las muestra en pantalla.
+// Trae los productos y las muestra en pantalla.
 // Es una función con nombre para poder volver a llamarla después de editar o borrar.
 // animar = true solo cuando se presiona el botón: al refrescar después de editar
 // no queremos que todas las tarjetas vuelvan a aparecer de nuevo.
 async function cargarProductos(animar = false) {
   // .order('id'): sin esto la base de datos no garantiza ningún orden, y una
-  // película recién actualizada suele "saltar" al final de la lista.
+  // producto recién actualizada suele "saltar" al final de la lista.
   const { data, error } = await db
     .from('practica-productos')
     .select('*')
@@ -338,7 +313,7 @@ async function cargarProductos(animar = false) {
   document.getElementById('json-crudo').hidden = false;
   document.getElementById('filtros').hidden = false;
 
-  // Guardamos las películas en memoria: los filtros trabajan sobre esta copia
+  // Guardamos los productos en memoria: los filtros trabajan sobre esta copia
   // sin volver a consultar a Supabase.
   productosCargados = data;
   llenarPillsCategorias(data);
@@ -380,7 +355,7 @@ function configurarPills(contenedorId, grupo) {
 configurarPills('filtro-categoria-pills', 'categoria');
 configurarPills('filtro-disponible-pills', 'disponible');
 
-// Rellena los botones de género con los que existen en los datos, sin repetir.
+// Rellena los botones de categoría con los que existen en los datos, sin repetir.
 // Set = colección que descarta duplicados automáticamente.
 function llenarPillsCategorias(productos) {
   const contenedor = document.getElementById('filtro-categoria-pills');
@@ -391,7 +366,7 @@ function llenarPillsCategorias(productos) {
   contenedor.innerHTML = '<button type="button" class="pill" data-valor="">Todos</button>' +
     [...categorias].sort().map(c => `<button type="button" class="pill" data-valor="${c}">${c}</button>`).join('');
 
-  // Si el género ya no existe (se borró esa película), vuelve a "Todos".
+  // Si la categoría ya no existe (se borró ese producto), vuelve a "Todos".
   const valorValido = categorias.has(seleccionActual) ? seleccionActual : '';
   filtrosPill.categoria = valorValido;
   contenedor.querySelectorAll('.pill').forEach(p => p.classList.toggle('activo', p.dataset.valor === valorValido));
@@ -406,7 +381,7 @@ function aplicarFiltros(animar = false) {
   const precioMax = document.getElementById('filtro-precio-max').value;
   const orden = document.getElementById('filtro-orden').value;
 
-  // filter() se queda solo con las películas que cumplen TODAS las condiciones.
+  // filter() se queda solo con los productos que cumplen TODAS las condiciones.
   // Cada condición "vacía" devuelve true, o sea, no filtra nada.
   const filtrados = productosCargados.filter(p => {
     const coincideTexto = !texto ||
@@ -436,7 +411,7 @@ function aplicarFiltros(animar = false) {
   });
 
   document.getElementById('contador-productos').textContent =
-    `Mostrando ${ordenados.length} de ${productosCargados.length} películas`;
+    `Mostrando ${ordenados.length} de ${productosCargados.length} productos`;
 
   pintarTarjetas(ordenados, animar);
 }
@@ -480,56 +455,56 @@ document.getElementById('btn-vista-lista').addEventListener('click', () => {
   aplicarVistaCatalogo('lista');
 });
 
-// Dibuja las tarjetas (cajas VHS) de las películas que recibe.
+// Dibuja las tarjetas de los productos que recibe.
 function pintarTarjetas(productos, animar = false) {
   const lista = document.getElementById('lista-productos');
 
   if (!productosCargados.length) {
-    lista.innerHTML = '<p class="sin-resultados">La estantería está vacía.</p>';
+    lista.innerHTML = '<p class="sin-resultados">El catálogo está vacío.</p>';
     return;
   }
 
   if (!productos.length) {
-    lista.innerHTML = '<p class="sin-resultados">Ninguna película coincide con los filtros.</p>';
+    lista.innerHTML = '<p class="sin-resultados">Ningún producto coincide con los filtros.</p>';
     return;
   }
 
   lista.classList.toggle('animar-entrada', animar);
 
-  // Una tarjeta por película: todos sus datos quedan juntos.
+  // Una tarjeta por producto: todos sus datos quedan juntos.
   // --i es la posición de la tarjeta: el CSS la usa para que aparezcan una tras otra.
   lista.innerHTML = productos.map((producto, i) => {
-    const generos = Array.isArray(producto.categorias) ? producto.categorias : [];
+    const etiquetas = Array.isArray(producto.categorias) ? producto.categorias : [];
 
     return `
     <article class="tarjeta-producto" data-id="${producto.id}" style="--i: ${i}">
-      <div class="tarjeta-imagen ${producto['img-url'] ? '' : 'sin-imagen'} ${producto.disponible ? '' : 'rentada'}">
+      <div class="tarjeta-imagen ${producto['img-url'] ? '' : 'sin-imagen'} ${producto.disponible ? '' : 'agotado'}">
         ${producto['img-url']
-          ? `<img src="${producto['img-url']}" alt="Póster de ${producto.nombre}" onerror="this.parentElement.classList.add('sin-imagen')">`
+          ? `<img src="${producto['img-url']}" alt="${producto.nombre}" onerror="this.parentElement.classList.add('sin-imagen')">`
           : ''}
-        <!-- Carátula VHS: solo se ve si no hay póster o si la URL está rota -->
-        <div class="caratula-vhs" aria-hidden="true">
-          <span class="vhs-logo">VHS</span>
-          <span class="vhs-titulo">${producto.nombre}</span>
-          <span class="vhs-genero">${generos.join(' / ')}</span>
+        <!-- Carátula de respaldo: solo se ve si no hay imagen o si la URL está rota -->
+        <div class="caratula-placeholder" aria-hidden="true">
+          <span class="placeholder-logo">MR. SOMNIEL</span>
+          <span class="placeholder-titulo">${producto.nombre}</span>
+          <span class="placeholder-categoria">${etiquetas.join(' / ')}</span>
         </div>
-        <!-- Sello sobre la carátula: solo se dibuja si la película está rentada -->
-        ${producto.disponible ? '' : '<span class="sello-rentada">Rentada</span>'}
+        <!-- Sello sobre la imagen: solo se dibuja si el producto está agotado -->
+        ${producto.disponible ? '' : '<span class="sello-agotado">Agotado</span>'}
       </div>
       <div class="tarjeta-info">
         <h4>${producto.nombre}</h4>
-        <p class="precio-lista">${formatoPesos.format(producto.precio)} / noche</p>
+        <p class="precio-lista">${formatoPesos.format(producto.precio)} c/u</p>
         <p>${producto.descripcion}</p>
         <dl>
-          <dt>Renta</dt><dd>${formatoPesos.format(producto.precio)} / noche</dd>
-          <dt>Copias</dt><dd>${producto.unidades}</dd>
+          <dt>Precio</dt><dd>${formatoPesos.format(producto.precio)} c/u</dd>
+          <dt>Stock</dt><dd>${producto.unidades}</dd>
           ${producto.descuento ? `<dt>Descuento</dt><dd>${Math.round(producto.descuento * 100)}%</dd>` : ''}
         </dl>
-        ${generos.length ? `<p class="categorias">${generos.join(' · ')}</p>` : ''}
+        ${etiquetas.length ? `<p class="categorias">${etiquetas.join(' · ')}</p>` : ''}
         <span class="estado ${producto.disponible ? 'disponible' : 'agotado'}">
-          ${producto.disponible ? 'En estante' : 'Rentada'}
+          ${producto.disponible ? 'A la venta' : 'Agotado'}
         </span>
-        <p class="sticker-rebobinar">¡Rebobine antes de devolver!</p>
+        <p class="sticker-firma">Ilustrado a mano · @mr.somniel</p>
         <div class="tarjeta-acciones">
           <button type="button" class="btn-editar" data-id="${producto.id}">Editar</button>
           <button type="button" class="btn-eliminar" data-id="${producto.id}" data-nombre="${producto.nombre}">Eliminar</button>
@@ -557,7 +532,7 @@ const formularioProducto = crearFormularioProducto();
 // MOSTRAR/OCULTAR EL FORMULARIO ("Mostrador")
 // ---------------------------------------------------------------------
 // Empieza oculto (ver admin.html) para que la lista tenga todo el espacio;
-// se abre con este botón o solo al editar una película.
+// se abre con este botón o solo al editar un producto.
 function abrirFormulario() {
   document.getElementById('form-container').hidden = false;
   document.getElementById('btn-toggle-form').textContent = '✕ Cerrar formulario';
@@ -565,7 +540,7 @@ function abrirFormulario() {
 
 function cerrarFormulario() {
   document.getElementById('form-container').hidden = true;
-  document.getElementById('btn-toggle-form').textContent = '+ Agregar película';
+  document.getElementById('btn-toggle-form').textContent = '+ Agregar producto';
 }
 
 document.getElementById('btn-toggle-form').addEventListener('click', () => {
@@ -576,23 +551,23 @@ document.getElementById('btn-toggle-form').addEventListener('click', () => {
 // ---------------------------------------------------------------------
 // MODO EDICIÓN
 // ---------------------------------------------------------------------
-// null = el formulario CREA una película nueva.
-// un id = el formulario ACTUALIZA esa película.
+// null = el formulario CREA un producto nueva.
+// un id = el formulario ACTUALIZA ese producto.
 let idEnEdicion = null;
 
-// Carga una película en el formulario y pasa a modo "actualizar".
+// Carga un producto en el formulario y pasa a modo "actualizar".
 async function empezarEdicion(id) {
   const producto = await buscarProductoPorId(id);
 
   if (!producto) {
-    document.getElementById('notificacion').textContent = 'No se encontró la película a editar.';
+    document.getElementById('notificacion').textContent = 'No se encontró el producto a editar.';
     return;
   }
 
   idEnEdicion = producto.id;
   llenarFormulario(producto);
 
-  document.getElementById('btn-guardar').textContent = 'Actualizar película';
+  document.getElementById('btn-guardar').textContent = 'Actualizar producto';
   document.getElementById('btn-cancelar').hidden = false;
   formularioProducto.classList.add('editando');
   abrirFormulario();
@@ -605,7 +580,7 @@ function terminarEdicion() {
   formularioProducto.reset();
   document.getElementById('disponible').checked = true;
 
-  document.getElementById('btn-guardar').textContent = 'Agregar película';
+  document.getElementById('btn-guardar').textContent = 'Agregar producto';
   document.getElementById('btn-cancelar').hidden = true;
   formularioProducto.classList.remove('editando');
   cerrarFormulario();
@@ -625,12 +600,12 @@ if (formularioProducto) {
       const respuesta = await modificarProducto(idEnEdicion, datos);
 
       if (respuesta) {
-        console.log('Película actualizada:', respuesta);
-        notificacion.textContent = 'Película actualizada: ' + JSON.stringify(respuesta, null, 2);
+        console.log('Producto actualizado:', respuesta);
+        notificacion.textContent = 'Producto actualizado: ' + JSON.stringify(respuesta, null, 2);
         terminarEdicion();
         refrescarCatalogo();
       } else {
-        notificacion.textContent = 'Error al actualizar la película (revisa la consola y la política RLS de update).';
+        notificacion.textContent = 'Error al actualizar el producto (revisa la consola y la política RLS de update).';
       }
       return;
     }
@@ -638,13 +613,13 @@ if (formularioProducto) {
     const respuesta = await agregarProducto(datos);
 
     if (respuesta) {
-      console.log('Película agregada:', respuesta);
-      notificacion.textContent = 'Película agregada: ' + JSON.stringify(respuesta, null, 2);
+      console.log('Producto agregado:', respuesta);
+      notificacion.textContent = 'Producto agregado: ' + JSON.stringify(respuesta, null, 2);
       formularioProducto.reset();
       document.getElementById('disponible').checked = true;
       refrescarCatalogo();
     } else {
-      notificacion.textContent = 'Error al agregar la película.';
+      notificacion.textContent = 'Error al agregar el producto.';
     }
   });
 }
@@ -702,11 +677,11 @@ async function confirmarEliminacion(id, nombre) {
   const seElimino = await eliminarProducto(id);
 
   if (seElimino) {
-    notificacion.textContent = `Película eliminada: ${nombre}`;
-    // Si justo estabas editando esa película, el formulario vuelve a modo "crear".
+    notificacion.textContent = `Producto eliminado: ${nombre}`;
+    // Si justo estabas editando ese producto, el formulario vuelve a modo "crear".
     if (String(idEnEdicion) === String(id)) terminarEdicion();
 
-    // Animación de "falla digital" en la tarjeta antes de volver a pintar la lista.
+    // Animación de "desvanecer" en la tarjeta antes de volver a pintar la lista.
     document.querySelector(`.tarjeta-producto[data-id="${id}"]`)?.classList.add('desintegrando');
     await new Promise(resolve => setTimeout(resolve, 700)); // dura lo mismo que la animación en CSS
 
@@ -722,7 +697,7 @@ async function confirmarEliminacion(id, nombre) {
 // FUNCIONES DE SUPABASE (Read por id, Update, Delete)
 // ---------------------------------------------------------------------
 
-// Trae una sola película por su id (se usa al presionar Editar).
+// Trae una soel producto por su id (se usa al presionar Editar).
 async function buscarProductoPorId(id) {
   const { data, error } = await db
     .from('practica-productos')
@@ -734,7 +709,7 @@ async function buscarProductoPorId(id) {
   return data;
 }
 
-// Actualiza solo las propiedades que vengan en "cambios" de la película con ese id.
+// Actualiza solo las propiedades que vengan en "cambios" de el producto con ese id.
 async function modificarProducto(id, cambios) {
   const { data, error } = await db
     .from('practica-productos')
@@ -751,7 +726,7 @@ async function modificarProducto(id, cambios) {
   return data?.[0] ?? null;
 }
 
-// Borra la película con ese id. Devuelve true solo si de verdad se borró una fila.
+// Borra el producto con ese id. Devuelve true solo si de verdad se borró una fila.
 async function eliminarProducto(id) {
   const { data, error } = await db
     .from('practica-productos')

@@ -1,0 +1,494 @@
+/* =====================================================================
+   gothic.css — final layer for galeria.html, cliente.html and admin.html.
+   Loaded LAST so it wins over admin.css / galeria.css / cliente.css.
+   Goal: same look as the landing (css/landing.css):
+     - palette: black, blood red, dusty pink, bone white
+     - no cyberpunk effects (neon grid, CRT lines, glitch, chrome text)
+     - same buttons, cards and titles as index.html
+   Only dark mode: the "Modo claro" button was removed.
+   ===================================================================== */
+
+/* ---------- 1. Palette (same values as landing.css) ---------- */
+/* admin.css uses these variable names everywhere, so changing them here
+   recolors every page at once. "--neon" now means the pink highlight. */
+:root,
+[data-theme="dark"],
+[data-theme="light"] {
+  --bg: #070506;
+  --surface: #120c0e;
+  --surface-2: #1b1215;
+  --text: #ece4e1;
+  --text-muted: #a8999b;
+  --accent: #8f0d1f;
+  --accent-hover: #d4213b;
+  --accent-glow: rgba(212, 33, 59, 0.35);
+  --neon: #e7a3b5;
+  --neon-glow: rgba(231, 163, 181, 0.22);
+  --sangre: #5a0812;
+  --sangre-glow: rgba(143, 13, 31, 0.35);
+  --border: #2b1d21;
+  --console-bg: #120c0e;
+  --console-text: #e7a3b5;
+  --ok: #ece4e1;
+  --overlay-bg: rgba(7, 5, 6, 0.94);
+  --scanlines: 0;
+  --radius: 4px;
+}
+
+/* ---------- 2. Background: soft red glow, no neon grid / CRT ---------- */
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 70% 40% at 80% 0%, var(--accent-glow), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(143, 13, 31, 0.25), transparent 70%);
+  line-height: 1.55;
+}
+
+body::before,          /* neon floor grid */
+html::after,           /* CRT scan lines */
+body::after {          /* theme-change interference */
+  display: none;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+/* ---------- 3. Titles: bone white with blood-red offset shadow ---------- */
+h1,
+h2,
+h3,
+.intro-galeria h2,
+.tarjeta-acceso h2,
+.sidebar-titulo {
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-weight: 400;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: var(--text);
+  text-shadow: 3px 3px 0 var(--accent);
+}
+
+h1 {
+  animation: none;
+  filter: none;
+  font-size: clamp(2.2rem, 6vw, 3.4rem);
+  text-shadow: 4px 4px 0 var(--accent), 0 0 30px var(--accent-glow);
+}
+
+/* glitch copies of the title: off */
+h1::before,
+h1::after { display: none; }
+
+.intro-galeria h2 { font-size: clamp(2rem, 6vw, 3.2rem); line-height: 1.1; }
+.intro-galeria { margin-bottom: 8px; }
+
+/* ---------- 4. Header ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  /* negative margins cancel the body padding (24px top, 16px sides):
+     the bar touches the top and both edges, like the landing nav */
+  margin: -24px -16px 24px;
+  padding: 14px 16px;
+  background: rgba(7, 5, 6, 0.85);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  border-image: none;
+}
+
+.header-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.header-nav a,
+.link-inicio {
+  text-decoration: none;
+}
+
+.header-nav a {
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.header-nav a:hover { color: var(--neon); }
+
+/* ---------- 5. Buttons: same as .btn in the landing ---------- */
+button {
+  clip-path: none;
+  border-radius: var(--radius);
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s, color 0.2s, border-color 0.2s;
+}
+
+button:hover {
+  filter: none;
+  animation: none;
+  text-shadow: none;
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--neon);
+  outline-offset: 3px;
+}
+
+/* Secondary (outline) buttons, like .btn-ghost in the landing */
+#btn-cancelar,
+.btn-editar,
+.btn-cancelar-eliminar,
+#btn-cancelar-checkout,
+#btn-logout,
+#btn-cerrar-carrito,
+.btn-quitar,
+.tab-acceso,
+.pill,
+.vista-toggle button,
+.btn-cantidad,
+.sidebar-item {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+#btn-cancelar:hover,
+.btn-editar:hover,
+.btn-cancelar-eliminar:hover,
+#btn-cancelar-checkout:hover,
+#btn-logout:hover,
+#btn-cerrar-carrito:hover,
+.btn-quitar:hover,
+.tab-acceso:hover,
+.pill:hover,
+.vista-toggle button:hover {
+  background: transparent;
+  color: var(--neon);
+  border-color: var(--neon);
+  box-shadow: none;
+}
+
+/* Delete: blood-red outline, fills on hover */
+.btn-eliminar {
+  background: transparent;
+  color: var(--accent-hover);
+  border: 1px solid var(--accent);
+}
+
+.btn-eliminar:hover { color: #fff; background: var(--accent); }
+
+/* Selected states (tabs, filter pills, grid/list toggle, sidebar item) */
+.tab-acceso[aria-selected="true"],
+.pill.activo,
+.vista-toggle button[aria-pressed="true"],
+.sidebar-item.activo {
+  color: var(--neon);
+  border-color: var(--neon);
+  background: var(--surface-2);
+  box-shadow: none;
+}
+
+.sidebar-item { border-width: 0 0 0 3px; border-color: transparent; }
+.sidebar-item:hover { background: var(--surface-2); color: var(--text); box-shadow: none; }
+
+/* −/+ quantity buttons live inside a box: no border of their own */
+.btn-cantidad { border: none; border-radius: 0; }
+.btn-cantidad:hover:not(:disabled) { color: var(--neon); background: transparent; box-shadow: none; }
+
+button:disabled,
+button:disabled:hover {
+  background: var(--surface-2);
+  border-color: var(--border);
+  color: var(--text-muted);
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+/* ---------- 6. Cart icon button ---------- */
+.btn-carrito-icono {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+}
+
+.btn-carrito-icono:hover {
+  color: var(--neon);
+  background: var(--surface-2);
+  border-color: var(--neon);
+  box-shadow: 0 0 18px var(--neon-glow);
+}
+
+.btn-carrito-icono svg { display: block; }
+
+/* Badge with the number of items, on the icon's top-right corner */
+.btn-carrito-icono #contador-carrito {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0 5px;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 22px;
+  color: #fff;
+  background: var(--accent-hover);
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+}
+
+/* In the client sidebar the icon button is centered in its row */
+.sidebar > .btn-carrito-icono {
+  width: 48px;
+  align-self: center;
+}
+
+/* ---------- 7. Panels, forms and inputs ---------- */
+.form-tab,
+#form-producto,
+#form-perfil,
+.filtros,
+.sidebar,
+#estado-sesion,
+#estado-sesion-admin {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+#estado-sesion,
+#estado-sesion-admin {
+  border-top-width: 1px;
+  border-left: 3px solid var(--accent);
+}
+
+input,
+textarea,
+select {
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  border-color: var(--neon);
+  box-shadow: 0 0 0 1px var(--neon);
+}
+
+#form-producto.editando {
+  border-color: var(--neon);
+  animation: none;
+  box-shadow: 0 0 18px var(--neon-glow);
+}
+
+#form-producto.editando::before {
+  content: '✎ Editando';
+  text-shadow: none;
+}
+
+/* ---------- 8. Product cards: same as .product-card in the landing ---------- */
+.tarjeta-producto {
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius);
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+
+.tarjeta-producto:hover {
+  transform: translateY(-6px);
+  border-color: var(--accent-hover);
+  box-shadow: 0 12px 30px var(--accent-glow);
+}
+
+.tarjeta-producto::before,               /* holographic border */
+.tarjeta-imagen::before,                 /* holographic shine */
+.animar-entrada .tarjeta-producto::after /* scan line */ {
+  display: none;
+}
+
+/* Image fills its frame, like the landing cards */
+.tarjeta-imagen { border-radius: 2px; }
+.tarjeta-imagen img {
+  object-fit: cover;
+  filter: saturate(0.85);
+  transition: filter 0.25s, transform 0.4s;
+}
+
+.tarjeta-producto:hover .tarjeta-imagen img {
+  filter: saturate(1.1);
+  transform: scale(1.03);
+}
+
+.tarjeta-producto h4 {
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  text-shadow: none;
+}
+
+.tarjeta-producto dd,
+.precio-lista,
+.tarjeta-producto .subtotal-tarjeta strong,
+.item-carrito .item-subtotal,
+#total-carrito {
+  color: var(--neon);
+  text-shadow: none;
+}
+
+.tarjeta-producto .categorias { color: var(--neon); }
+
+.tarjeta-producto.en-carrito {
+  border-color: var(--neon);
+  border-top-color: var(--neon);
+  box-shadow: 0 0 18px var(--neon-glow);
+}
+
+.control-cantidad { border-radius: var(--radius); }
+
+/* Signature sticker under each card */
+.sticker-firma {
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* "Agotado" stamp */
+.sello-agotado {
+  color: var(--text);
+  border-color: var(--accent-hover);
+  background: rgba(7, 5, 6, 0.7);
+  text-shadow: 2px 2px 0 var(--accent);
+  box-shadow: none;
+}
+
+/* Fallback cover (no image) */
+.caratula-placeholder {
+  background:
+    radial-gradient(circle at 50% 30%, var(--sangre), transparent 70%),
+    var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+.placeholder-logo { transform: none; border-radius: 2px; }
+.placeholder-titulo { text-shadow: 2px 2px 0 var(--accent); }
+
+/* Status label in admin */
+.estado.disponible { color: var(--text); border-color: var(--neon); box-shadow: none; }
+
+/* ---------- 9. Animations: soft fade-up instead of digital glitch ---------- */
+@keyframes gothic-fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes gothic-fade-out {
+  to { opacity: 0; transform: scale(0.94); filter: blur(4px); }
+}
+
+.animar-entrada .tarjeta-producto {
+  animation: gothic-fade-up 0.6s ease-out backwards;
+  animation-delay: calc(var(--i) * 80ms);
+}
+
+/* Same 0.7 s as the old effect: admin.js waits that long before repainting */
+#lista-productos .desintegrando {
+  animation: gothic-fade-out 0.7s ease-in forwards;
+}
+
+/* "Are you sure?" layer on top of a card */
+.confirmar-eliminar {
+  background: var(--overlay-bg);
+  border: 1px solid var(--accent-hover);
+  border-radius: var(--radius);
+  box-shadow: none;
+  animation: gothic-fade-up 0.25s ease-out;
+}
+
+.confirmar-alerta {
+  color: var(--accent-hover);
+  text-shadow: none;
+  animation: none;
+}
+
+/* Admin notification: a quiet note instead of a terminal */
+#notificacion:not(:empty) {
+  font-family: 'Oswald', system-ui, sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--neon);
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+
+#notificacion:not(:empty)::before,
+#notificacion:not(:empty)::after {
+  content: none;
+}
+
+#notificacion.transmision { animation: gothic-fade-up 0.3s ease-out; }
+
+/* ---------- 10. Cart panel ---------- */
+#panel-carrito {
+  background: var(--bg);
+  border-left: 3px solid var(--accent);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.carrito-cabecera h3 { font-size: 2rem; }
+
+.item-carrito {
+  border-radius: var(--radius);
+  border-left: 3px solid var(--accent);
+}
+
+.item-carrito h4 {
+  font-family: 'Metal Mania', 'Oswald', cursive;
+  font-weight: 400;
+  font-size: 1.2rem;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+
+.carrito-vacio { border-radius: var(--radius); }
+
+#mensaje-carrito {
+  font-family: 'Oswald', system-ui, sans-serif;
+  color: var(--neon);
+}
+
+/* ---------- 11. Phones ---------- */
+@media (max-width: 600px) {
+  .header-nav { gap: 12px; }
+  .header-nav a { font-size: 0.75rem; }
+  .header-acciones { width: auto; }
+  .header-acciones button { flex: 0 0 auto; }
+}
+
+/* Link inside the cart message ("inicia sesión en Mi cuenta") */
+#mensaje-carrito a {
+  color: var(--neon);
+  font-weight: 700;
+}

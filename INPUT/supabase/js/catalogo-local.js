@@ -1,141 +1,88 @@
 // =====================================================================
-// catalogo-local.js — datos de prueba de la galería, SIN Supabase.
-// Son las mismas 10 películas de sql/peliculas.sql, con las MISMAS
+// catalogo-local.js — catálogo de respaldo de la galería (si Supabase falla).
+// Son los mismos 5 productos de sql/somniel_productos.sql, con las MISMAS
 // columnas que la tabla "practica-productos". Así, cuando conectes
 // Supabase, galeria.js no cambia: solo cambia obtenerProductos().
+//
+// TODO: precios y stock son valores de ejemplo — cámbialos por los reales
+// (aquí Y en sql/somniel_productos.sql, para que coincidan).
 // =====================================================================
 
 const catalogoLocal = [
-  // ---------- Tim Burton ----------
   {
     id: 1,
-    nombre: 'Beetlejuice (1988)',
-    descripcion: 'Dir. Tim Burton. Una pareja de fantasmas recién fallecidos contrata a un bioexorcista desquiciado para espantar a la familia que se mudó a su casa.',
-    precio: 5000,
-    unidades: 3,
+    nombre: 'Poster Yeyo (A3)',
+    descripcion: 'Impresión en papel mate de 200 g, 29,7 × 42 cm. Ilustración original de @mr.somniel.',
+    precio: 35000,
+    unidades: 10,
     descuento: 0,
     disponible: true,
-    categorias: ['tim burton'],
-    'img-url': null
+    categorias: ['posters'],
+    'img-url': 'assets/art/art-01.jpg'
   },
   {
     id: 2,
-    nombre: 'Edward Scissorhands (1990)',
-    descripcion: 'Dir. Tim Burton. Un joven creado por un inventor que murió antes de terminarlo, con tijeras en lugar de manos, intenta encajar en un suburbio.',
-    precio: 5500,
-    unidades: 2,
-    descuento: 0,
+    nombre: 'Poster Guiño (A3)',
+    descripcion: 'Impresión en papel mate de 200 g, 29,7 × 42 cm. Fondo azul con trazos naranja y amarillo.',
+    precio: 35000,
+    unidades: 8,
+    descuento: 0.1,
     disponible: true,
-    categorias: ['tim burton', 'romance'],
-    'img-url': null
+    categorias: ['posters'],
+    'img-url': 'assets/art/art-02.jpg'
   },
   {
     id: 3,
-    nombre: 'Sleepy Hollow (1999)',
-    descripcion: 'Dir. Tim Burton. El investigador Ichabod Crane llega a un pueblo aterrorizado por un jinete sin cabeza.',
-    precio: 6000,
-    unidades: 2,
+    nombre: 'Pack de stickers Punks (x5)',
+    descripcion: 'Cinco stickers troquelados de vinilo resistente al agua, de 6 a 8 cm cada uno.',
+    precio: 12000,
+    unidades: 30,
     descuento: 0,
-    disponible: false,
-    categorias: ['tim burton', 'terror'],
-    'img-url': null
+    disponible: true,
+    categorias: ['stickers'],
+    'img-url': 'assets/art/art-05.jpg'
   },
-  // ---------- Anime ----------
   {
     id: 4,
-    nombre: 'Akira (1988)',
-    descripcion: 'Dir. Katsuhiro Otomo. En Neo-Tokio, años después de una guerra que destruyó la ciudad, un pandillero desarrolla poderes psíquicos que no puede controlar.',
-    precio: 6000,
-    unidades: 2,
-    descuento: 0.1,
+    nombre: 'Cómic Somniel #1',
+    descripcion: 'Fanzine de 24 páginas a color, tamaño media carta, grapado a mano.',
+    precio: 28000,
+    unidades: 15,
+    descuento: 0,
     disponible: true,
-    categorias: ['anime'],
-    'img-url': null
+    categorias: ['comics'],
+    'img-url': 'assets/art/art-03.jpg'
   },
   {
     id: 5,
-    nombre: 'Ghost in the Shell (1995)',
-    descripcion: 'Dir. Mamoru Oshii. La mayor Motoko Kusanagi, una cyborg de una unidad de seguridad, persigue a un hacker conocido como el Titiritero.',
-    precio: 6000,
-    unidades: 1,
-    descuento: 0,
-    disponible: true,
-    categorias: ['anime'],
-    'img-url': null
-  },
-  {
-    id: 6,
-    nombre: 'Perfect Blue (1997)',
-    descripcion: 'Dir. Satoshi Kon. Una cantante pop deja su grupo para ser actriz y empieza a perder el límite entre realidad y fantasía mientras un acosador la sigue.',
-    precio: 5500,
-    unidades: 1,
+    nombre: 'Pin Dados',
+    descripcion: 'Pin metálico esmaltado de 3 cm con broche de mariposa. Agotado por ahora.',
+    precio: 10000,
+    unidades: 0,
     descuento: 0,
     disponible: false,
-    categorias: ['anime', 'terror'],
-    'img-url': null
-  },
-  // ---------- Terror ----------
-  {
-    id: 7,
-    nombre: 'The Shining (1980)',
-    descripcion: 'Dir. Stanley Kubrick. Jack Torrance acepta cuidar un hotel aislado durante el invierno junto a su familia, y el lugar lo va enloqueciendo.',
-    precio: 5000,
-    unidades: 3,
-    descuento: 0,
-    disponible: true,
-    categorias: ['terror'],
-    'img-url': null
-  },
-  {
-    id: 8,
-    nombre: 'A Nightmare on Elm Street (1984)',
-    descripcion: 'Dir. Wes Craven. Freddy Krueger ataca a un grupo de adolescentes en sus sueños; si mueren soñando, mueren de verdad.',
-    precio: 4500,
-    unidades: 4,
-    descuento: 0.2,
-    disponible: true,
-    categorias: ['terror'],
-    'img-url': null
-  },
-  // ---------- Romance ----------
-  {
-    id: 9,
-    nombre: 'Dirty Dancing (1987)',
-    descripcion: 'Dir. Emile Ardolino. En el verano de 1963, Baby se enamora de Johnny Castle, el instructor de baile del centro vacacional donde veranea su familia.',
-    precio: 4500,
-    unidades: 2,
-    descuento: 0,
-    disponible: true,
-    categorias: ['romance'],
-    'img-url': null
-  },
-  {
-    id: 10,
-    nombre: 'Ghost (1990)',
-    descripcion: 'Dir. Jerry Zucker. Sam es asesinado y queda como fantasma; con ayuda de la médium Oda Mae intenta proteger a Molly, su pareja.',
-    precio: 5000,
-    unidades: 2,
-    descuento: 0,
-    disponible: false,
-    categorias: ['romance'],
-    'img-url': null
+    categorias: ['pines'],
+    'img-url': 'assets/art/art-04.jpg'
   }
 ];
 
-// "async" aunque hoy no espera nada: así galeria.js ya la llama con await,
-// igual que hará cuando los datos vengan de internet.
+// Trae el catálogo para galeria.html.
+// 1° intenta Supabase (la misma tabla que leen cliente.html y admin.html):
+//    así los ids coinciden con la base y el carrito se puede pagar.
+// 2° si Supabase falla (sin internet, URL mal copiada...), usa la lista
+//    local de arriba para que la galería no quede vacía. Con esa lista
+//    se puede mirar y armar el carrito, pero no pagar.
 // Devuelve COPIAS ({ ...p }) para que la galería no modifique el catálogo original.
 async function obtenerProductos() {
-  return catalogoLocal.map(producto => ({ ...producto, categorias: [...producto.categorias] }));
+  if (typeof db !== 'undefined') {
+    const { data, error } = await db
+      .from('practica-productos')
+      .select('*') // '*' evita pelear con el guion de la columna img-url
+      .order('id', { ascending: true });
 
-  // Versión Supabase (para después): borra el return de arriba y usa esto.
-  // const { data, error } = await db
-  //   .from('practica-productos')
-  //   .select('*')
-  //   .order('id', { ascending: true });
-  // if (error) {
-  //   console.log('Error al traer el catálogo:', error);
-  //   return [];
-  // }
-  // return data;
+    if (!error && data.length) return data;
+    console.log('No se pudo leer Supabase; uso el catálogo local:', error);
+  }
+
+  return catalogoLocal.map(producto => ({ ...producto, categorias: [...producto.categorias] }));
 }

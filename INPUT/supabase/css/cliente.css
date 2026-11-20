@@ -1,6 +1,6 @@
 /* =====================================================================
    cliente.css — SOLO el layout de "Mi cuenta": acceso, sidebar y ajustes.
-   Colores, fuentes, botones, cajas VHS y carrito vienen de admin.css y
+   Colores, fuentes, botones, tarjetas de producto y carrito vienen de admin.css y
    galeria.css (se cargan antes). Aquí no hay :root propio: se usan sus
    variables (--surface, --neon...), así el modo claro funciona solo.
    ===================================================================== */
@@ -66,7 +66,7 @@ body {
 }
 
 .sidebar {
-  /* sticky: se queda pegada arriba mientras la estantería hace scroll */
+  /* sticky: se queda pegada arriba mientras el catálogo hace scroll */
   position: sticky;
   top: 24px;
   display: flex;
@@ -135,7 +135,7 @@ body {
   width: 100%;
 }
 
-/* Cerrar sesión: solo contorno, para que no compita con "Mis rentas" */
+/* Cerrar sesión: solo contorno, para que no compita con "Carrito" */
 #btn-logout {
   color: var(--text-muted);
   background: transparent;
@@ -149,7 +149,7 @@ body {
 }
 
 .contenido {
-  min-width: 0; /* sin esto, la estantería puede estirar la columna 1fr fuera de la pantalla */
+  min-width: 0; /* sin esto, el catálogo puede estirar la columna 1fr fuera de la pantalla */
 }
 
 /* ---------- Vista Ajustes ---------- */
