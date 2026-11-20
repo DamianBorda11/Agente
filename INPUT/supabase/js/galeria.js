@@ -12,6 +12,8 @@
 //   7. Acciones: cambiar noches, rentar, quitar
 //   8. Abrir / cerrar el panel
 //   9. Eventos e inicio
+//   10. Carrito en Supabase (solo con sesión; ver guia_carrito_pedidos_supabase.pdf)
+//   11. Checkout: formulario de envío y confirmación del pedido
 // =====================================================================
 
 // ---------------------------------------------------------------------
@@ -30,6 +32,11 @@ const formatoPesos = new Intl.NumberFormat('es-CO', {
 let productos = [];               // el catálogo, tal como llega de obtenerProductos()
 let carrito = [];                 // las rentas: [{ id: 4, noches: 2 }, ...]
 const nochesSeleccionadas = {};   // lo que marca el −/+ de cada tarjeta: { 4: 2, 7: 1 }
+
+// Con sesión (cliente.html), el carrito vive en Supabase: pedidos + detalles_pedidos.
+// "cantidad" en detalles_pedidos es, en este proyecto, el número de noches.
+let pedidoId = null;       // id del pedido en estado 'carrito' del cliente (null = sin sesión o aún no creado)
+const detalleIds = {};     // { producto_id: id de la fila en detalles_pedidos }
 
 // ---------------------------------------------------------------------
 // 2. TEMA OSCURO / CLARO (misma clave 'tema' que admin.js: se comparte)
@@ -228,6 +235,9 @@ function pintarCarrito() {
   if (!carrito.length) {
     lista.innerHTML = '<p class="carrito-vacio">Aún no tienes rentas. Elige una película de la estantería.</p>';
     total.textContent = formatoPesos.format(0);
+    // Con el carrito vacío no tiene sentido seguir viendo el formulario de envío.
+    document.getElementById('form-checkout').hidden = true;
+    botonPagar.hidden = false;
     return;
   }
 
@@ -274,34 +284,94 @@ function cambiarNochesTarjeta(id, cambio) {
 }
 
 // En el CARRITO: cambia la renta de una vez, y la tarjeta se sincroniza.
-function cambiarNochesCarrito(id, cambio) {
+// Con sesión, primero lo confirma la base (RLS puede bloquear sin dar error:
+// por eso se revisa data.length) antes de tocar el estado local.
+async function cambiarNochesCarrito(id, cambio) {
   const item = buscarEnCarrito(id);
   if (!item) return;
 
-  item.noches = limitarNoches(item.noches + cambio);
-  nochesSeleccionadas[id] = item.noches;
-  guardarCarrito();
+  const nuevasNoches = limitarNoches(item.noches + cambio);
+  const usuario = await obtenerUsuario();
+
+  if (usuario) {
+    const { data, error } = await db
+      .from('detalles_pedidos')
+      .update({ cantidad: nuevasNoches })
+      .eq('id', detalleIds[id])
+      .select();
+
+    if (error || data.length === 0) {
+      console.log('Error al cambiar las noches:', error);
+      return;
+    }
+  }
+
+  item.noches = nuevasNoches;
+  nochesSeleccionadas[id] = nuevasNoches;
+  if (!usuario) guardarCarrito();
   pintarCarrito();
   actualizarTarjeta(id);
 }
 
-// Una película = una entrada. Si ya estaba, se REEMPLAZAN las noches.
-function rentar(id, boton) {
-  const noches = nochesSeleccionadas[id];
+// Agrega o actualiza la renta de "id" a exactamente "noches" (se reemplaza,
+// no se suma). Sin sesión: modo demostración, solo memoria + localStorage.
+// Con sesión: inserta o actualiza en detalles_pedidos (el precio lo copia
+// un trigger de la base; nunca se envía desde aquí). Devuelve true/false.
+async function agregarAlCarrito(id, noches) {
+  const usuario = await obtenerUsuario();
   const item = buscarEnCarrito(id);
 
-  if (item) {
-    item.noches = noches;
-  } else {
-    carrito.push({ id, noches });
+  if (!usuario) {
+    if (item) item.noches = noches; else carrito.push({ id, noches });
+    guardarCarrito();
+    pintarCarrito();
+    return true;
   }
 
-  guardarCarrito();
-  pintarCarrito();
+  const idCarrito = await obtenerOCrearCarrito(usuario);
+  if (idCarrito === null) return false;
 
-  // Feedback: el botón confirma durante 1,2 s y la burbuja del contador salta
+  if (detalleIds[id]) {
+    const { data, error } = await db
+      .from('detalles_pedidos')
+      .update({ cantidad: noches })
+      .eq('id', detalleIds[id])
+      .select();
+
+    if (error || data.length === 0) {
+      console.log('Error al actualizar la renta:', error);
+      return false;
+    }
+  } else {
+    const { data, error } = await db
+      .from('detalles_pedidos')
+      .insert([{ pedido_id: idCarrito, producto_id: Number(id), cantidad: noches }])
+      .select('id')
+      .single();
+
+    if (error) {
+      console.log('Error al agregar la renta:', error);
+      return false;
+    }
+    detalleIds[id] = data.id;
+  }
+
+  if (item) item.noches = noches; else carrito.push({ id, noches });
+  pintarCarrito();
+  return true;
+}
+
+// Botón "Rentar" de cada tarjeta: deshabilita mientras espera y muestra el
+// resultado (éxito o error) antes de volver a "Rentar".
+async function rentar(id, boton) {
+  const noches = nochesSeleccionadas[id];
+  boton.disabled = true;
+
+  const ok = await agregarAlCarrito(id, noches);
+
+  boton.disabled = false;
   boton.classList.add('agregada');
-  boton.textContent = '✓ Agregada';
+  boton.textContent = ok ? '✓ Agregada' : 'Error';
   setTimeout(() => {
     boton.classList.remove('agregada');
     actualizarTarjeta(id);
@@ -314,9 +384,25 @@ function rentar(id, boton) {
   contador.classList.add('rebote');
 }
 
-function quitar(id) {
+async function quitar(id) {
+  const usuario = await obtenerUsuario();
+
+  if (usuario) {
+    const { data, error } = await db
+      .from('detalles_pedidos')
+      .delete()
+      .eq('id', detalleIds[id])
+      .select();
+
+    if (error || data.length === 0) {
+      console.log('Error al quitar la renta:', error);
+      return; // RLS pudo bloquearlo sin error: no tocamos el carrito local
+    }
+    delete detalleIds[id];
+  }
+
   carrito = carrito.filter(item => item.id !== id);
-  guardarCarrito();
+  if (!usuario) guardarCarrito();
   pintarCarrito();
   actualizarTarjeta(id);
   // El botón ✕ desapareció con el repintado: dejamos el foco en un lugar seguro
@@ -378,7 +464,7 @@ document.getElementById('lista-productos').addEventListener('click', (event) => 
   if (accion === 'rentar') rentar(id, boton);
 });
 
-document.getElementById('lista-carrito').addEventListener('click', (event) => {
+document.getElementById('lista-carrito').addEventListener('click', async (event) => {
   const boton = event.target.closest('button[data-accion]');
   if (!boton) return;
 
@@ -387,7 +473,7 @@ document.getElementById('lista-carrito').addEventListener('click', (event) => {
 
   if (accion === 'quitar') return quitar(id);
 
-  cambiarNochesCarrito(id, accion === 'sumar' ? +1 : -1);
+  await cambiarNochesCarrito(id, accion === 'sumar' ? +1 : -1);
   // pintarCarrito() reemplazó el botón: devolvemos el foco al nuevo,
   // o al de al lado si este quedó desactivado (llegó a 1 o a 7)
   const mismo = document.querySelector(`#lista-carrito [data-accion="${accion}"][data-id="${id}"]`);
@@ -401,12 +487,6 @@ overlayCarrito.addEventListener('click', cerrarCarrito);
 
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') cerrarCarrito();
-});
-
-// Pago: solo visual hasta conectar Supabase
-document.getElementById('btn-pagar').addEventListener('click', () => {
-  document.getElementById('mensaje-carrito').textContent =
-    '> El pago se conectará con Supabase más adelante.';
 });
 
 // fuenteProductos = la función que trae el catálogo. Se pasa SIN paréntesis
@@ -427,3 +507,197 @@ async function iniciarGaleria(fuenteProductos) {
   pintarGaleria();
   pintarCarrito();
 }
+
+// ---------------------------------------------------------------------
+// 10. CARRITO EN SUPABASE (solo con sesión)
+// Diseño de dos tablas: pedidos (una fila por compra, estado 'carrito'
+// mientras se arma) y detalles_pedidos (una fila por película, con su
+// precio_unitario calculado por la base). Ver guia_carrito_pedidos_supabase.pdf.
+// galeria.html no carga supabaseClient.js, así que "db" no existe ahí:
+// obtenerUsuario() devuelve null y todo sigue en modo demostración.
+// ---------------------------------------------------------------------
+
+async function obtenerUsuario() {
+  if (typeof db === 'undefined') return null;
+  const { data } = await db.auth.getUser();
+  return data.user || null;
+}
+
+// Busca el pedido de este cliente que está en estado 'carrito'.
+// maybeSingle(): si no hay ninguno, devuelve null en vez de fallar.
+async function buscarCarrito(usuario) {
+  const { data, error } = await db
+    .from('pedidos')
+    .select('id')
+    .eq('cliente_id', usuario.id)
+    .eq('estado', 'carrito')
+    .maybeSingle();
+
+  if (error) {
+    console.log('Error al buscar el carrito:', error);
+    return null;
+  }
+  return data?.id ?? null;
+}
+
+// Si ya se conoce pedidoId lo devuelve; si no, busca el carrito existente
+// o crea uno nuevo enviando SOLO cliente_id (el estado lo pone la base).
+// Si el insert falla con 23505 (otra pestaña ya creó el carrito al mismo
+// tiempo), lo busca en vez de tratarlo como error.
+async function obtenerOCrearCarrito(usuario) {
+  if (pedidoId !== null) return pedidoId;
+
+  const existente = await buscarCarrito(usuario);
+  if (existente !== null) {
+    pedidoId = existente;
+    return pedidoId;
+  }
+
+  const { data, error } = await db
+    .from('pedidos')
+    .insert([{ cliente_id: usuario.id }])
+    .select('id')
+    .single();
+
+  if (error) {
+    if (error.code === '23505') {
+      pedidoId = await buscarCarrito(usuario);
+      return pedidoId;
+    }
+    console.log('Error al crear el carrito:', error);
+    return null;
+  }
+
+  pedidoId = data.id;
+  return pedidoId;
+}
+
+// Limpia el estado en memoria del carrito (se usa al cerrar sesión y antes
+// de reconstruirlo desde la base).
+function vaciarCarritoLocal() {
+  carrito = [];
+  for (const id in detalleIds) delete detalleIds[id];
+  pedidoId = null;
+  pintarCarrito();
+}
+
+// Reconstruye el carrito desde Supabase cuando hay sesión. Se llama DESPUÉS
+// de iniciarGaleria() (necesita que "productos" y las tarjetas ya existan).
+// Una sola consulta con select anidado (gracias a la clave foránea
+// detalles_pedidos.pedido_id) trae el pedido y sus detalles juntos.
+async function cargarCarritoDesdeBD() {
+  vaciarCarritoLocal();
+
+  const usuario = await obtenerUsuario();
+  if (!usuario) return;
+
+  const { data, error } = await db
+    .from('pedidos')
+    .select('id, detalles_pedidos(id, producto_id, cantidad)')
+    .eq('cliente_id', usuario.id)
+    .eq('estado', 'carrito')
+    .maybeSingle();
+
+  if (error) {
+    console.log('Error al cargar el carrito:', error);
+    return;
+  }
+  if (!data) return;
+
+  pedidoId = data.id;
+  data.detalles_pedidos.forEach(detalle => {
+    const noches = limitarNoches(Number(detalle.cantidad));
+    carrito.push({ id: detalle.producto_id, noches });
+    detalleIds[detalle.producto_id] = detalle.id;
+    nochesSeleccionadas[detalle.producto_id] = noches;
+  });
+
+  productos.forEach(producto => actualizarTarjeta(producto.id));
+  pintarCarrito();
+}
+
+// ---------------------------------------------------------------------
+// 11. CHECKOUT: formulario de envío y confirmación del pedido
+// ---------------------------------------------------------------------
+const botonPagarCheckout = document.getElementById('btn-pagar');
+const formCheckout = document.getElementById('form-checkout');
+const mensajeCarritoCheckout = document.getElementById('mensaje-carrito');
+const checkEnvio = document.getElementById('checkout-envio');
+const campoDireccion = document.getElementById('checkout-direccion');
+const campoTelefono = document.getElementById('checkout-telefono');
+
+botonPagarCheckout.addEventListener('click', async () => {
+  mensajeCarritoCheckout.textContent = '';
+
+  if (!carrito.length) {
+    mensajeCarritoCheckout.textContent = 'Aún no tienes rentas en el carrito.';
+    return;
+  }
+
+  const usuario = await obtenerUsuario();
+  if (!usuario) {
+    mensajeCarritoCheckout.textContent = 'Para rentar, inicia sesion en cliente.html (Mi cuenta).';
+    return;
+  }
+
+  formCheckout.hidden = false;
+  botonPagarCheckout.hidden = true;
+});
+
+document.getElementById('btn-cancelar-checkout').addEventListener('click', () => {
+  formCheckout.hidden = true;
+  botonPagarCheckout.hidden = false;
+});
+
+// Dirección y teléfono solo son obligatorios si se pide envío a domicilio.
+checkEnvio.addEventListener('change', () => {
+  campoDireccion.required = checkEnvio.checked;
+  campoTelefono.required = checkEnvio.checked;
+});
+
+formCheckout.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (pedidoId === null) return;
+
+  const botonConfirmar = document.getElementById('btn-confirmar');
+  botonConfirmar.disabled = true;
+
+  const direccion = campoDireccion.value.trim() || null;
+  const telefono = campoTelefono.value.trim() || null;
+  const observacion = document.getElementById('checkout-observacion').value.trim() || null;
+
+  // El navegador NO calcula el total ni cambia el estado: solo llama a la
+  // función de la base, que valida, descuenta stock y fija precios.
+  const { data, error } = await db.rpc('confirmar_pedido', {
+    p_pedido_id: pedidoId,
+    p_envio: checkEnvio.checked,
+    p_direccion: direccion,
+    p_telefono: telefono,
+    p_observacion: observacion
+  });
+
+  botonConfirmar.disabled = false;
+
+  if (error) {
+    console.log('Error al confirmar el pedido:', error);
+    mensajeCarritoCheckout.textContent = error.message;
+    return;
+  }
+
+  // El total lo calcula la base (vista pedidos_con_total), no el navegador.
+  const { data: conTotal } = await db
+    .from('pedidos_con_total')
+    .select('total')
+    .eq('id', data.id)
+    .single();
+
+  vaciarCarritoLocal();
+  formCheckout.reset();
+  formCheckout.hidden = true;
+  botonPagarCheckout.hidden = false;
+  campoDireccion.required = false;
+  campoTelefono.required = false;
+
+  mensajeCarritoCheckout.textContent =
+    `Pedido #${data.id} confirmado. Total: ${formatoPesos.format(conTotal?.total ?? 0)}`;
+});

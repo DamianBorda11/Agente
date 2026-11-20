@@ -348,6 +348,75 @@ body.carrito-abierto {
   display: none;
 }
 
+/* ---------- Formulario de envío (checkout) ---------- */
+#form-checkout {
+  display: grid;
+  gap: 10px;
+}
+
+#form-checkout label {
+  display: grid;
+  gap: 4px;
+  font-family: 'Orbitron', 'Oswald', sans-serif;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--neon);
+}
+
+#form-checkout input,
+#form-checkout textarea {
+  font-family: 'Oswald', system-ui, sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+}
+
+#form-checkout textarea {
+  resize: vertical;
+}
+
+/* La casilla "Envío a domicilio" va en una sola fila, no apilada como las demás */
+#form-checkout .campo-checkbox {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+#form-checkout .campo-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+
+.checkout-botones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.checkout-botones button {
+  flex: 1;
+}
+
+#btn-cancelar-checkout {
+  clip-path: none;
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+#btn-cancelar-checkout:hover {
+  border-color: var(--neon);
+  color: var(--neon);
+  box-shadow: 0 0 10px var(--neon-glow);
+}
+
 /* ---------- Celular ---------- */
 @media (max-width: 480px) {
   .header-acciones {

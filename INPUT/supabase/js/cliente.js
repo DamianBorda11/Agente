@@ -142,7 +142,10 @@ document.getElementById('sidebar-usuario').textContent = data.user.email;
 mostrarVista('vista-productos'); // al entrar, siempre arranca en Productos
 // galeria.js pinta la estantería y el carrito; leerProductos (abajo) le da
 // los datos de Supabase. Va sin paréntesis: le pasamos la función, no su resultado.
-iniciarGaleria(leerProductos);
+await iniciarGaleria(leerProductos);
+// El carrito de este cliente puede ya existir en Supabase (pedidos +
+// detalles_pedidos): se reconstruye DESPUÉS de pintar la estantería.
+await cargarCarritoDesdeBD();
 // Primero LEER, después mostrar: los campos se llenan con lo que hay en la tabla.
 const perfil = await leerPerfil(data.user.id);
 if (perfil) {
@@ -153,6 +156,7 @@ document.getElementById('perfil-mensaje').textContent =
 }
 } else {
 estado.textContent = 'No has iniciado sesión.';
+vaciarCarritoLocal(); // sin sesión no hay carrito de Supabase que mostrar
 }
 }
 

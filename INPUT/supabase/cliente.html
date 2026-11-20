@@ -121,6 +121,28 @@
 <strong id="total-carrito">$ 0</strong>
 </div>
 <button id="btn-pagar" type="button">Pagar rentas →</button>
+
+<!-- Oculto hasta que se pulsa "Pagar rentas" con sesión iniciada -->
+<form id="form-checkout" hidden>
+<label class="campo-checkbox">
+<input type="checkbox" id="checkout-envio">
+Envío a domicilio
+</label>
+<label>Dirección
+<input type="text" id="checkout-direccion" placeholder="Calle 10 # 5-20">
+</label>
+<label>Teléfono
+<input type="tel" id="checkout-telefono" placeholder="300 123 4567">
+</label>
+<label>Observaciones
+<textarea id="checkout-observacion" rows="2"></textarea>
+</label>
+<div class="checkout-botones">
+<button type="submit" id="btn-confirmar">Confirmar pedido</button>
+<button type="button" id="btn-cancelar-checkout">Volver al carrito</button>
+</div>
+</form>
+
 <p id="mensaje-carrito" role="status"></p>
 </div>
 </aside>
